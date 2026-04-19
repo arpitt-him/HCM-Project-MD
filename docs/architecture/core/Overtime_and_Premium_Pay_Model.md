@@ -1,127 +1,53 @@
 # Overtime_and_Premium_Pay_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Overtime_and_Premium_Pay_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | Time_Entry_and_Worked_Time_Model, Scheduling_and_Shift_Model, Earnings_and_Deductions_Computation_Model, Jurisdiction_and_Compliance_Rules_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define calculation structures and rule behaviors governing overtime,
-premium pay, and special wage multipliers triggered by worked time
-conditions.
+Defines calculation structures and rule behaviours governing overtime, premium pay, and special wage multipliers triggered by worked time conditions.
 
-## 2. Scope of Premium Pay
+---
 
-Supported premium categories include:\
-\
-Daily Overtime\
-Weekly Overtime\
-Double Time\
-Holiday Premium\
-Shift Differential\
-Weekend Premium\
-Callback Pay\
-On-Call Premium\
-Minimum Pay Guarantees
+## 1. Scope of Premium Pay
 
-## 3. Core Premium_Rule Entity
+Supported premium categories: Daily Overtime, Weekly Overtime, Double Time, Holiday Premium, Shift Differential, Weekend Premium, Callback Pay, On-Call Premium, Minimum Pay Guarantees.
 
-Premium_Rule\
-\
-Premium_Rule_ID\
-Rule_Name\
-Premium_Type\
-Jurisdiction_ID\
-Effective_Start_Date\
-Effective_End_Date\
-Status
+## 2. Core Premium_Rule Entity
 
-## 4. Threshold Definitions
+Premium_Rule_ID, Rule_Name, Premium_Type, Jurisdiction_ID, Effective_Start_Date, Effective_End_Date, Status.
 
-Premium eligibility thresholds define when premium pay applies.\
-\
-Examples:\
-\
-Daily threshold → 8 hours\
-Weekly threshold → 40 hours\
-Holiday work → Entire shift premium\
-Callback minimum → 2-hour minimum pay
+## 3. Threshold Definitions
 
-## 5. Premium Rate Structure
+Premium eligibility thresholds define when premium pay applies. Examples: daily threshold: 8 hours; weekly threshold: 40 hours; holiday work: entire shift premium; callback minimum: 2-hour minimum pay.
 
-Premium calculations may use:\
-\
-Multiplier-based rates\
-Flat premium amounts\
-Tiered multipliers\
-\
-Examples:\
-\
-1.5x rate for overtime\
-2.0x rate for double time\
-Shift differential → +\$1.25 per hour
+## 4. Premium Rate Structure
 
-## 6. Jurisdictional Rule Support
+Premium calculations may use: multiplier-based rates (1.5x, 2.0x), flat premium amounts, or tiered multipliers. Example: shift differential at +$1.25 per hour.
 
-Premium rules must vary by jurisdiction.\
-\
-Examples:\
-\
-Federal overtime rules\
-State-specific overtime thresholds\
-Union-specific premium rules\
-\
-Jurisdiction_ID must determine applicable rules.
+## 5. Jurisdictional Rule Support
 
-## 7. Premium Calculation Flow
+Premium rules must vary by jurisdiction. Examples: federal overtime rules, state-specific overtime thresholds, union-specific premium rules. Jurisdiction_ID must determine applicable rules.
 
-Premium calculations follow ordered evaluation.\
-\
-Typical flow:\
-\
-Determine base hours\
-Apply overtime thresholds\
-Apply premium multipliers\
-Apply minimum guarantees\
-Generate premium earnings lines
+## 6. Premium Calculation Flow
 
-## 8. Interaction with Time Entries
+Determine base hours, apply overtime thresholds, apply premium multipliers, apply minimum guarantees, generate premium earnings lines.
 
-Premium rules depend on classified time entries.\
-\
-Examples:\
-\
-Overtime hours derived from weekly totals\
-Holiday premium derived from holiday calendar\
-Callback premium derived from call-back events
+## 7. Interaction with Time Entries
 
-## 9. Retroactive Adjustments
+Overtime hours derived from weekly totals. Holiday premium derived from holiday calendar. Callback premium derived from call-back events.
 
-Premium calculations must support retroactive changes.\
-\
-Examples:\
-\
-Corrected time entries\
-Policy updates\
-Jurisdiction rule changes\
-\
-Retroactive recalculation must preserve historical traceability.
+## 8. Retroactive Adjustments
 
-## 10. Reporting and Audit Support
+Premium calculations must support retroactive changes: corrected time entries, policy updates, jurisdiction rule changes. Retroactive recalculation must preserve historical traceability.
 
-Premium pay reporting supports:\
-\
-Overtime summaries\
-Premium pay totals\
-Compliance audits\
-Labor law reporting\
-\
-Audit trails must preserve premium calculation logic.
+## 9. Relationship to Other Models
 
-## 11. Relationship to Other Models
-
-This model integrates with:\
-\
-Time_Entry_and_Worked_Time_Model\
-Payroll_Check_Model\
-Multi_Context_Calendar_Model\
-Operational_Reporting_and_Analytics_Model\
-Correction_and_Immutability_Model
+This model integrates with: Time_Entry_and_Worked_Time_Model, Payroll_Check_Model, Multi_Context_Calendar_Model, Operational_Reporting_and_Analytics_Model, Correction_and_Immutability_Model.

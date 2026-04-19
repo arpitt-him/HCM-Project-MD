@@ -1,13 +1,22 @@
-# 1. Purpose
+# External_Result_Import_Specification
 
-This document defines the structure, validation, and processing rules
-for importing externally calculated earnings into the platform.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/External_Result_Import_Specification.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | PRD-400-Earnings-Model.md, PRD-900-Integration-Model.md, SPEC/External-Earnings.md, SPEC/Residual-Commissions.md, Calculation_Engine, Result_and_Payable_Model, Integration_and_Data_Exchange_Model |
 
-The intent is to support summarized externally calculated results that
-are suitable for payroll processing while maintaining appropriate
-auditability and reconciliation controls.
+## Purpose
 
-# 2. Supported Import Method (v0.1)
+Defines the structure, validation rules, and processing workflow for importing externally calculated earnings into the platform. Supports summarised external results suitable for payroll processing while maintaining auditability and reconciliation controls.
+
+---
+
+# 1. Supported Import Method (v0.1)
 
 Primary Method:\
 Manual CSV File Upload
@@ -20,7 +29,7 @@ Future methods (planned but not required for v0.1):\
 • Scheduled file-drop ingestion\
 • API-based ingestion
 
-# 3. Record Granularity Standard
+# 2. Record Granularity Standard
 
 External earnings shall be provided at summarized level.
 
@@ -33,7 +42,7 @@ Multiple earning types per participant are supported and expected.
 Transaction-level commission detail is not required and should remain in
 the originating commission system.
 
-# 4. CSV File Structure
+# 3. CSV File Structure
 
 Required Fields:
 
@@ -53,15 +62,14 @@ Recommended Fields:
 
 Example Structure:
 
-Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Source_Record_Count,Description\
-10025,RESIDUAL,2026-01,3104.22,COMM_SYS,BATCH-2026-01-RES,417,January
-residual commissions\
-10025,COMMISSION,2026-01,9842.55,COMM_SYS,BATCH-2026-01-COM,126,January
-direct commissions\
-10025,RECOVERY,2026-01,-420.00,COMM_SYS,BATCH-2026-01-ADJ,3,Chargeback
-adjustments
+```
+Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Source_Record_Count,Description
+10025,RESIDUAL,2026-01,3104.22,COMM_SYS,BATCH-2026-01-RES,417,January residual commissions
+10025,COMMISSION,2026-01,9842.55,COMM_SYS,BATCH-2026-01-COM,126,January direct commissions
+10025,RECOVERY,2026-01,-420.00,COMM_SYS,BATCH-2026-01-ADJ,3,Chargeback adjustments
+```
 
-# 5. Adjustment Model Standard
+# 4. Adjustment Model Standard
 
 Multiple submissions for the same Participant_ID, Earning_Type, and
 Period_ID are allowed.
@@ -76,7 +84,7 @@ reference the appropriate Source_Batch_ID.
 
 This preserves audit history and prevents silent data replacement.
 
-# 6. File Processing Workflow
+# 5. File Processing Workflow
 
 The following staged workflow shall be used:
 
@@ -91,7 +99,7 @@ Authorized user reviews validation results and confirms processing.
 Commit:\
 Records become available for calculation and payroll processing.
 
-# 7. Validation Rules
+# 6. Validation Rules
 
 The system shall validate:
 
@@ -106,7 +114,7 @@ The system shall validate:
 Files failing validation shall be rejected or partially accepted
 according to configured policy.
 
-# 8. Error Handling
+# 7. Error Handling
 
 Errors shall be reported at both:
 
@@ -118,7 +126,7 @@ Individual records rejected with error logging.
 
 Rejected records shall not be committed until corrected and resubmitted.
 
-# 9. Reconciliation Controls
+# 8. Reconciliation Controls
 
 Each batch should support reconciliation using:
 
@@ -129,7 +137,7 @@ Each batch should support reconciliation using:
 These controls allow confirmation that imported totals match source
 system expectations.
 
-# 10. Audit Requirements
+# 9. Audit Requirements
 
 The system shall record:
 
@@ -144,7 +152,7 @@ The system shall record:
 
 Audit records must be retained according to retention policy.
 
-# 11. Security Controls
+# 10. Security Controls
 
 Access to upload and approval functions shall be restricted to
 authorized roles.
@@ -154,7 +162,7 @@ Files shall be protected against unauthorized viewing or modification.
 Sensitive financial data shall be handled according to platform security
 standards.
 
-# 12. Future Expansion Considerations
+# 11. Future Expansion Considerations
 
 Future enhancements may include:
 
@@ -166,7 +174,7 @@ Future enhancements may include:
 These enhancements shall not change the core summarized-record ingestion
 model.
 
-# 13. Key Design Principle
+# 12. Key Design Principle
 
 This platform accepts summarized externally calculated earnings suitable
 for payroll processing.

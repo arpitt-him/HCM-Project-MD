@@ -1,14 +1,22 @@
-# 1. Purpose
+# Accumulator_and_Balance_Model
 
-This document defines the structure, behavior, and lifecycle rules
-governing accumulators and balances within the payroll platform.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | PRD-500-Accumulator-Strategy.md, ADR-002-Deterministic-Replayability.md, Result_and_Payable_Model, Payroll_Calendar_Model, Correction_and_Immutability_Model |
 
-Accumulators represent persisted payroll balances and their supporting
-contribution history. The design ensures accurate payroll outcomes,
-supports reruns and adjustments, preserves audit traceability, and
-aligns with payroll calendar and run lifecycle rules.
+## Purpose
 
-# 2. Core Design Principles
+Defines the structure, behaviour, and lifecycle rules governing accumulators and balances within the payroll platform. Accumulators represent persisted payroll balances and their supporting contribution history, ensuring accurate payroll outcomes, rerun safety, and audit traceability.
+
+---
+
+# 1. Core Design Principles
 
 The accumulator model shall follow these principles:
 
@@ -21,7 +29,7 @@ than once.\
 periods.\
 • Historical traceability shall remain intact after release.
 
-# 3. Accumulator Balance Structure
+# 2. Accumulator Balance Structure
 
 Accumulator Balance records represent the current authoritative value
 for a defined scope.
@@ -41,7 +49,7 @@ Recommended Balance Fields:
 
 Balance records are optimized for quick lookup and update operations.
 
-# 4. Accumulator Contribution History Structure
+# 3. Accumulator Contribution History Structure
 
 Contribution History records represent the individual calculation
 effects that produced the current balance.
@@ -63,7 +71,7 @@ Recommended Contribution Fields:
 
 Contribution records provide traceability and reconstruction capability.
 
-# 5. Accumulator Scope Types
+# 4. Accumulator Scope Types
 
 Accumulators may operate at multiple scopes.
 
@@ -76,14 +84,9 @@ Common Scope Types:
 • Plan-Specific\
 • Organizational-Level
 
-Scope determines:
+Scope determines storage keys, reset logic, update eligibility, and retrieval behavior.
 
-• Storage keys\
-• Reset logic\
-• Update eligibility\
-• Retrieval behavior.
-
-# 6. Time Dimensions
+# 5. Time Dimensions
 
 Accumulators operate across defined time dimensions.
 
@@ -99,7 +102,7 @@ Supported Dimensions:
 Time alignment shall reference Payroll_Context_ID and Period_ID from the
 Payroll Calendar Model.
 
-# 7. Reset Rules
+# 6. Reset Rules
 
 Accumulator reset behavior shall be explicitly defined.
 
@@ -114,73 +117,68 @@ Supported Reset Types:
 Reset logic shall execute at defined calendar boundaries and shall
 preserve historical traceability.
 
-# 8. Update Timing Rules
+# 7. Update Timing Rules
 
 Accumulator updates occur during controlled lifecycle stages.
 
-Typical Update Points:
+Update timing rules:
 
-• During participant calculation\
-• During rerun recalculation\
-• During adjustment processing\
-• During corrective recalculation
+• Updates shall occur only after validation is complete.\
+• Updates shall be atomic with the associated payroll result posting.\
+• Partial updates shall not be permitted.\
+• Updates shall reference the triggering run and period.
 
-Updates shall be transactional and consistent within the scope of a run.
+# 8. Rerun and Recalculation Safety
 
-# 9. Recalculation and Replacement Policy
+Accumulator design shall support safe recalculation.
 
-Recalculation shall not cause the same participant result to be counted
-more than once for the same calculation context.
+Rerun safety requirements:
 
-Behavior shall follow these rules:
+• Prior contribution history shall be retained.\
+• Rerun contributions shall be clearly identified.\
+• Net effect of rerun contributions shall be deterministic.\
+• Double-counting shall be prevented through contribution tracking.
 
-Before Release:
+# 9. Correction Handling
 
-• Prior unreleased participant results may be refreshed or replaced.\
-• Contribution history associated with replaced results may be marked
-superseded.\
-• The balance shall reflect only the latest recalculated values.
+Corrections may affect accumulator balances.
 
-After Release:
+Correction behavior:
 
-• Prior released results shall not be silently replaced.\
-• Corrections shall be applied through auditable adjustment methods.\
-• Adjustments may use reversal, reposting, or delta-based correction.\
-• Contribution history shall reflect correction activity.
+• Corrections shall generate reversal contribution records.\
+• Reversal records shall clearly link to original contributions.\
+• Net accumulator values shall reflect all corrections.\
+• Correction history shall remain permanently auditable.
 
-In all cases:
+# 10. Accumulator Family Classification
 
-• Persisted balances shall represent the participant only once for the
-applicable calculation context.\
-• Historical traceability shall remain intact.
+Accumulators are organized into functional families.
 
-# 10. Idempotency Requirements
+Example families:
 
-Accumulator processing shall support safe rerun behavior.
+• Gross Wages\
+• Pre-Tax Deductions\
+• Post-Tax Deductions\
+• Federal Tax Withheld\
+• State Tax Withheld\
+• Employer Tax Contributions\
+• Benefit Contributions\
+• Retirement Contributions\
+• Garnishment Totals
 
-Repeated processing of the same participant shall:
+Family classification supports reporting, compliance thresholds, and cross-scope validation.
 
-• Produce identical net results when inputs remain unchanged.\
-• Avoid duplicate balance updates.\
-• Avoid duplicate contribution records.\
-• Maintain consistent state integrity across reruns.
+# 11. Cross-Scope Validation
 
-Idempotency shall be enforced through calculation context identification
-and controlled persistence rules.
+Accumulator integrity may be validated across scopes.
 
-# 11. Adjustment Handling
+Validation examples:
 
-Adjustments shall update balances and record supporting contributions.
+• Employee YTD gross wages should reconcile to employer-level totals.\
+• Jurisdiction-level tax accumulators should reconcile to employee tax contributions.\
+• Plan-year benefit accumulators should reconcile to deduction history.
 
-Adjustment behavior may include:
-
-• Prior-period corrections\
-• Supplemental adjustments\
-• Retroactive recalculations\
-• Policy-driven recalculation updates
-
-Adjustment processing shall maintain historical traceability and correct
-final balances.
+Cross-scope validation supports compliance and audit readiness.
 
 # 12. Audit and Traceability
 
@@ -194,25 +192,11 @@ Required audit capabilities:
 • Record timestamps and origin sources\
 • Maintain historical continuity across recalculations
 
-Audit traceability is mandatory for payroll verification and compliance.
-
 # 13. Performance Considerations
 
 Balance and contribution separation supports performance optimization.
 
-Balance records shall support:
-
-• Fast lookup\
-• Minimal contention\
-• Efficient update behavior
-
-Contribution history shall support:
-
-• Indexed retrieval\
-• Efficient filtering\
-• Historical reconstruction capability
-
-Performance tuning shall not compromise data integrity.
+Balance records shall support fast lookup, minimal contention, and efficient update behavior. Contribution history shall support indexed retrieval, efficient filtering, and historical reconstruction. Performance tuning shall not compromise data integrity.
 
 # 14. Key Design Principle
 

@@ -1,150 +1,56 @@
 # Pay_Statement_Template_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/interfaces/Pay_Statement_Template_Model.md` |
+| **Domain** | Interfaces |
+| **Related Documents** | Pay_Statement_Model, Payroll_Check_Model, Code_Classification_and_Mapping_Model, Multi_Context_Calendar_Model, Organizational_Structure_Model |
 
-## 1. Purpose
+## Purpose
 
-Define reusable pay statement templates that control layout, branding,
-field placement, and conditional display logic across multiple clients
-or organizations.
+Defines reusable pay statement templates that control layout, branding, field placement, and conditional display logic across multiple clients or organisations.
 
-## 2. Template Overview
+---
 
-A Pay Statement Template defines how payroll data is presented
-visually.\
-\
-Each template controls:\
-\
-Layout structure\
-Section ordering\
-Field visibility\
-Branding elements\
-Formatting rules
+## 1. Core Template Entity
 
-## 3. Core Template Entity
+Pay_Statement_Template: Template_ID, Template_Name, Organization_ID, Template_Type, Effective_Start_Date, Effective_End_Date, Status.
+Template_Type examples: STANDARD, PEO_CLIENT, MULTI_ENTITY, REGULATORY_SPECIAL.
 
-Pay_Statement_Template\
-\
-Template_ID\
-Template_Name\
-Organization_ID\
-Template_Type\
-Effective_Start_Date\
-Effective_End_Date\
-Status\
-\
-Template_Type examples:\
-\
-STANDARD\
-PEO_CLIENT\
-MULTI_ENTITY\
-REGULATORY_SPECIAL
+## 2. Template Sections
 
-## 4. Template Sections
+Supported sections: Header, Employee Information, Earnings, Deductions, Tax, Employer Contributions, Totals, Payment, Messages, Footer.
 
-Templates are composed of configurable sections.\
-\
-Supported Sections:\
-\
-Header Section\
-Employee Information Section\
-Earnings Section\
-Deductions Section\
-Tax Section\
-Employer Contributions Section\
-Totals Section\
-Payment Section\
-Messages Section\
-Footer Section
+## 3. Section Configuration
 
-## 5. Section Configuration
+Section_ID, Section_Name, Display_Order, Visibility_Rule, Formatting_Rule.
+Visibility may depend on: presence of data, client configuration, jurisdiction requirements.
 
-Each section includes:\
-\
-Section_ID\
-Section_Name\
-Display_Order\
-Visibility_Rule\
-Formatting_Rule\
-\
-Visibility may depend on:\
-\
-Presence of data\
-Client configuration\
-Jurisdiction requirements
+## 4. Branding Elements
 
-## 6. Branding Elements
+Company Logo, Company Name, Client Name, Color Scheme, Font Settings. Supports multi-client payroll providers and white-label environments.
 
-Templates support branding customization.\
-\
-Examples:\
-\
-Company Logo\
-Company Name\
-Client Name\
-Color Scheme\
-Font Settings\
-\
-Supports multi-client payroll providers and white-label environments.
+## 5. Field Mapping
 
-## 7. Field Mapping
+Each display field maps to a data source. Field_Label, Data_Source, Format_Type, Alignment, Display_Condition.
+Examples: Employee_Name → Employee_Master; Gross_Earnings → Payroll_Check; YTD_Taxes → Accumulator.
 
-Each display field maps to a data source.\
-\
-Examples:\
-\
-Employee_Name → Employee_Master\
-Gross_Earnings → Payroll_Check\
-YTD_Taxes → Accumulator\
-\
-Field attributes include:\
-\
-Field_Label\
-Data_Source\
-Format_Type\
-Alignment\
-Display_Condition
+## 6. Conditional Display Rules
 
-## 8. Conditional Display Rules
+Show Employer Contributions only if configured. Show Paycard details if Payment_Method = PAYCARD. Show State Tax only if applicable.
 
-Fields and sections may appear conditionally.\
-\
-Examples:\
-\
-Show Employer Contributions only if configured\
-Show Paycard details if Payment_Method = PAYCARD\
-Show State Tax only if applicable
+## 7. Localization Support
 
-## 9. Localization Support
+Currency formatting, date formatting, language translation, jurisdiction-specific disclosures.
 
-Templates support regional formatting.\
-\
-Examples:\
-\
-Currency formatting\
-Date formatting\
-Language translation\
-Jurisdiction-specific disclosures
+## 8. Versioning and Governance
 
-## 10. Versioning and Governance
+Version_Number, Approval_Status, Effective_Date, Change_Description. Historical templates remain accessible for audit replay.
 
-Templates must be version-controlled.\
-\
-Each template version includes:\
-\
-Version_Number\
-Approval_Status\
-Effective_Date\
-Change_Description\
-\
-Historical templates remain accessible for audit replay.
+## 9. Relationship to Other Models
 
-## 11. Relationship to Other Models
-
-This model integrates with:\
-\
-Pay_Statement_Model\
-Payroll_Check_Model\
-Code_Classification_and_Mapping_Model\
-Multi_Context_Calendar_Model\
-Organizational_Structure_Model
+This model integrates with: Pay_Statement_Model, Payroll_Check_Model, Code_Classification_and_Mapping_Model, Multi_Context_Calendar_Model, Organizational_Structure_Model.

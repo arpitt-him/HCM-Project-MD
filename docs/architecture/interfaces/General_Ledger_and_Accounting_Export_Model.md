@@ -1,207 +1,67 @@
 # General_Ledger_and_Accounting_Export_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/interfaces/General_Ledger_and_Accounting_Export_Model.md` |
+| **Domain** | Interfaces |
+| **Related Documents** | Payroll_Check_Model, Result_and_Payable_Model, Tax_Classification_and_Obligation_Model, Multi_Context_Calendar_Model, Integration_and_Data_Exchange_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define the structure and lifecycle of payroll-to-accounting exports.
-This model ensures that payroll financial results are transformed into
-balanced journal entries suitable for downstream accounting and
-financial reporting systems.
+Defines the structure and lifecycle of payroll-to-accounting exports. Ensures that payroll financial results are transformed into balanced journal entries suitable for downstream accounting and financial reporting systems.
 
-## 2. Scope of Accounting Exports
+---
 
-Accounting exports include:\
-\
-Payroll expense postings\
-Employer tax liabilities\
-Benefit expenses\
-Cash disbursement postings\
-Accrual postings\
-Adjustment entries\
-Departmental cost allocations
+## 1. Scope of Accounting Exports
 
-## 3. Core Journal_Entry Entity
+Payroll expense postings, employer tax liabilities, benefit expenses, cash disbursement postings, accrual postings, adjustment entries, departmental cost allocations.
 
-Journal_Entry\
-\
-Journal_Entry_ID\
-Journal_Date\
-Accounting_Period_ID\
-Organization_ID\
-\
-Source_System\
-Source_Run_ID\
-Source_Check_ID (optional)\
-\
-Journal_Status\
-\
-Status examples:\
-\
-Initialized\
-Balanced\
-Approved\
-Exported\
-Posted
+## 2. Core Journal_Entry Entity
 
-## 4. Journal_Line Entity
+Journal_Entry_ID, Journal_Date, Accounting_Period_ID, Organization_ID, Source_System, Source_Run_ID, Source_Check_ID (optional), Journal_Status.
+Status examples: Initialized, Balanced, Approved, Exported, Posted.
 
-Each Journal_Entry contains multiple Journal_Lines.\
-\
-Journal_Line\
-\
-Journal_Line_ID\
-Journal_Entry_ID\
-\
-Account_Code\
-Account_Description\
-\
-Debit_Amount\
-Credit_Amount\
-\
-Department_ID\
-Cost_Center_ID\
-Location_ID\
-\
-Reference_Code\
-Memo_Text
+## 3. Journal_Line Entity
 
-## 5. Chart of Accounts Integration
+Journal_Line_ID, Journal_Entry_ID, Account_Code, Account_Description, Debit_Amount, Credit_Amount, Department_ID, Cost_Center_ID, Location_ID, Reference_Code, Memo_Text.
 
-Payroll accounting exports rely on a defined Chart of Accounts.\
-\
-Attributes include:\
-\
-Account_Code\
-Account_Type\
-Account_Description\
-Posting_Category\
-\
-Examples:\
-\
-Wage Expense\
-Employer Tax Expense\
-Cash\
-Benefits Expense\
-Accrued Liabilities
+## 4. Chart of Accounts Integration
 
-## 6. Mapping from Payroll to Accounting
+Account_Code, Account_Type, Account_Description, Posting_Category.
+Examples: Wage Expense, Employer Tax Expense, Cash, Benefits Expense, Accrued Liabilities.
 
-Payroll components must map to accounting accounts.\
-\
-Examples:\
-\
-Gross Earnings → Wage Expense Account\
-Employee Taxes → Tax Liability Account\
-Employer Taxes → Employer Tax Expense\
-Net Pay → Cash Disbursement\
-Benefits → Benefits Expense\
-\
-Mappings should be configurable and version-controlled.
+## 5. Mapping from Payroll to Accounting
 
-## 7. Cost Allocation Support
+Gross Earnings → Wage Expense Account. Employee Taxes → Tax Liability Account. Employer Taxes → Employer Tax Expense. Net Pay → Cash Disbursement. Benefits → Benefits Expense. Mappings shall be configurable and version-controlled.
 
-Journal lines may allocate cost across organizational units.\
-\
-Supported allocation dimensions:\
-\
-Department\
-Location\
-Cost Center\
-Project\
-Business Unit\
-\
-Allocations may be:\
-\
-Single-dimension\
-Multi-dimensional\
-Percentage-based
+## 6. Cost Allocation Support
 
-## 8. Balancing Requirements
+Supported allocation dimensions: Department, Location, Cost Center, Project, Business Unit. Allocations may be single-dimension, multi-dimensional, or percentage-based.
 
-All journal entries must balance.\
-\
-Requirements:\
-\
-Total Debits = Total Credits\
-Validation prior to export\
-Automatic rejection of unbalanced journals\
-\
-Balance verification is mandatory before posting to accounting systems.
+## 7. Balancing Requirements
 
-## 9. Accounting Period Alignment
+Total Debits = Total Credits. Validation prior to export. Automatic rejection of unbalanced journals. Balance verification is mandatory before posting to accounting systems.
 
-Journal entries must align with accounting periods.\
-\
-Attributes include:\
-\
-Accounting_Period_ID\
-Fiscal_Year\
-Fiscal_Period\
-\
-Supports:\
-\
-Calendar fiscal years\
-Non-calendar fiscal years (e.g., October--September).
+## 8. Accounting Period Alignment
 
-## 10. Export Formats
+Accounting_Period_ID, Fiscal_Year, Fiscal_Period. Supports calendar fiscal years and non-calendar fiscal years (e.g., October–September).
 
-Supported export formats include:\
-\
-CSV\
-Fixed-width files\
-XML\
-JSON\
-API submission\
-Accounting system native formats\
-\
-Each export definition must specify:\
-\
-File format\
-Field mapping\
-Export frequency
+## 9. Export Formats
 
-## 11. Idempotency and Replay Protection
+CSV, Fixed-width files, XML, JSON, API submission, accounting system native formats. Each export definition must specify file format, field mapping, and export frequency.
 
-Accounting exports must support replay safety.\
-\
-Required attributes:\
-\
-Export_Batch_ID\
-Source_Run_Reference\
-Journal_Fingerprint\
-\
-Duplicate exports must not create duplicate postings.
+## 10. Idempotency and Replay Protection
 
-## 12. Reconciliation and Validation
+Export_Batch_ID, Source_Run_Reference, Journal_Fingerprint. Duplicate exports must not create duplicate postings.
 
-Post-export validation includes:\
-\
-Payroll-to-GL reconciliation\
-Control total matching\
-Expense validation\
-Cash validation\
-\
-Reconciliation must detect discrepancies before closing periods.
+## 11. Reconciliation and Validation
 
-## 13. Security and Audit Controls
+Post-export validation includes: payroll-to-GL reconciliation, control total matching, expense validation, cash validation. Reconciliation must detect discrepancies before closing periods.
 
-All accounting exports must support:\
-\
-Access control\
-Approval workflows\
-Audit logging\
-Export tracking\
-\
-Sensitive financial data must be protected during transmission.
+## 12. Relationship to Other Models
 
-## 14. Relationship to Other Models
-
-This model integrates with:\
-\
-Payroll_Check_Model\
-Provider_Billing_and_Charge_Model\
-Tax_Classification_and_Obligation_Model\
-Multi_Context_Calendar_Model\
-Operational_Reporting_and_Analytics_Model\
-Integration_and_Data_Exchange_Model
+This model integrates with: Payroll_Check_Model, Provider_Billing_and_Charge_Model, Tax_Classification_and_Obligation_Model, Multi_Context_Calendar_Model, Operational_Reporting_and_Analytics_Model, Integration_and_Data_Exchange_Model.

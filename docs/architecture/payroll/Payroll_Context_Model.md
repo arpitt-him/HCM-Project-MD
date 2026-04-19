@@ -1,270 +1,49 @@
-Document Title: Payroll_Context_Model
+# Payroll_Context_Model
 
-Document Version: 0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Payroll Domain |
+| **Location** | `docs/architecture/payroll/Payroll_Context_Model.md` |
+| **Domain** | Payroll |
+| **Related Documents** | Payroll_Calendar_Model, Payroll_Run_Model, Security_and_Access_Control_Model, Organizational_Structure_Model, Multi_Context_Calendar_Model |
 
-Status: Draft
+## Purpose
 
-Last Updated: 2026-04-15
+Defines the structure, identity, lifecycle, and operational scope of Payroll Contexts. A Payroll Context represents the operational boundary within which payroll calculation, validation, approval, export, and reconciliation activities occur.
 
-Description:
+---
 
-Defines the structure, identity, lifecycle, and operational scope of
-Payroll Contexts, including their relationship to clients, companies,
-payroll groups, calendars, and runs.
+## 1. Core Design Principles
 
-# 1. Purpose
+Payroll Contexts shall define operational payroll boundaries. They shall isolate processing activity, support multi-client and multi-company environments, and be explicitly associated with payroll calendars. Configuration shall be auditable.
 
-This document defines the Payroll Context model.
+## 2. Payroll Context Definition
 
-A Payroll Context represents the operational boundary within which
-payroll calculation, validation, approval, export, and reconciliation
-activities occur. Payroll Contexts enable safe multi-client and
-multi-company operation and provide the logical container for payroll
-runs.
+Payroll_Context_ID, Payroll_Context_Name, Client_ID (if applicable), Company_ID, Payroll_Calendar_ID, Payroll_Type, Default_Pay_Date_Rule, Active_Status, Effective_Date, Termination_Date (optional).
 
-# 2. Core Design Principles
+## 3. Relationship to Client and Company
 
-Payroll Context behavior shall follow these principles:
+One Client may support multiple Payroll Contexts. One Company may support multiple Payroll Contexts. Each Payroll Context belongs to one Client and one Company. Enables controlled segmentation in multi-tenant environments.
 
-• Payroll Contexts shall define operational payroll boundaries.\
-• Payroll Contexts shall isolate processing activity.\
-• Payroll Contexts shall support multi-client and multi-company
-environments.\
-• Payroll Context identity shall remain stable over time.\
-• Payroll Context configuration shall be auditable.\
-• Payroll Contexts shall be explicitly associated with payroll
-calendars.
+## 4. Payroll Type Classification
 
-# 3. Payroll Context Definition
+Weekly, Biweekly, Semi-Monthly, Monthly, Off-Cycle, Supplemental.
 
-A Payroll Context represents a logical payroll processing environment.
+## 5. Context Lifecycle States
 
-Recommended Payroll_Context fields:
+Defined, Configured, Active, Suspended, Closed. Lifecycle transitions shall be auditable and controlled.
 
-• Payroll_Context_ID\
-• Payroll_Context_Name\
-• Client_ID (if applicable)\
-• Company_ID\
-• Payroll_Calendar_ID\
-• Payroll_Type\
-• Default_Pay_Date_Rule\
-• Active_Status\
-• Effective_Date\
-• Termination_Date (optional)
+## 6. Payroll Run Association
 
-Payroll Contexts shall serve as the primary container for payroll
-execution.
+Payroll Runs are associated with a Payroll Context. A context may have many runs. Runs cannot span multiple contexts.
 
-# 4. Relationship to Client and Company
+## 7. Security and Access Scoping
 
-Payroll Contexts shall be associated with client and company identity.
+Access to a Payroll Context is role-governed. Users may be scoped to specific contexts. Cross-context access requires explicit authorisation.
 
-Typical relationships:
+## 8. Relationship to Other Models
 
-• One Client may support multiple Payroll Contexts.\
-• One Company may support multiple Payroll Contexts.\
-• Each Payroll Context shall belong to one Client and one Company.
-
-This relationship enables controlled segmentation in multi-tenant
-environments.
-
-# 5. Relationship to Payroll Calendar
-
-Each Payroll Context shall reference a Payroll Calendar.
-
-Calendar relationships include:
-
-• Payroll Period Definitions\
-• Pay Dates\
-• Cutoff Dates\
-• Approval Deadlines\
-• Release Deadlines
-
-Calendar linkage ensures consistent temporal control within the Payroll
-Context.
-
-# 6. Payroll Type Classification
-
-Payroll Contexts shall be classified by payroll type.
-
-Typical Payroll_Type values include:
-
-• Weekly\
-• Biweekly\
-• Semi-Monthly\
-• Monthly\
-• Off-Cycle\
-• Supplemental
-
-Classification supports scheduling and reporting logic.
-
-# 7. Context Lifecycle States
-
-Payroll Contexts shall maintain lifecycle state.
-
-Typical lifecycle states include:
-
-• Defined\
-• Configured\
-• Active\
-• Suspended\
-• Closed
-
-Lifecycle transitions shall be auditable and controlled.
-
-# 8. Payroll Run Association
-
-Payroll Runs shall be associated with a Payroll Context.
-
-Each Payroll Run shall include:
-
-• Payroll_Context_ID\
-• Period_ID\
-• Run_ID\
-• Run_Type\
-• Run_Status
-
-Payroll Context identity shall remain consistent across multiple runs.
-
-# 9. Multi-Run Support
-
-Payroll Contexts shall support multiple runs over time.
-
-Typical run types include:
-
-• Regular Run\
-• Adjustment Run\
-• Correction Run\
-• Reprocessing Run
-
-Multiple runs shall remain traceable within the same Payroll Context.
-
-# 10. Context Readiness
-
-Payroll Context readiness shall be validated before run execution.
-
-Typical readiness checks include:
-
-• Calendar readiness\
-• Assignment readiness\
-• Rule readiness\
-• Reference data completeness\
-• External dependency readiness
-
-Readiness validation supports safe payroll execution.
-
-# 11. Context Isolation
-
-Payroll Contexts shall isolate processing activity.
-
-Isolation includes:
-
-• Exception queues\
-• Run execution\
-• Approval workflows\
-• Export delivery\
-• Reconciliation tracking
-
-Isolation prevents cross-context interference.
-
-# 12. Deadline Management
-
-Payroll Contexts shall support deadline-aware operations.
-
-Typical deadlines include:
-
-• Data entry cutoff\
-• Calculation completion deadline\
-• Approval deadline\
-• Release deadline\
-• Export deadline
-
-Deadline tracking supports operational safety.
-
-# 13. Operational Visibility
-
-Payroll Contexts shall be visible in operational dashboards.
-
-Typical context-level visibility includes:
-
-• Active status\
-• Run progress\
-• Exception count\
-• Deadline proximity\
-• Export readiness\
-• Reconciliation status
-
-Visibility enables informed operational decision-making.
-
-# 14. Authorization and Access Control
-
-Payroll Context visibility shall be governed by authorization rules.
-
-Access rules may include:
-
-• Role-based access\
-• Client-level access\
-• Company-level access\
-• Read-only vs operational access
-
-Authorization ensures data isolation and compliance.
-
-# 15. Historical Retention
-
-Payroll Context history shall be retained for audit and reporting.
-
-Retention elements include:
-
-• Run history\
-• Configuration changes\
-• Calendar associations\
-• Correction lineage\
-• Reconciliation records
-
-Historical retention supports regulatory and audit requirements.
-
-# 16. Integration Dependencies
-
-Payroll Contexts shall coordinate with external integration workflows.
-
-Typical integration relationships include:
-
-• Export configuration\
-• Provider response handling\
-• External validation systems
-
-Integration awareness supports reliable data exchange.
-
-# 17. Context Closure Rules
-
-Payroll Context closure shall follow controlled rules.
-
-Closure may occur when:
-
-• Payroll operations cease\
-• Client relationship ends\
-• Company payroll structure changes
-
-Closed contexts shall remain historically accessible.
-
-# 18. Audit and Traceability
-
-Payroll Context lifecycle and usage shall be auditable.
-
-Audit elements include:
-
-• Context creation\
-• Configuration updates\
-• Lifecycle transitions\
-• Run associations\
-• Access history
-
-Auditability supports operational accountability.
-
-# 19. Key Design Principle
-
-Payroll Contexts define the operational boundary of payroll execution.
-
-All payroll activity occurs within an explicitly defined Payroll
-Context, ensuring safe segmentation, traceability, and operational
-clarity across multi-client and multi-company environments.
+This model integrates with: Payroll_Calendar_Model, Payroll_Run_Model, Security_and_Access_Control_Model, Organizational_Structure_Model, Multi_Context_Calendar_Model, Run_Visibility_and_Dashboard_Model.

@@ -1,111 +1,55 @@
 # Payroll_Check_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Payroll Domain |
+| **Location** | `docs/architecture/processing/Payroll_Check_Model.md` |
+| **Domain** | Processing |
+| **Related Documents** | DATA/Entity-Payroll-Item.md, Payroll_Run_Model, Result_and_Payable_Model, Accumulator_and_Balance_Model, Pay_Statement_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define the Payroll Check as the atomic accounting unit of payroll
-execution. All payroll financial results originate from a Payroll_Check
-and flow into accumulators, billing processes, and reporting outputs.
+Defines the Payroll Check as the atomic accounting unit of payroll execution. All payroll financial results originate from a Payroll Check and flow into accumulators, billing processes, and reporting outputs.
 
-## 2. Core Payroll_Check Entity
+---
 
-Payroll_Check\
-Check_ID\
-Check_Number\
-Payroll_Run_ID\
-Employee_ID\
-Employment_ID\
-Pay_Period_Start_Date\
-Pay_Period_End_Date\
-Check_Date\
-Payment_Date\
-Calendar_Context_ID\
-Check_Status (Initialized, Calculated, Validated, Released, Voided,
-Corrected)
+## 1. Core Payroll_Check Entity
 
-## 3. Payment Handling
+Check_ID, Check_Number, Payroll_Run_ID, Employee_ID, Employment_ID, Pay_Period_Start_Date, Pay_Period_End_Date, Check_Date, Payment_Date, Calendar_Context_ID, Check_Status.
+Check_Status: Initialized, Calculated, Validated, Released, Voided, Corrected.
 
-Payment_Method\
-DIRECT_DEPOSIT\
-PRINTED_CHECK\
-PAYCARD\
-CASH\
-MANUAL_CHECK\
-OTHER\
-\
-Payment_Context\
-REGULAR\
-OFF_CYCLE\
-ADJUSTMENT\
-VOID_REPLACEMENT\
-TERMINATION\
-BONUS\
-MANUAL
+## 2. Payment Handling
 
-## 4. Result Line Ownership
+Payment_Method: DIRECT_DEPOSIT, PRINTED_CHECK, PAYCARD, CASH, MANUAL_CHECK, OTHER.
+Payment_Context: REGULAR, OFF_CYCLE, ADJUSTMENT, VOID_REPLACEMENT, TERMINATION, BONUS, MANUAL.
 
-Each Payroll_Check owns Result_Lines\[\].\
-\
-Result_Line fields include:\
-Code_Type\
-Code\
-Description\
-Calculation_Mode\
-Hours (optional)\
-Rate (optional)\
-Amount
+## 3. Result Line Ownership
 
-## 5. Check-Level Totals
+Each Payroll_Check owns Result_Lines[]. Result_Line fields: Code_Type, Code, Description, Calculation_Mode, Hours (optional), Rate (optional), Amount.
 
-Derived totals maintained per check:\
-\
-Gross_Earnings\
-Total_Deductions\
-Total_Taxes\
-Net_Pay\
-Employer_Total_Cost
+## 4. Check-Level Totals
 
-## 6. Accumulator Posting Boundary
+Gross_Earnings, Total_Deductions, Total_Taxes, Net_Pay, Employer_Total_Cost. Derived from result lines.
 
-Posting Flow:\
-\
-Payroll_Check\
-→ Result_Line\
-→ Accumulator_Contribution\
-→ Accumulator_Balance
+## 5. Accumulator Posting Boundary
 
-## 7. Idempotency Boundary
+Payroll_Check → Result_Line → Accumulator_Contribution → Accumulator_Balance. Posting is atomic at the check level.
 
-Idempotency Key:\
-\
-Employment_ID\
-Check_Number\
-Payroll_Context\
-\
-Reprocessing replaces prior results rather than duplicating them.
+## 6. Idempotency Boundary
 
-## 8. Correction Lifecycle
+Idempotency key: Employment_ID + Check_Number + Payroll_Context. Reprocessing replaces prior results rather than duplicating them.
 
-Supported correction actions:\
-\
-Void Check\
-Replacement Check\
-Adjustment Check\
-\
-These actions integrate with the Correction_and_Immutability_Model.
+## 7. Correction Lifecycle
 
-## 9. Provider Billing Relationship
+Void Check, Replacement Check, Adjustment Check. All correction actions integrate with the Correction_and_Immutability_Model.
 
-Payroll_Check records generate employer financial obligations which feed
-invoice allocation processes.
+## 8. Reporting Integration
 
-## 10. Reporting Integration
+Payroll_Check records support: Pay Statements, Tax Reporting, Invoice Reporting, Reconciliation, Audit Logs.
 
-Payroll_Check records support downstream reporting including:\
-\
-Pay Statements\
-Tax Reporting\
-Invoice Reporting\
-Reconciliation\
-Audit Logs
+## 9. Relationship to Other Models
+
+This model integrates with: Payroll_Run_Model, Result_and_Payable_Model, Accumulator_and_Balance_Model, Net_Pay_and_Disbursement_Model, Pay_Statement_Model, Provider_Billing_and_Charge_Model, Correction_and_Immutability_Model.

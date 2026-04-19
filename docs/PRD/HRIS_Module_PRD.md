@@ -1,9 +1,48 @@
 # HRIS Module PRD
 
-Version: v0.1
-Status: Draft
-Date: April 2026
-Location: docs/PRD/HRIS_Module_PRD.md
+| Field | Detail |
+|---|---|
+| **Document Type** | Product Requirements — Module Specification |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Core Platform / HRIS |
+| **Location** | `docs/PRD/HRIS_Module_PRD.md` |
+| **Date** | April 2026 |
+| **Related Documents** | PRD-0000_Core_Vision, PRD-0100_Architecture_Principles, PRD-0200_Core_Entity_Model, PRD-0700_Workflow_Framework, PRD-0800_Validation_Framework, ADR-001_Event_Driven_Architecture, DATA/Entity_Person.md, DATA/Entity_Employee.md |
+
+## Purpose
+
+Defines the requirements for the HRIS module — the authoritative system of record for people, employment relationships, organisational structure, and HR lifecycle events across the HCM platform. HRIS is the upstream source of truth for Payroll and all future downstream modules.
+
+This document is a self-contained module specification. It inherits and applies the platform-level principles defined in `PRD-0100_Architecture_Principles.md` without repeating or modifying them. It does not cover payroll calculation, benefits administration, or any other module's internal behaviour.
+
+---
+
+## Section Map
+
+| § | Section | What it covers |
+|---|---|---|
+| 1 | Module Vision and Strategic Purpose | Why this module exists; its role in the platform |
+| 2 | Module Scope | In scope, out of scope, and boundary with Payroll |
+| 3 | Inherited Architectural Principles | Platform principles as applied to HRIS |
+| 4 | Core Entity Model | Primary HRIS entities and identity anchoring |
+| 5 | Person Record Model | Person attributes, status values, persistence rules |
+| 6 | Employment Record Model | Employment attributes, types, status values |
+| 7 | Organisational Structure Model | Org unit types, hierarchy rules, legal entity and location attributes |
+| 8 | Job and Position Model | Job classification and position slot definitions |
+| 9 | Employee Lifecycle Event Model | Event types, attributes, workflow states, retroactive handling |
+| 10 | Compensation Record Model | Rate types, change rules, multiple rate support |
+| 11 | Leave and Absence Management Model | Leave types, request lifecycle, payroll impact signals |
+| 12 | Document Storage Model | Supported document types, attributes, governance |
+| 13 | Onboarding Workflow Model | Task types, blocking vs non-blocking tasks |
+| 14 | Self-Service Model | Manager, HR administrator, and employee self-service capabilities |
+| 15 | Data Intake Model | Supported intake methods, validation requirements, batch rules |
+| 16 | Approval Workflow Model | Workflow states, applicability, configuration |
+| 17 | Validation and Exception Framework | Exception categories, examples, routing rules |
+| 18 | Reporting and Analytics Support | Operational reports, workforce analytics feeds, constraints |
+| 19 | Integration with Downstream Modules | Payroll, Benefits, T&A, Recruiting integration patterns |
+| 20 | Architecture Model Dependencies | Which platform architecture models govern HRIS behaviour |
+| 21 | Future Expansion Considerations | Out-of-scope capabilities planned for later phases |
 
 ---
 

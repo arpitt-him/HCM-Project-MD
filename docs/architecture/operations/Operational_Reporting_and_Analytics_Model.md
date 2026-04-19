@@ -1,171 +1,59 @@
 # Operational_Reporting_and_Analytics_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Payroll Domain |
+| **Location** | `docs/architecture/operations/Operational_Reporting_and_Analytics_Model.md` |
+| **Domain** | Operations |
+| **Related Documents** | Accumulator_and_Balance_Model, Payroll_Check_Model, Organizational_Structure_Model, Multi_Context_Calendar_Model, Exception_and_Work_Queue_Model |
 
-## 1. Purpose
+## Purpose
 
-Define operational reporting and analytics capabilities that provide
-insight into payroll, labor cost, tax exposure, billing obligations, and
-exception trends. This model supports decision-making, financial
-planning, and operational transparency.
+Defines operational reporting and analytics capabilities that provide insight into payroll, labour cost, tax exposure, billing obligations, and exception trends. Supports decision-making, financial planning, and operational transparency.
 
-## 2. Reporting Scope
+---
 
-Operational reporting includes:\
-\
-Payroll Cost Analysis\
-Departmental Labor Reporting\
-Benefit Cost Analysis\
-Tax Liability Tracking\
-Exception Trend Analysis\
-Overtime Monitoring\
-Employer Cost Forecasting
+## 1. Reporting Scope
 
-## 3. Core Operational_Report Entity
+Payroll Cost Analysis, Departmental Labour Reporting, Benefit Cost Analysis, Tax Liability Tracking, Exception Trend Analysis, Overtime Monitoring, Employer Cost Forecasting.
 
-Operational_Report\
-\
-Report_ID\
-Report_Name\
-Report_Type\
-Organization_ID\
-\
-Reporting_Period_Start\
-Reporting_Period_End\
-Calendar_Context_ID\
-\
-Generation_Date\
-Report_Status
+## 2. Core Operational_Report Entity
 
-## 4. Report Categories
+Report_ID, Report_Name, Report_Type, Organization_ID, Reporting_Period_Start, Reporting_Period_End, Calendar_Context_ID, Generation_Date, Report_Status.
 
-Operational reports are grouped into categories:\
-\
-FINANCIAL_REPORT\
-LABOR_REPORT\
-TAX_ANALYTICS\
-BENEFIT_ANALYTICS\
-EXCEPTION_ANALYTICS\
-PRODUCTIVITY_REPORT\
-\
-Examples:\
-\
-Labor Cost by Department\
-Employer Tax Liability Trend\
-Benefit Participation Summary\
-Overtime Cost Analysis
+## 3. Report Categories
 
-## 5. Data Aggregation Sources
+FINANCIAL_REPORT, LABOR_REPORT, TAX_ANALYTICS, BENEFIT_ANALYTICS, EXCEPTION_ANALYTICS, PRODUCTIVITY_REPORT.
+Examples: Labour Cost by Department, Employer Tax Liability Trend, Benefit Participation Summary, Overtime Cost Analysis.
 
-Reports aggregate data from:\
-\
-Payroll_Check\
-Result_Lines\
-Accumulators\
-Organizational Units\
-Provider Billing Charges\
-\
-Aggregation may occur across:\
-\
-Employees\
-Departments\
-Locations\
-Cost Centers\
-Time Periods
+## 4. Data Aggregation Sources
 
-## 6. Metric Definitions
+Payroll_Check, Result_Lines, Accumulators, Organisational Units, Provider Billing Charges. Aggregation may occur across employees, departments, locations, cost centres, and time periods.
 
-Each report defines measurable metrics.\
-\
-Examples:\
-\
-Total Labor Cost\
-Average Hourly Cost\
-Overtime Percentage\
-Employer Tax Burden\
-Benefit Cost per Employee\
-\
-Metrics include:\
-\
-Metric_Name\
-Calculation_Formula\
-Data_Source\
-Aggregation_Level
+## 5. Metric Definitions
 
-## 7. Time-Series Analysis
+Metric_Name, Calculation_Formula, Data_Source, Aggregation_Level.
+Examples: Total Labour Cost, Average Hourly Cost, Overtime Percentage, Employer Tax Burden, Benefit Cost per Employee.
 
-Supports trend-based analysis across periods.\
-\
-Examples:\
-\
-Monthly Payroll Cost Trend\
-Quarterly Tax Liability Trend\
-Annual Benefit Cost Growth\
-\
-Requires:\
-\
-Calendar_Context_ID\
-Sequential Period Comparison
+## 6. Time-Series Analysis
 
-## 8. Exception Analytics
+Monthly Payroll Cost Trend, Quarterly Tax Liability Trend, Annual Benefit Cost Growth. Requires Calendar_Context_ID and sequential period comparison.
 
-Reports monitor operational anomalies.\
-\
-Examples:\
-\
-Missing Payroll Data\
-Unmapped Codes\
-Unusual Earnings Variations\
-Excessive Overtime Patterns\
-\
-Exception metrics support proactive issue detection.
+## 7. Exception Analytics
 
-## 9. Forecasting Support
+Missing Payroll Data, Unmapped Codes, Unusual Earnings Variations, Excessive Overtime Patterns. Exception metrics support proactive issue detection.
 
-Supports predictive financial planning.\
-\
-Examples:\
-\
-Projected Payroll Cost\
-Future Employer Tax Liability\
-Benefit Cost Forecasting\
-\
-Forecasts may use:\
-\
-Historical Accumulator Data\
-Growth Rate Assumptions\
-External Economic Inputs
+## 8. Forecasting Support
 
-## 10. Visualization Support
+Projected Payroll Cost, Future Employer Tax Liability, Benefit Cost Forecasting. Forecasts may use historical accumulator data, growth rate assumptions, and external economic inputs.
 
-Reports may support visual dashboards.\
-\
-Examples:\
-\
-Charts\
-Trend Graphs\
-Heat Maps\
-Summary Indicators\
-\
-Visualization elements support rapid decision-making.
+## 9. Security and Access Control
 
-## 11. Security and Access Control
+Payroll Administrator → full access. Manager → department-level access. Executive → organisation-level summary.
 
-Access to operational reports must respect role permissions.\
-\
-Examples:\
-\
-Payroll Administrator → Full access\
-Manager → Department-level access\
-Executive → Organization-level summary
+## 10. Relationship to Other Models
 
-## 12. Relationship to Other Models
-
-This model integrates with:\
-\
-Payroll_Check_Model\
-Accumulator_and_Balance_Model\
-Organizational_Structure_Model\
-Multi_Context_Calendar_Model\
-Exception_and_Work_Queue_Model\
-Run_Visibility_and_Dashboard_Model
+This model integrates with: Payroll_Check_Model, Accumulator_and_Balance_Model, Organizational_Structure_Model, Multi_Context_Calendar_Model, Exception_and_Work_Queue_Model, Run_Visibility_and_Dashboard_Model.

@@ -1,0 +1,205 @@
+# Documentation Index
+
+This index lists every document in the repository and its purpose. It is the starting point for navigating the HCM platform documentation.
+
+**In-scope modules (v1):** HRIS, Payroll
+**Platform status:** In Design
+
+---
+
+## PRD — Product Requirements
+
+Product requirements documents define *what* the system must do and *why*. They are the authoritative source of functional scope for all modules.
+
+### Platform PRDs
+
+| Document | Purpose |
+|---|---|
+| [PRD-0000_Core_Vision.md](docs/PRD/PRD-0000_Core_Vision.md) | Platform vision, module roadmap, deployment model, and data entry channels |
+| [PRD-0100_Architecture_Principles.md](docs/PRD/PRD-0100_Architecture_Principles.md) | Non-negotiable architectural principles governing all design decisions |
+| [PRD-0200_Core_Entity_Model.md](docs/PRD/PRD-0200_Core_Entity_Model.md) | Conceptual entity model — primary objects, relationships, and identity anchoring |
+| [PRD-0300_Payroll_Calendar.md](docs/PRD/PRD-0300_Payroll_Calendar.md) | Pay frequency support, period structure, and calendar governance |
+| [PRD-0400_Earnings_Model.md](docs/PRD/PRD-0400_Earnings_Model.md) | Supported earning types, external earnings requirements, and import methods |
+| [PRD-0500_Accumulator_Strategy.md](docs/PRD/PRD-0500_Accumulator_Strategy.md) | Accumulator scopes, period granularities, and integrity requirements |
+| [PRD-0600_Jurisdiction_Model.md](docs/PRD/PRD-0600_Jurisdiction_Model.md) | Supported jurisdiction levels and multi-jurisdiction handling principles |
+| [PRD-0700_Workflow_Framework.md](docs/PRD/PRD-0700_Workflow_Framework.md) | Approval workflow applicability, states, and configuration requirements |
+| [PRD-0800_Validation_Framework.md](docs/PRD/PRD-0800_Validation_Framework.md) | Validation phases, exception categories, and configuration readiness checks |
+| [PRD-0900_Integration_Model.md](docs/PRD/PRD-0900_Integration_Model.md) | Integration patterns, inbound/outbound requirements, formats, and security |
+
+### Module PRDs
+
+| Document | Purpose |
+|---|---|
+| [HRIS_Module_PRD.md](docs/PRD/HRIS_Module_PRD.md) | HRIS module scope, entity model, lifecycle events, self-service, and integration |
+
+---
+
+## NFR — Non-Functional Requirements
+
+| Document | Purpose |
+|---|---|
+| [HCM_NFR_Specification.md](docs/NFR/HCM_NFR_Specification.md) | Platform-wide non-functional requirements: performance, availability, security, integrity, auditability |
+
+---
+
+## ADR — Architecture Decision Records
+
+ADRs document significant architectural decisions — the context, the decision made, consequences, and alternatives considered. They are the historical record of *why* the architecture is the way it is.
+
+| Document | Decision |
+|---|---|
+| [ADR-001_Event_Driven_Architecture.md](docs/ADR/ADR-001_Event_Driven_Architecture.md) | All inter-module integration uses an event-driven model; direct module-to-module calls are prohibited |
+| [ADR-002_Deterministic_Replayability.md](docs/ADR/ADR-002_Deterministic_Replayability.md) | Historical payroll results must be exactly reproducible from historical inputs and rules |
+
+---
+
+## DATA — Entity Specifications
+
+DATA documents define the canonical data entities — attributes, status values, relationships, and governance rules at the field level.
+
+| Document | Entity |
+|---|---|
+| [Entity_Person.md](docs/DATA/Entity_Person.md) | Person — the enduring human identity record |
+| [Entity_Employee.md](docs/DATA/Entity_Employee.md) | Employment — the payroll-recognised employment relationship |
+| [Entity_Payroll_Item.md](docs/DATA/Entity_Payroll_Item.md) | Payroll Item — a single computed earning, deduction, tax, or contribution line |
+
+---
+
+## SPEC — Functional Specifications
+
+SPEC documents define detailed behaviour for specific features or integration patterns, below the level of the PRD and above the level of architecture models.
+
+| Document | Subject |
+|---|---|
+| [External_Earnings.md](docs/SPEC/External_Earnings.md) | Import format, validation, workflow, and audit for externally calculated earnings |
+| [Residual_Commissions.md](docs/SPEC/Residual_Commissions.md) | Payroll treatment, tax handling, and reconciliation for residual commission earning types |
+
+---
+
+## Architecture Models
+
+Architecture models define *how* the system implements the requirements. They are organised by domain. Each model document covers entity definitions, design principles, and relationships to other models.
+
+### Calculation Engine
+
+| Document | Purpose |
+|---|---|
+| [Accumulator_and_Balance_Model.md](docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md) | Accumulator entity structure, rollup behaviour, and balance management |
+| [Calculation_Engine.md](docs/architecture/calculation-engine/Calculation_Engine.md) | Core calculation framework, hybrid model (internal + external), and audit traceability |
+| [Earnings_and_Deductions_Computation_Model.md](docs/architecture/calculation-engine/Earnings_and_Deductions_Computation_Model.md) | Ordered computation of earnings and deductions from inputs to result lines |
+| [External_Result_Import_Specification.md](docs/architecture/calculation-engine/External_Result_Import_Specification.md) | Structure and processing rules for externally calculated earnings imports |
+| [Net_Pay_and_Disbursement_Model.md](docs/architecture/calculation-engine/Net_Pay_and_Disbursement_Model.md) | Net pay finalisation, payment methods, split deposits, and disbursement lifecycle |
+| [Result_and_Payable_Model.md](docs/architecture/calculation-engine/Result_and_Payable_Model.md) | Result record structure, payable promotion, status lifecycle, and accumulator feeding |
+
+### Core
+
+| Document | Purpose |
+|---|---|
+| [Accrual_and_Entitlement_Model.md](docs/architecture/core/Accrual_and_Entitlement_Model.md) | Leave accrual rules, entitlement calculation, and balance management |
+| [Benefit_and_Deduction_Configuration_Model.md](docs/architecture/core/Benefit_and_Deduction_Configuration_Model.md) | Benefit plan configuration and deduction setup |
+| [Compensation_and_Pay_Rate_Model.md](docs/architecture/core/Compensation_and_Pay_Rate_Model.md) | Compensation record structure, rate history, and change handling |
+| [Eligibility_and_Enrollment_Lifecycle_Model.md](docs/architecture/core/Eligibility_and_Enrollment_Lifecycle_Model.md) | Benefit eligibility determination and enrollment state management |
+| [Employee_Assignment_Model.md](docs/architecture/core/Employee_Assignment_Model.md) | Job, position, department, and location assignment linkages |
+| [Employee_Event_and_Status_Change_Model.md](docs/architecture/core/Employee_Event_and_Status_Change_Model.md) | Lifecycle event structure, status transitions, and downstream routing |
+| [Employment_and_Person_Identity_Model.md](docs/architecture/core/Employment_and_Person_Identity_Model.md) | Person/Employment identity separation and payroll anchor rules |
+| [Leave_and_Absence_Management_Model.md](docs/architecture/core/Leave_and_Absence_Management_Model.md) | Leave request lifecycle and payroll impact signals |
+| [Organizational_Structure_Model.md](docs/architecture/core/Organizational_Structure_Model.md) | Org hierarchy, legal entity, department, and location structures |
+| [Overtime_and_Premium_Pay_Model.md](docs/architecture/core/Overtime_and_Premium_Pay_Model.md) | Overtime eligibility, premium pay rules, and FLSA compliance |
+| [Plan_and_Rule_Model.md](docs/architecture/core/Plan_and_Rule_Model.md) | Plan definitions and rule structures governing payroll behaviour |
+| [Reference_Data_Model.md](docs/architecture/core/Reference_Data_Model.md) | Standardised code sets, versioning, and reference data governance |
+| [Scheduling_and_Shift_Model.md](docs/architecture/core/Scheduling_and_Shift_Model.md) | Work schedule and shift definitions consumed by time and payroll |
+| [Time_Entry_and_Worked_Time_Model.md](docs/architecture/core/Time_Entry_and_Worked_Time_Model.md) | Time entry structure and worked time records for payroll consumption |
+
+### Governance
+
+| Document | Purpose |
+|---|---|
+| [Configuration_and_Metadata_Management_Model.md](docs/architecture/governance/Configuration_and_Metadata_Management_Model.md) | Configuration validation, readiness assessment, and dependency diagnostics |
+| [Correction_and_Immutability_Model.md](docs/architecture/governance/Correction_and_Immutability_Model.md) | Correction handling, immutability rules, and compensating transaction model |
+| [Data_Retention_and_Archival_Model.md](docs/architecture/governance/Data_Retention_and_Archival_Model.md) | Retention periods, archival lifecycle, and purge governance |
+| [Garnishment_and_Legal_Order_Model.md](docs/architecture/governance/Garnishment_and_Legal_Order_Model.md) | Legal order processing, garnishment calculation, and remittance |
+| [Jurisdiction_and_Compliance_Rules_Model.md](docs/architecture/governance/Jurisdiction_and_Compliance_Rules_Model.md) | Jurisdiction hierarchy, compliance rule structure, and applicability |
+| [Payroll_Reconciliation_Model.md](docs/architecture/governance/Payroll_Reconciliation_Model.md) | Reconciliation controls between payroll results and financial records |
+| [Regulatory_and_Compliance_Reporting_Model.md](docs/architecture/governance/Regulatory_and_Compliance_Reporting_Model.md) | Tax and regulatory filing structures (W-2, 941, etc.) |
+| [Release_and_Approval_Model.md](docs/architecture/governance/Release_and_Approval_Model.md) | Approval workflow structure and release governance |
+| [Security_and_Access_Control_Model.md](docs/architecture/governance/Security_and_Access_Control_Model.md) | Role-based access, segregation of duties, and data access scoping |
+
+### Interfaces
+
+| Document | Purpose |
+|---|---|
+| [General_Ledger_and_Accounting_Export_Model.md](docs/architecture/interfaces/General_Ledger_and_Accounting_Export_Model.md) | Journal entry structure and payroll-to-GL export lifecycle |
+| [Integration_and_Data_Exchange_Model.md](docs/architecture/interfaces/Integration_and_Data_Exchange_Model.md) | Integration boundaries, exchange patterns, and canonical translation layer |
+| [Pay_Statement_Model.md](docs/architecture/interfaces/Pay_Statement_Model.md) | Pay statement structure and content fields |
+| [Pay_Statement_Template_Model.md](docs/architecture/interfaces/Pay_Statement_Template_Model.md) | Reusable pay statement templates, branding, and conditional display rules |
+| [Payroll_Interface_and_Export_Model.md](docs/architecture/interfaces/Payroll_Interface_and_Export_Model.md) | Outbound payroll export structure, transmission, and retry handling |
+| [Provider_Billing_and_Charge_Model.md](docs/architecture/interfaces/Provider_Billing_and_Charge_Model.md) | Employer-facing provider billing and charge classification (PEO contexts) |
+
+### Operations
+
+| Document | Purpose |
+|---|---|
+| [Monitoring_and_Alerting_Model.md](docs/architecture/operations/Monitoring_and_Alerting_Model.md) | Operational monitoring, alerting thresholds, and incident routing |
+| [Operational_Reporting_and_Analytics_Model.md](docs/architecture/operations/Operational_Reporting_and_Analytics_Model.md) | Payroll cost, labour, tax, and exception reporting |
+| [Run_Visibility_and_Dashboard_Model.md](docs/architecture/operations/Run_Visibility_and_Dashboard_Model.md) | Payroll run status dashboards and operator visibility |
+| [System_Initialization_and_Bootstrap_Model.md](docs/architecture/operations/System_Initialization_and_Bootstrap_Model.md) | System startup, environment bootstrap, and initialisation controls |
+| [System_Maintenance_and_Upgrade_Model.md](docs/architecture/operations/System_Maintenance_and_Upgrade_Model.md) | Maintenance windows, upgrade lifecycle, and environment promotion |
+| [Exception_and_Work_Queue_Model.md](docs/architecture/operations/Exception_and_Work_Queue_Model.md) | Exception routing, work queue structure, and resolution workflows |
+
+### Payroll
+
+| Document | Purpose |
+|---|---|
+| [Holiday_and_Special_Calendar_Model.md](docs/architecture/payroll/Holiday_and_Special_Calendar_Model.md) | Holiday definitions and special calendar rules |
+| [Multi_Context_Calendar_Model.md](docs/architecture/payroll/Multi_Context_Calendar_Model.md) | Multi-context calendar support for complex PEO environments |
+| [Payroll_Calendar_Model.md](docs/architecture/payroll/Payroll_Calendar_Model.md) | Payroll period structure, date controls, and calendar governance |
+| [Payroll_Context_Model.md](docs/architecture/payroll/Payroll_Context_Model.md) | Payroll group and context definitions governing run scope |
+
+### Processing
+
+| Document | Purpose |
+|---|---|
+| [Calculation_Run_Lifecycle.md](docs/architecture/processing/Calculation_Run_Lifecycle.md) | Payroll run states, transitions, and lifecycle management |
+| [Error_Handling_and_Isolation_Model.md](docs/architecture/processing/Error_Handling_and_Isolation_Model.md) | Error isolation, failure containment, and recovery patterns |
+| [Payroll_Check_Model.md](docs/architecture/processing/Payroll_Check_Model.md) | Payroll check structure and its relationship to results and disbursement |
+| [Payroll_Run_Model.md](docs/architecture/processing/Payroll_Run_Model.md) | Payroll run entity, execution model, and approval governance |
+
+### Rules
+
+| Document | Purpose |
+|---|---|
+| [Code_Classification_and_Mapping_Model.md](docs/rules/Code_Classification_and_Mapping_Model.md) | External code classification into canonical result classes |
+| [Policy_and_Rule_Execution_Model.md](docs/rules/Policy_and_Rule_Execution_Model.md) | Policy evaluation and rule execution framework |
+| [Posting_Rules_and_Mutation_Semantics.md](docs/rules/Posting_Rules_and_Mutation_Semantics.md) | How validated results become durable postings; correction behaviour |
+| [Rule_Resolution_Engine.md](docs/rules/Rule_Resolution_Engine.md) | Rule candidate selection, precedence model, and resolution tracing |
+| [Rule_Versioning_Model.md](docs/rules/Rule_Versioning_Model.md) | Rule version lifecycle, effective dating, and historical preservation |
+| [Tax_Classification_and_Obligation_Model.md](docs/rules/Tax_Classification_and_Obligation_Model.md) | Tax type classification, obligation structure, and jurisdiction linkage |
+
+### Accumulators
+
+| Document | Purpose |
+|---|---|
+| [Accumulator_Model_Detailed.md](docs/accumulators/Accumulator_Model_Detailed.md) | Detailed accumulator entity structure, rollup behaviour, and reconciliation |
+
+---
+
+## Conventions
+
+Convention documents define the naming, numbering, and structural standards that apply across all documentation. All contributors must consult these before adding new requirements, state models, or exception rules.
+
+| Document | Purpose |
+|---|---|
+| [Requirement_ID_Convention.md](docs/conventions/Requirement_ID_Convention.md) | Defines REQ, STATE, EXC, and ENT prefix taxonomies, numbering rules, severity levels, and known state/exception values |
+
+---
+
+## Control Artifacts
+
+| Document | Purpose |
+|---|---|
+| [Architecture_Model_Inventory.md](docs/architecture/Architecture_Model_Inventory.md) | Complete inventory of all architecture models with status and lifecycle tracking |
+| [PRD_to_Architecture_Coverage_Map.md](docs/architecture/PRD_to_Architecture_Coverage_Map.md) | Traceability map from PRD capabilities to primary and supporting architecture models |
+
+---
+
+*Last updated: April 2026*

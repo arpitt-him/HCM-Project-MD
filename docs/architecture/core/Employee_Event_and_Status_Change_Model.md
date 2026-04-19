@@ -1,145 +1,57 @@
 # Employee_Event_and_Status_Change_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Employee_Event_and_Status_Change_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | ADR-001-Event-Driven-Architecture.md, DATA/Entity-Employee.md, Employment_and_Person_Identity_Model, Employee_Assignment_Model, Correction_and_Immutability_Model, Tax_Classification_and_Obligation_Model |
 
-## 1. Purpose
+## Purpose
 
-Define employee lifecycle events and status changes that affect payroll,
-benefits, tax handling, eligibility, assignment behavior, and downstream
-reporting. This model establishes a consistent event-driven control
-layer for employee state transitions.
+Defines employee lifecycle events and status changes that affect payroll, benefits, tax handling, eligibility, assignment behaviour, and downstream reporting. Establishes a consistent event-driven control layer for employee state transitions.
 
-## 2. Event Scope
+---
 
-Employee events include:\
-\
-Hire\
-Rehire\
-Termination\
-Leave of Absence\
-Return to Work\
-Status Change\
-Compensation Change\
-Location Transfer\
-Department Transfer\
-Work State Change\
-Job Change
+## 1. Event Scope
 
-## 3. Core Employee_Event Entity
+Employee events include: Hire, Rehire, Termination, Leave of Absence, Return to Work, Status Change, Compensation Change, Location Transfer, Department Transfer, Work State Change, Job Change.
 
-Employee_Event\
-\
-Employee_Event_ID\
-Employee_ID\
-Employment_ID\
-Event_Type\
-Event_Date\
-Effective_Date\
-Recorded_Date\
-Event_Status\
-Event_Reason_Code\
-Source_Context_ID
+## 2. Core Employee_Event Entity
 
-## 4. Event Type Definitions
+Employee_Event_ID, Employee_ID, Employment_ID, Event_Type, Event_Date, Effective_Date, Recorded_Date, Event_Status, Event_Reason_Code, Source_Context_ID.
 
-Supported event types include:\
-\
-HIRE\
-REHIRE\
-TERMINATION\
-LEAVE_OF_ABSENCE\
-RETURN_TO_WORK\
-STATUS_CHANGE\
-COMPENSATION_CHANGE\
-LOCATION_TRANSFER\
-DEPARTMENT_TRANSFER\
-WORK_STATE_CHANGE\
-JOB_CHANGE
+## 3. Event Type Definitions
 
-## 5. Status Change Model
+HIRE, REHIRE, TERMINATION, LEAVE_OF_ABSENCE, RETURN_TO_WORK, STATUS_CHANGE, COMPENSATION_CHANGE, LOCATION_TRANSFER, DEPARTMENT_TRANSFER, WORK_STATE_CHANGE, JOB_CHANGE, POSITION_CHANGE, LEGAL_ENTITY_TRANSFER, MANAGER_CHANGE, VOLUNTARY_RESIGNATION.
 
-Employee status attributes that may change include:\
-\
-Employment_Status\
-Full_or_Part_Time_Status\
-Regular_or_Temporary_Status\
-Active_or_Inactive_Status\
-Benefit_Eligibility_Status\
-Payroll_Eligibility_Status\
-\
-Status changes must preserve prior state history.
+## 4. Status Change Model
 
-## 6. Effective Dating and Timing
+Employment status attributes that may change: Employment_Status, Full_or_Part_Time_Status, Regular_or_Temporary_Status, Active_or_Inactive_Status, Benefit_Eligibility_Status, Payroll_Eligibility_Status. Status changes must preserve prior state history.
 
-Each event must support:\
-\
-Event_Date\
-Effective_Date\
-Payroll_Effective_Date\
-Benefit_Effective_Date\
-Tax_Effective_Date\
-\
-This allows different downstream domains to apply changes on appropriate
-schedules.
+## 5. Effective Dating and Timing
 
-## 7. Event Impact Routing
+Each event supports: Event_Date, Effective_Date, Payroll_Effective_Date, Benefit_Effective_Date, Tax_Effective_Date. Downstream modules apply changes on their own schedules.
 
-Events may trigger downstream recalculation or workflow actions.\
-\
-Examples:\
-\
-Hire → Initial payroll eligibility, benefit eligibility evaluation\
-Termination → Final pay, benefit termination, continuation eligibility\
-Work State Change → Tax jurisdiction update\
-Status Change → Benefit re-evaluation\
-Compensation Change → Future payroll recalculation
+## 6. Event Impact Routing
 
-## 8. Retroactive Event Handling
+Examples: Hire triggers initial payroll eligibility and benefit eligibility evaluation. Termination triggers final pay, benefit termination, and continuation eligibility. Work State Change triggers tax jurisdiction update. Compensation Change triggers future payroll recalculation.
 
-Events may be entered after their effective dates.\
-\
-Retroactive handling requires:\
-\
-Retroactive_Flag\
-Retroactive_Start_Date\
-Retroactive_Adjustment_Required\
-Affected_Payroll_Periods\
-\
-Retroactive events must not silently alter historical records without
-traceable corrections.
+## 7. Retroactive Event Handling
 
-## 9. Event Sequencing and Dependency
+Retroactive_Flag, Retroactive_Start_Date, Retroactive_Adjustment_Required, Affected_Payroll_Periods. Retroactive events must not silently alter historical records without traceable corrections.
 
-Events may have dependencies or ordering rules.\
-\
-Examples:\
-\
-Return to Work requires prior Leave of Absence\
-Rehire follows prior Termination\
-Department Transfer may coincide with Location Transfer\
-\
-Event sequencing must prevent invalid state transitions.
+## 8. Event Sequencing and Dependency
 
-## 10. Audit and Historical Preservation
+Examples: Return to Work requires prior Leave of Absence. Rehire follows prior Termination. Department Transfer may coincide with Location Transfer. Event sequencing must prevent invalid state transitions.
 
-All employee events must remain historically preserved.\
-\
-Historical requirements include:\
-\
-Previous state values\
-New state values\
-Event source\
-Approval or review trail\
-Correction linkage
+## 9. Audit and Historical Preservation
 
-## 11. Relationship to Other Models
+All employee events must remain historically preserved: previous state values, new state values, event source, approval or review trail, correction linkage.
 
-This model integrates with:\
-\
-Employee_Assignment_Model\
-Employment_and_Person_Identity_Model\
-Benefit_and_Deduction_Configuration_Model\
-Eligibility_and_Enrollment_Lifecycle_Model\
-Payroll_Check_Model\
-Tax_Classification_and_Obligation_Model\
-Correction_and_Immutability_Model
+## 10. Relationship to Other Models
+
+This model integrates with: Employee_Assignment_Model, Employment_and_Person_Identity_Model, Benefit_and_Deduction_Configuration_Model, Eligibility_and_Enrollment_Lifecycle_Model, Payroll_Check_Model, Tax_Classification_and_Obligation_Model, Correction_and_Immutability_Model.

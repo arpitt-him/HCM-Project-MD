@@ -1,170 +1,63 @@
 # Accrual_and_Entitlement_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Accrual_and_Entitlement_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | Leave_and_Absence_Management_Model, Accumulator_and_Balance_Model, Multi_Context_Calendar_Model, Correction_and_Immutability_Model, Employee_Event_and_Status_Change_Model |
 
-## 1. Purpose
+## Purpose
 
-Define how leave, time-off, and related employee entitlements accrue,
-are consumed, carry over, expire, and remain auditable across payroll
-and employee lifecycle events.
+Defines how leave, time-off, and related employee entitlements accrue, are consumed, carry over, expire, and remain auditable across payroll and employee lifecycle events.
 
-## 2. Scope of Entitlements
+---
 
-Supported entitlement categories include:\
-\
-Paid Time Off (PTO)\
-Vacation\
-Sick Leave\
-Personal Days\
-Floating Holidays\
-Compensatory Time\
-Service-based Leave\
-Special Company Leave Banks
+## 1. Scope of Entitlements
 
-## 3. Core Entitlement_Plan Entity
+Supported entitlement categories include: Paid Time Off (PTO), Vacation, Sick Leave, Personal Days, Floating Holidays, Compensatory Time, Service-based Leave, Special Company Leave Banks.
 
-Entitlement_Plan\
-\
-Entitlement_Plan_ID\
-Plan_Name\
-Plan_Type\
-Organization_ID\
-Effective_Start_Date\
-Effective_End_Date\
-Status\
-\
-Plan_Type examples:\
-\
-PTO\
-VACATION\
-SICK\
-COMP_TIME\
-FLOATING_HOLIDAY\
-OTHER
+## 2. Core Entitlement_Plan Entity
 
-## 4. Accrual Rule Definition
+Entitlement_Plan: Entitlement_Plan_ID, Plan_Name, Plan_Type, Organization_ID, Effective_Start_Date, Effective_End_Date, Status.
+Plan_Type examples: PTO, VACATION, SICK, COMP_TIME, FLOATING_HOLIDAY, OTHER.
 
-Accrual_Rule\
-\
-Accrual_Rule_ID\
-Entitlement_Plan_ID\
-Accrual_Method\
-Accrual_Frequency\
-Accrual_Rate\
-Maximum_Balance\
-Carryover_Rule\
-Expiration_Rule\
-\
-Accrual_Method examples:\
-\
-FIXED_PER_PERIOD\
-HOURS_WORKED_BASED\
-SERVICE_TIER_BASED\
-EVENT_DRIVEN
+## 3. Accrual Rule Definition
 
-## 5. Entitlement Balance Entity
+Accrual_Rule: Accrual_Rule_ID, Entitlement_Plan_ID, Accrual_Method, Accrual_Frequency, Accrual_Rate, Maximum_Balance, Carryover_Rule, Expiration_Rule.
+Accrual_Method examples: FIXED_PER_PERIOD, HOURS_WORKED_BASED, SERVICE_TIER_BASED, EVENT_DRIVEN.
 
-Entitlement_Balance\
-\
-Entitlement_Balance_ID\
-Employee_ID\
-Employment_ID\
-Entitlement_Plan_ID\
-Balance_Period_ID\
-Available_Balance\
-Pending_Balance\
-Used_Balance\
-Expired_Balance\
-Carried_Over_Balance
+## 4. Entitlement Balance Entity
 
-## 6. Accrual Triggers
+Entitlement_Balance: Entitlement_Balance_ID, Employee_ID, Employment_ID, Entitlement_Plan_ID, Balance_Period_ID, Available_Balance, Pending_Balance, Used_Balance, Expired_Balance, Carried_Over_Balance.
 
-Balances may accrue based on:\
-\
-Payroll completion\
-Hours worked\
-Service anniversaries\
-Beginning of period\
-Manual adjustment\
-Policy event\
-\
-Accrual timing must align with payroll and calendar contexts.
+## 5. Accrual Triggers
 
-## 7. Consumption and Deduction
+Balances may accrue based on: payroll completion, hours worked, service anniversaries, beginning of period, manual adjustment, or policy event. Accrual timing must align with payroll and calendar contexts.
 
-Entitlements are consumed by approved leave events.\
-\
-Consumption attributes include:\
-\
-Consumption_ID\
-Leave_Request_ID\
-Entitlement_Plan_ID\
-Consumed_Amount\
-Consumption_Date\
-Consumption_Status\
-\
-Consumption must reduce balances in an auditable manner.
+## 6. Consumption and Deduction
 
-## 8. Carryover and Expiration
+Consumption_ID, Leave_Request_ID, Entitlement_Plan_ID, Consumed_Amount, Consumption_Date, Consumption_Status. Consumption must reduce balances in an auditable manner.
 
-Plans may define year-end or period-end behavior.\
-\
-Examples:\
-\
-Unlimited carryover\
-Carryover up to capped hours\
-Use-it-or-lose-it expiration\
-Jurisdiction-protected balances\
-\
-Carryover and expiration must reference the correct calendar context.
+## 7. Carryover and Expiration
 
-## 9. Service-Tier and Eligibility Interaction
+Plans may define: unlimited carryover, carryover up to capped hours, use-it-or-lose-it expiration, or jurisdiction-protected balances. Carryover and expiration must reference the correct calendar context.
 
-Accrual rates may vary by service or status.\
-\
-Examples:\
-\
-0--1 years service → 3.08 hours per pay period\
-1--5 years service → 4.62 hours per pay period\
-Part-time employees → prorated accrual\
-\
-Accrual rules must integrate with employee status and assignment data.
+## 8. Service-Tier and Eligibility Interaction
 
-## 10. Manual Adjustments and Corrections
+Accrual rates may vary by service or status. Examples: 0-1 years service: 3.08 hours per pay period; 1-5 years: 4.62 hours per pay period; part-time: prorated accrual. Rules must integrate with employee status and assignment data.
 
-Balances may change due to corrections or discretionary adjustments.\
-\
-Adjustment attributes:\
-\
-Adjustment_ID\
-Adjustment_Type\
-Adjustment_Amount\
-Effective_Date\
-Reason_Code\
-Approval_Status\
-\
-Adjustments must preserve historical traceability.
+## 9. Manual Adjustments and Corrections
 
-## 11. Reporting and Audit Support
+Adjustment_ID, Adjustment_Type, Adjustment_Amount, Effective_Date, Reason_Code, Approval_Status. Adjustments must preserve historical traceability.
 
-Entitlement reporting must support:\
-\
-Current balances\
-Projected balances\
-Used balances\
-Expired balances\
-Carryover analysis\
-Audit history\
-\
-Historical replay must reconstruct prior balances accurately.
+## 10. Reporting and Audit Support
 
-## 12. Relationship to Other Models
+Entitlement reporting must support: current balances, projected balances, used balances, expired balances, carryover analysis, and audit history. Historical replay must reconstruct prior balances accurately.
 
-This model integrates with:\
-\
-Leave_and_Absence_Management_Model\
-Accumulator_and_Balance_Model\
-Employee_Event_and_Status_Change_Model\
-Multi_Context_Calendar_Model\
-Correction_and_Immutability_Model\
-Operational_Reporting_and_Analytics_Model
+## 11. Relationship to Other Models
+
+This model integrates with: Leave_and_Absence_Management_Model, Accumulator_and_Balance_Model, Multi_Context_Calendar_Model, Employee_Event_and_Status_Change_Model, Correction_and_Immutability_Model, Payroll_Calendar_Model.

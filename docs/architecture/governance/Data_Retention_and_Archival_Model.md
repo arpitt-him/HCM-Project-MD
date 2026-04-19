@@ -1,148 +1,61 @@
 # Data_Retention_and_Archival_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Compliance Domain |
+| **Location** | `docs/architecture/governance/Data_Retention_and_Archival_Model.md` |
+| **Domain** | Governance |
+| **Related Documents** | ADR-002-Deterministic-Replayability.md, Correction_and_Immutability_Model, Security_and_Access_Control_Model, Regulatory_and_Compliance_Reporting_Model, Multi_Context_Calendar_Model |
 
-## 1. Purpose
+## Purpose
 
-Define lifecycle rules for retaining, archiving, and purging payroll,
-tax, billing, and reporting data. This model ensures regulatory
-compliance, operational continuity, and efficient long-term storage
-management.
+Defines lifecycle rules for retaining, archiving, and purging payroll, tax, billing, and reporting data. Ensures regulatory compliance, operational continuity, and efficient long-term storage management.
 
-## 2. Retention Objectives
+---
 
-Retention policies support:\
-\
-Regulatory compliance\
-Audit traceability\
-Historical replay capability\
-Operational reporting continuity\
-Data storage optimization
+## 1. Retention Objectives
 
-## 3. Core Retention Entity
+Retention policies support: regulatory compliance, audit traceability, historical replay capability, operational reporting continuity, and data storage optimisation.
 
-Data_Retention_Policy\
-\
-Policy_ID\
-Policy_Name\
-Data_Category\
-Retention_Period\
-Archive_After_Period\
-Purge_After_Period\
-Legal_Hold_Flag\
-Status
+## 2. Core Retention Entity
 
-## 4. Data Categories
+Data_Retention_Policy: Policy_ID, Policy_Name, Data_Category, Retention_Period, Archive_After_Period, Purge_After_Period, Legal_Hold_Flag, Status.
 
-Retention rules apply to specific data categories.\
-\
-Examples:\
-\
-Payroll_Run_Data\
-Payroll_Check_Data\
-Result_Line_Data\
-Accumulator_Data\
-Tax_Data\
-Billing_Data\
-Pay_Statement_Data\
-Regulatory_Report_Data\
-Operational_Report_Data\
-Audit_Log_Data
+## 3. Data Categories
 
-## 5. Retention Period Requirements
+Payroll_Run_Data, Payroll_Check_Data, Result_Line_Data, Accumulator_Data, Tax_Data, Billing_Data, Pay_Statement_Data, Regulatory_Report_Data, Operational_Report_Data, Audit_Log_Data.
 
-Typical regulatory-driven retention examples:\
-\
-Payroll Records → 7 years minimum\
-Tax Records → 7--10 years\
-Employee Pay Statements → 7 years\
-Audit Logs → 7 years\
-Financial Reports → 7--10 years\
-\
-Retention periods must be configurable per jurisdiction.
+## 4. Retention Period Requirements
 
-## 6. Archival Lifecycle
+Payroll Records → 7 years minimum. Tax Records → 7–10 years. Employee Pay Statements → 7 years. Audit Logs → 7 years. Financial Reports → 7–10 years. Retention periods must be configurable per jurisdiction.
 
-Data transitions through lifecycle stages:\
-\
-Active\
-Archived\
-Purged\
-\
-Active Data:\
-Accessible for daily operations.\
-\
-Archived Data:\
-Stored in long-term storage but retrievable.\
-\
-Purged Data:\
-Securely deleted after retention expiration.
+## 5. Archival Lifecycle
 
-## 7. Archive Strategy
+Active → Archived → Purged. Active data is accessible for daily operations. Archived data is stored in long-term storage but retrievable. Purged data is securely deleted after retention expiration.
 
-Archived data must support:\
-\
-Historical payroll replay\
-Audit verification\
-Tax reporting reproduction\
-Regulatory inquiry response\
-\
-Archive storage may include:\
-\
-Cold Storage\
-Long-Term Database Storage\
-Secure File Archives
+## 6. Archive Strategy
 
-## 8. Legal Hold Handling
+Archived data must support: historical payroll replay, audit verification, tax reporting reproduction, regulatory inquiry response. Archive storage may include cold storage, long-term database storage, or secure file archives.
 
-Certain records may be preserved indefinitely.\
-\
-Legal hold prevents:\
-\
-Archival purge\
-Automatic deletion\
-\
-Legal hold flags override standard retention rules.
+## 7. Legal Hold Handling
 
-## 9. Retrieval and Replay Support
+Legal hold prevents archival purge and automatic deletion. Legal hold flags override standard retention rules and may preserve records indefinitely.
 
-Archived data must support system replay operations.\
-\
-Examples:\
-\
-Re-run historical payroll\
-Reconstruct pay statements\
-Reproduce regulatory filings\
-\
-Requires complete historical integrity.
+## 8. Retrieval and Replay Support
 
-## 10. Purge Governance
+Archived data must support: re-running historical payroll, reconstructing pay statements, reproducing regulatory filings. Requires complete historical integrity.
 
-Data purging must follow strict controls.\
-\
-Requirements:\
-\
-Approval workflow\
-Audit logging\
-Secure deletion methods\
-Verification checks
+## 9. Purge Governance
 
-## 11. Security and Compliance
+Data purging must follow strict controls: approval workflow, audit logging, secure deletion methods, verification checks.
 
-Retention and archival processes must maintain:\
-\
-Data encryption\
-Access control restrictions\
-Audit tracking\
-\
-Ensures regulatory and privacy compliance.
+## 10. Security and Compliance
 
-## 12. Relationship to Other Models
+Retention and archival processes must maintain: data encryption, access control restrictions, audit tracking.
 
-This model integrates with:\
-\
-Payroll_Run_Model\
-Payroll_Check_Model\
-Regulatory_and_Compliance_Reporting_Model\
-Multi_Context_Calendar_Model\
-Security_and_Access_Control_Model
+## 11. Relationship to Other Models
+
+This model integrates with: Payroll_Run_Model, Payroll_Check_Model, Regulatory_and_Compliance_Reporting_Model, Multi_Context_Calendar_Model, Security_and_Access_Control_Model, Correction_and_Immutability_Model.

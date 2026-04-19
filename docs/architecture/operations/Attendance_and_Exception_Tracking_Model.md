@@ -1,157 +1,64 @@
 # Attendance_and_Exception_Tracking_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Payroll Domain |
+| **Location** | `docs/architecture/operations/Attendance_and_Exception_Tracking_Model.md` |
+| **Domain** | Operations |
+| **Related Documents** | Scheduling_and_Shift_Model, Time_Entry_and_Worked_Time_Model, Payroll_Check_Model, Exception_and_Work_Queue_Model, Operational_Reporting_and_Analytics_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define structures and workflows for detecting, recording, managing, and
-resolving attendance-related exceptions resulting from differences
-between scheduled and actual worked time.
+Defines structures and workflows for detecting, recording, managing, and resolving attendance-related exceptions resulting from differences between scheduled and actual worked time.
 
-## 2. Scope of Attendance Exceptions
+---
 
-Supported attendance exceptions include:\
-\
-Late Arrival\
-Early Departure\
-Missed Shift (No-Show)\
-Unscheduled Work\
-Unapproved Overtime\
-Incomplete Shift\
-Shift Overrun\
-Schedule Conflict\
-Clocking Errors
+## 1. Scope of Attendance Exceptions
 
-## 3. Core Attendance_Exception Entity
+Late Arrival, Early Departure, Missed Shift (No-Show), Unscheduled Work, Unapproved Overtime, Incomplete Shift, Shift Overrun, Schedule Conflict, Clocking Errors.
 
-Attendance_Exception\
-\
-Attendance_Exception_ID\
-Employee_ID\
-Employment_ID\
-Exception_Type\
-Exception_Date\
-Scheduled_Shift_ID\
-Time_Entry_ID\
-Exception_Status\
-Severity_Level\
-Detection_Source
+## 2. Core Attendance_Exception Entity
 
-## 4. Exception Type Classification
+Attendance_Exception_ID, Employee_ID, Employment_ID, Exception_Type, Exception_Date, Scheduled_Shift_ID, Time_Entry_ID, Exception_Status, Severity_Level, Detection_Source.
 
-Exception types include:\
-\
-LATE_ARRIVAL\
-EARLY_DEPARTURE\
-NO_SHOW\
-UNSCHEDULED_WORK\
-OVERTIME_EXCEPTION\
-SHIFT_VARIANCE\
-TIME_ENTRY_ERROR\
-OTHER
+## 3. Exception Type Classification
 
-## 5. Detection Mechanisms
+LATE_ARRIVAL, EARLY_DEPARTURE, NO_SHOW, UNSCHEDULED_WORK, OVERTIME_EXCEPTION, SHIFT_VARIANCE, TIME_ENTRY_ERROR, OTHER.
 
-Exceptions may be detected through:\
-\
-Automated schedule comparison\
-Manager review\
-Employee self-report\
-System validation rules\
-\
-Detection attributes:\
-\
-Detection_Method\
-Detection_Timestamp\
-Rule_Triggered
+## 4. Detection Mechanisms
 
-## 6. Exception Severity Levels
+Exceptions may be detected through: automated schedule comparison, manager review, employee self-report, system validation rules.
+Detection attributes: Detection_Method, Detection_Timestamp, Rule_Triggered.
 
-Severity determines escalation behavior.\
-\
-Examples:\
-\
-LOW → Minor variance\
-MEDIUM → Manager review required\
-HIGH → Payroll or compliance risk\
-\
-Severity levels must be configurable.
+## 5. Exception Severity Levels
 
-## 7. Exception Resolution Workflow
+LOW → minor variance. MEDIUM → manager review required. HIGH → payroll or compliance risk. Severity levels must be configurable.
 
-Exceptions follow defined workflows.\
-\
-Typical lifecycle:\
-\
-Detected\
-Assigned\
-Reviewed\
-Resolved\
-Closed\
-\
-Resolution attributes:\
-\
-Resolution_Action\
-Resolution_Date\
-Resolution_User
+## 6. Exception Resolution Workflow
 
-## 8. Payroll Impact Integration
+Detected → Assigned → Reviewed → Resolved → Closed.
+Resolution attributes: Resolution_Action, Resolution_Date, Resolution_User.
 
-Attendance exceptions may affect payroll processing.\
-\
-Examples:\
-\
-Unapproved overtime flagged for review\
-Missing shift results in unpaid status\
-Shift variance triggers premium recalculation\
-\
-Payroll review must occur before final processing when required.
+## 7. Payroll Impact Integration
 
-## 9. Notification and Escalation
+Attendance exceptions may affect payroll processing. Examples: unapproved overtime flagged for review; missing shift results in unpaid status; shift variance triggers premium recalculation. Payroll review must occur before final processing when required.
 
-Exception workflows may generate alerts.\
-\
-Examples:\
-\
-Manager notification\
-Payroll team escalation\
-Compliance alerts\
-\
-Notification attributes:\
-\
-Notification_Type\
-Recipient_Group\
-Escalation_Level
+## 8. Notification and Escalation
 
-## 10. Historical Tracking and Audit
+Exception workflows may generate alerts to: manager notification, payroll team escalation, compliance alerts.
+Notification attributes: Notification_Type, Recipient_Group, Escalation_Level.
 
-All exception activity must be preserved.\
-\
-Audit tracking includes:\
-\
-Original exception data\
-Resolution details\
-Responsible users\
-Timeline history\
-\
-Historical records support compliance verification.
+## 9. Historical Tracking and Audit
 
-## 11. Reporting and Analytics
+All exception activity must be preserved: original exception data, resolution details, responsible users, timeline history. Historical records support compliance verification.
 
-Attendance reporting supports:\
-\
-Exception frequency analysis\
-Department-level attendance patterns\
-Schedule adherence metrics\
-Operational risk indicators
+## 10. Reporting and Analytics
 
-## 12. Relationship to Other Models
+Exception frequency analysis, department-level attendance patterns, schedule adherence metrics, operational risk indicators.
 
-This model integrates with:\
-\
-Scheduling_and_Shift_Model\
-Time_Entry_and_Worked_Time_Model\
-Payroll_Check_Model\
-Exception_and_Work_Queue_Model\
-Operational_Reporting_and_Analytics_Model\
-Correction_and_Immutability_Model
+## 11. Relationship to Other Models
+
+This model integrates with: Scheduling_and_Shift_Model, Time_Entry_and_Worked_Time_Model, Payroll_Check_Model, Exception_and_Work_Queue_Model, Operational_Reporting_and_Analytics_Model, Correction_and_Immutability_Model.

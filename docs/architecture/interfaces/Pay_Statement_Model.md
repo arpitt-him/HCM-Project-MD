@@ -1,158 +1,62 @@
 # Pay_Statement_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/interfaces/Pay_Statement_Model.md` |
+| **Domain** | Interfaces |
+| **Related Documents** | DATA/Entity-Payroll-Item.md, Pay_Statement_Template_Model, Payroll_Check_Model, Accumulator_and_Balance_Model, Code_Classification_and_Mapping_Model, Multi_Context_Calendar_Model |
 
-## 1. Purpose
+## Purpose
 
-Define the structure and content of employee pay statements generated
-from payroll checks. This model ensures that payroll results are clearly
-presented to employees and aligned with financial, tax, and regulatory
-reporting requirements.
+Defines the structure and content of employee pay statements generated from payroll checks. Ensures that payroll results are clearly presented to employees and aligned with financial, tax, and regulatory reporting requirements.
 
-## 2. Core Pay_Statement Entity
+---
 
-Pay_Statement\
-\
-Pay_Statement_ID\
-Payroll_Check_ID\
-Employee_ID\
-Employment_ID\
-\
-Statement_Date\
-Pay_Date\
-Pay_Period_Start_Date\
-Pay_Period_End_Date\
-\
-Calendar_Context_ID
+## 1. Core Pay_Statement Entity
 
-## 3. Earnings Section
+Pay_Statement_ID, Payroll_Check_ID, Employee_ID, Employment_ID, Statement_Date, Pay_Date, Pay_Period_Start_Date, Pay_Period_End_Date, Calendar_Context_ID.
 
-Displays all earnings components.\
-\
-Earnings_Line fields:\
-\
-Code\
-Description\
-Hours (optional)\
-Rate (optional)\
-Amount\
-\
-Examples:\
-\
-Regular Pay\
-Holiday Pay\
-Bonus Pay\
-Supplemental Earnings
+## 2. Earnings Section
 
-## 4. Deductions Section
+Earnings_Line: Code, Description, Hours (optional), Rate (optional), Amount.
+Examples: Regular Pay, Holiday Pay, Bonus Pay, Supplemental Earnings, Residual Commission.
 
-Displays employee deductions.\
-\
-Deduction_Line fields:\
-\
-Code\
-Description\
-Amount\
-Deduction_Type\
-\
-Types include:\
-\
-PRE_TAX\
-POST_TAX\
-VOLUNTARY\
-MANDATORY
+## 3. Deductions Section
 
-## 5. Tax Withholding Section
+Deduction_Line: Code, Description, Amount, Deduction_Type.
+Types: PRE_TAX, POST_TAX, VOLUNTARY, MANDATORY.
 
-Displays employee tax withholdings.\
-\
-Tax_Line fields:\
-\
-Tax_Code\
-Tax_Description\
-Jurisdiction\
-Amount\
-\
-Examples:\
-\
-Federal Income Tax\
-State Income Tax\
-Medicare\
-Social Security
+## 4. Tax Withholding Section
 
-## 6. Employer Contributions Section (Optional Display)
+Tax_Line: Tax_Code, Tax_Description, Jurisdiction, Amount.
+Examples: Federal Income Tax, State Income Tax, Medicare, Social Security.
 
-Some pay statements optionally display employer-paid contributions.\
-\
-Contribution_Line fields:\
-\
-Code\
-Description\
-Amount\
-\
-Examples:\
-\
-Employer Benefits\
-Employer Payroll Taxes\
-Worker Compensation
+## 5. Employer Contributions Section (Optional Display)
 
-## 7. Check Summary Totals
+Contribution_Line: Code, Description, Amount.
+Examples: Employer Benefits, Employer Payroll Taxes, Worker Compensation. Display is configurable per template.
 
-Summary values displayed prominently:\
-\
-Gross_Earnings\
-Total_Deductions\
-Total_Taxes\
-Net_Pay\
-\
-Optional:\
-\
-Employer_Total_Cost
+## 6. Check Summary Totals
 
-## 8. Payment Information
+Gross_Earnings, Total_Deductions, Total_Taxes, Net_Pay. Optional: Employer_Total_Cost.
 
-Displays payment delivery details.\
-\
-Fields include:\
-\
-Payment_Method\
-Payment_Context\
-Payment_Reference\
-\
-Examples:\
-\
-Direct Deposit\
-Printed Check\
-Paycard\
-Off-Cycle Payment
+## 7. Payment Information
 
-## 9. Year-to-Date (YTD) Values
+Payment_Method, Payment_Context, Payment_Reference.
+Examples: Direct Deposit, Printed Check, Paycard, Off-Cycle Payment.
 
-Displays cumulative totals aligned to the appropriate tax calendar.\
-\
-Examples:\
-\
-YTD_Gross_Earnings\
-YTD_Taxes_Withheld\
-YTD_Deductions\
-YTD_Net_Pay
+## 8. Year-to-Date (YTD) Values
 
-## 10. Compliance and Messaging
+YTD_Gross_Earnings, YTD_Taxes_Withheld, YTD_Deductions, YTD_Net_Pay. Aligned to appropriate tax calendar via Calendar_Context_ID.
 
-Supports regulatory disclosures and employer messaging.\
-\
-Examples:\
-\
-Tax notices\
-Legal disclaimers\
-Employer messages
+## 9. Compliance and Messaging
 
-## 11. Relationship to Other Models
+Supports regulatory disclosures and employer messaging: tax notices, legal disclaimers, employer messages.
 
-This model integrates with:\
-\
-Payroll_Check_Model\
-Code_Classification_and_Mapping_Model\
-Tax_Classification_and_Obligation_Model\
-Accumulator_and_Balance_Model\
-Multi_Context_Calendar_Model
+## 10. Relationship to Other Models
+
+This model integrates with: Payroll_Check_Model, Pay_Statement_Template_Model, Code_Classification_and_Mapping_Model, Tax_Classification_and_Obligation_Model, Accumulator_and_Balance_Model, Multi_Context_Calendar_Model.

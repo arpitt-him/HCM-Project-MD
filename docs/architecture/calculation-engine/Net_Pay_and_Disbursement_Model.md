@@ -1,14 +1,22 @@
 # Net_Pay_and_Disbursement_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/Net_Pay_and_Disbursement_Model.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | Payroll_Check_Model, Earnings_and_Deductions_Computation_Model, Payroll_Interface_and_Export_Model, General_Ledger_and_Accounting_Export_Model, Security_and_Access_Control_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define structures governing the finalization of payroll results into net
-pay, payment distribution methods, and disbursement processing
-workflows.
+Defines the structures governing the finalisation of payroll results into net pay, payment distribution methods, and disbursement processing workflows.
 
-## 2. Disbursement Scope
+---
+
+## 1. Disbursement Scope
 
 Supported payment methods include:\
 \
@@ -20,7 +28,7 @@ Manual Adjustment Payment\
 Split Deposit\
 International Wire (future extension)
 
-## 3. Core Net_Pay Entity
+## 2. Core Net_Pay Entity
 
 Net_Pay\
 \
@@ -36,7 +44,7 @@ Net_Pay_Amount\
 \
 Net_Pay_Status
 
-## 4. Payment Method Definition
+## 3. Payment Method Definition
 
 Payment_Method\
 \
@@ -55,7 +63,7 @@ CHECK\
 PAYCARD\
 WIRE
 
-## 5. Split Payment Handling
+## 4. Split Payment Handling
 
 Employees may distribute pay across multiple destinations.\
 \
@@ -67,7 +75,7 @@ Savings account → Percentage-based allocation\
 \
 Split distribution must follow priority order rules.
 
-## 6. Bank and Financial Routing
+## 5. Bank and Financial Routing
 
 Payment routing requires financial institution details.\
 \
@@ -81,7 +89,7 @@ Country_Code\
 \
 Sensitive data must be securely stored and encrypted.
 
-## 7. Check Generation Handling
+## 6. Check Generation Handling
 
 Paper check payments include:\
 \
@@ -93,7 +101,7 @@ Reissue_Flag\
 \
 Check printing must remain auditable and reproducible.
 
-## 8. Paycard Handling
+## 7. Paycard Handling
 
 Paycard processing includes:\
 \
@@ -104,7 +112,7 @@ Funding_Status\
 \
 Paycards must integrate with secure payment providers.
 
-## 9. Off-Cycle Payment Handling
+## 8. Off-Cycle Payment Handling
 
 Off-cycle payments support:\
 \
@@ -115,7 +123,7 @@ Emergency payments\
 \
 Off-cycle runs must remain fully traceable.
 
-## 10. Payment Status Lifecycle
+## 9. Payment Status Lifecycle
 
 Payments progress through defined states.\
 \
@@ -129,7 +137,7 @@ Completed\
 Failed\
 Voided
 
-## 11. Reconciliation and Settlement
+## 10. Reconciliation and Settlement
 
 Payment reconciliation ensures financial accuracy.\
 \
@@ -141,7 +149,7 @@ Failed payment resolution\
 \
 Reconciliation must detect mismatches before final closure.
 
-## 12. Security and Compliance
+## 11. Security and Compliance
 
 Payment processing must enforce:\
 \
@@ -152,7 +160,7 @@ Audit tracking\
 \
 Sensitive financial operations require strict controls.
 
-## 13. Relationship to Other Models
+## 12. Relationship to Other Models
 
 This model integrates with:\
 \

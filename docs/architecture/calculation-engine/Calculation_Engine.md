@@ -1,19 +1,22 @@
-# 1. Purpose
+# Calculation_Engine
 
-The Calculation Engine is responsible for transforming approved source
-transactions, configuration rules, rates, and effective-dated reference
-data into calculated earnings, adjustments, balances, and explanatory
-outputs.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/Calculation_Engine.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | PRD-400-Earnings-Model.md, ADR-002-Deterministic-Replayability.md, Earnings_and_Deductions_Computation_Model, Result_and_Payable_Model, External_Result_Import_Specification, Accumulator_and_Balance_Model |
 
-Its purpose is not simply to produce a number. It must also produce
-enough supporting detail to explain how the number was derived, why it
-changed, and what inputs contributed to the result.
+## Purpose
 
-This is especially important for complex earnings such as commissions,
-draws, recoveries, retroactive adjustments, and externally calculated
-residual commissions.
+Defines the core calculation framework responsible for transforming approved source transactions, configuration rules, rates, and effective-dated reference data into calculated earnings, adjustments, balances, and explanatory outputs. Supports both internally calculated and externally imported earnings through a hybrid model.
 
-# 2. Position in the Overall Model
+---
+
+# 1. Position in the Overall Model
 
 The Calculation Engine sits between upstream transaction/event intake
 and downstream payroll consumption.
@@ -36,7 +39,7 @@ Outputs include:\
 • Payroll-ready outputs\
 • Exceptions
 
-# 3. Core Design Principle
+# 2. Core Design Principle
 
 The Calculation Engine supports a hybrid calculation model.
 
@@ -46,7 +49,7 @@ calculated externally and loaded into the platform as approved results.
 In both cases, sufficient structure must be retained to support payroll
 delivery, auditability, reporting, and user explanation.
 
-# 4. Scope for v0.1
+# 3. Scope for v0.1
 
 In Scope:\
 • Core calculation framework\
@@ -65,7 +68,7 @@ Out of Scope:\
 • Full dispute workflow\
 • Advanced territory conflict logic
 
-# 5. Functional Highlights
+# 4. Functional Highlights
 
 Key capabilities include:
 
@@ -78,7 +81,7 @@ Key capabilities include:
 • Structured Output Generation\
 • Full Audit Traceability
 
-# 6. Non-Functional Requirements
+# 5. Non-Functional Requirements
 
 • Deterministic accuracy\
 • Full traceability\
@@ -86,7 +89,7 @@ Key capabilities include:
 • Extensible rule model\
 • Role-based security access
 
-# 7. Data / Entity Concepts
+# 6. Data / Entity Concepts
 
 Primary logical entities:
 
@@ -103,7 +106,7 @@ Primary logical entities:
 • Exception Record\
 • Audit Record
 
-# 8. Open Design Decisions
+# 7. Open Design Decisions
 
 • Intermediate calculation persistence strategy\
 • External result payload standards\

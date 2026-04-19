@@ -1,208 +1,65 @@
-# 1. Purpose
+# Organizational_Structure_Model
 
-This document defines the structure, hierarchy, and lifecycle management
-of organizational entities within the payroll platform.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Organizational_Structure_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | PRD-200-Core-Entity-Model.md, Employment_and_Person_Identity_Model, Reference_Data_Model, Jurisdiction_and_Compliance_Rules_Model, Security_and_Access_Control_Model |
 
-Organizational structures support employee assignment resolution,
-reporting rollups, eligibility determination, legal compliance, and
-jurisdictional alignment. This model ensures that organizational
-relationships remain historically traceable and operationally
-consistent.
+## Purpose
 
-# 2. Core Design Principles
+Defines the structure, hierarchy, and lifecycle management of organisational entities within the payroll platform. Supports employee assignment resolution, reporting rollups, eligibility determination, legal compliance, and jurisdictional alignment.
 
-Organizational structure management shall follow these principles:
+---
 
-• Organizational units shall be hierarchical.\
-• Hierarchies shall support effective dating.\
-• Organizational changes shall preserve historical lineage.\
-• Organizational relationships shall be auditable.\
-• Organizational codes shall align with reference data definitions.\
-• Rollup relationships shall be deterministic.
+## 1. Core Design Principles
 
-# 3. Organizational Unit Definition
+Organisational units shall be hierarchical and support effective dating. Changes shall preserve historical lineage. Organisational relationships shall be auditable. Rollup relationships shall be deterministic.
 
-An Organizational Unit represents a structural entity within the
-organization.
+## 2. Organisational Unit Definition
 
-Recommended Organizational Unit fields:
+Org_Unit_ID, Org_Unit_Type, Org_Unit_Code, Org_Unit_Name, Parent_Org_Unit_ID (optional), Org_Level, Effective_Start_Date, Effective_End_Date (optional), Org_Status, Creation_Timestamp, Last_Update_Timestamp.
 
-• Org_Unit_ID\
-• Org_Unit_Type\
-• Org_Unit_Code\
-• Org_Unit_Name\
-• Parent_Org_Unit_ID (optional)\
-• Org_Level\
-• Effective_Start_Date\
-• Effective_End_Date (optional)\
-• Org_Status\
-• Creation_Timestamp\
-• Last_Update_Timestamp
+## 3. Organisational Unit Types
 
-Organizational units form the foundation of structural relationships.
+Legal Entity, Division, Business Unit, Department, Cost Center, Location, Region, Country. Each type shall be managed as a distinct classification.
 
-# 4. Organizational Unit Types
+## 4. Hierarchy Relationships
 
-Organizational unit types define the role of each unit within the
-hierarchy.
+Parent-child relationships define reporting structure. Each unit may have one parent and multiple children. Hierarchies shall prevent circular relationships. Hierarchy changes shall maintain historical traceability.
 
-Typical Org_Unit_Type values:
+## 5. Effective Dating Requirements
 
-• Legal Entity\
-• Division\
-• Business Unit\
-• Department\
-• Cost Center\
-• Location\
-• Region\
-• Country
+Changes create new effective-dated records. Historical structures remain preserved. Future organisational changes may be staged. Lookups shall resolve by effective date.
 
-Each type shall be managed as a distinct classification.
+## 6. Rollup and Aggregation Behaviour
 
-# 5. Hierarchy Relationships
+Department totals roll up to Business Unit totals. Business Units roll up to Legal Entity totals. Locations roll up to regional totals. Rollup behaviour shall remain consistent and deterministic.
 
-Organizational units shall form hierarchical relationships.
+## 7. Legal Entity Modelling
 
-Recommended hierarchy structure:
+Legal_Entity_ID, Legal_Entity_Code, Legal_Entity_Name, Country_Code, Tax_Registration_Number, Effective_Start_Date, Effective_End_Date. Legal entities define taxation and regulatory jurisdiction boundaries.
 
-Parent → Child relationships define reporting structure.
+## 8. Location Modelling
 
-Rules include:
+Location_ID, Location_Code, Location_Name, Address_Attributes, Country_Code, State_Code, Locality_Code, Effective_Start_Date, Effective_End_Date. Locations influence tax jurisdiction resolution and reporting.
 
-• Each unit may have one parent.\
-• Units may have multiple children.\
-• Hierarchies shall prevent circular relationships.\
-• Hierarchy changes shall maintain historical traceability.
+## 9. Department and Cost Center Modelling
 
-# 6. Effective Dating Requirements
+Department_ID, Department_Code, Department_Name, Parent_Department_ID, Effective_Start_Date, Effective_End_Date. Cost centers support financial allocation and reporting.
 
-Organizational structures shall support effective dating.
+## 10. Organisational Assignment Integration
 
-Required behaviors:
+Employment_ID links to Department_ID, Location_ID, and Legal_Entity_ID. Organisational assignments support eligibility and calculation logic.
 
-• Changes create new effective-dated records.\
-• Historical structures remain preserved.\
-• Future organizational changes may be staged.\
-• Organizational lookups shall resolve by effective date.
+## 11. Audit and Traceability
 
-Effective dating supports accurate historical payroll processing.
+Organisational change history, effective date lineage, parent-child relationship changes, and responsible user or system must all be captured. Audit supports regulatory and financial reporting requirements.
 
-# 7. Rollup and Aggregation Behavior
+## 12. Key Design Principle
 
-Organizational hierarchies support rollup and aggregation.
-
-Examples:
-
-• Department totals roll up to Business Unit totals.\
-• Business Units roll up to Legal Entity totals.\
-• Locations roll up to regional totals.
-
-Rollup behavior shall remain consistent and deterministic.
-
-# 8. Legal Entity Modeling
-
-Legal entities represent payroll and regulatory boundaries.
-
-Recommended Legal Entity fields:
-
-• Legal_Entity_ID\
-• Legal_Entity_Code\
-• Legal_Entity_Name\
-• Country_Code\
-• Tax_Registration_Number\
-• Effective_Start_Date\
-• Effective_End_Date
-
-Legal entities define taxation and regulatory jurisdiction boundaries.
-
-# 9. Location Modeling
-
-Locations represent physical or jurisdictional workplaces.
-
-Recommended Location fields:
-
-• Location_ID\
-• Location_Code\
-• Location_Name\
-• Address_Attributes\
-• Country_Code\
-• State_Code\
-• Locality_Code\
-• Effective_Start_Date\
-• Effective_End_Date
-
-Locations influence tax jurisdiction resolution and reporting.
-
-# 10. Department and Cost Center Modeling
-
-Departments and cost centers represent operational groupings.
-
-Recommended Department fields:
-
-• Department_ID\
-• Department_Code\
-• Department_Name\
-• Parent_Department_ID\
-• Effective_Start_Date\
-• Effective_End_Date
-
-Cost centers support financial allocation and reporting.
-
-# 11. Organizational Assignment Integration
-
-Employment assignments shall reference organizational units.
-
-Typical assignment relationships include:
-
-• Employment_ID → Department_ID\
-• Employment_ID → Location_ID\
-• Employment_ID → Legal_Entity_ID
-
-Organizational assignments support eligibility and calculation logic.
-
-# 12. Organizational Change Handling
-
-Organizational changes shall follow controlled lifecycle rules.
-
-Examples:
-
-• Department restructuring\
-• Legal entity merger\
-• Location closure\
-• Organizational realignment
-
-Changes must preserve historical reporting accuracy.
-
-# 13. Reporting and Analytics Support
-
-Organizational structures support reporting and analytics.
-
-Supported reporting includes:
-
-• Department-level payroll totals\
-• Legal entity summaries\
-• Regional payroll reporting\
-• Organizational headcount reporting
-
-Hierarchical reporting shall rely on effective-dated relationships.
-
-# 14. Audit and Traceability
-
-Organizational changes shall be fully auditable.
-
-Required audit elements:
-
-• Organizational change history\
-• Effective date lineage\
-• Parent-child relationship changes\
-• Responsible user or system
-
-Audit supports regulatory and financial reporting requirements.
-
-# 15. Key Design Principle
-
-Organizational structures define where employees belong within the
-enterprise.
-
-Effective-dated hierarchical structures ensure accurate payroll
-processing, reporting, and compliance across organizational boundaries.
+Organisational structures define where employees belong within the enterprise. Effective-dated hierarchical structures ensure accurate payroll processing, reporting, and compliance across organisational boundaries.

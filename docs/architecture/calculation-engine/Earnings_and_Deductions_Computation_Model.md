@@ -1,15 +1,22 @@
 # Earnings_and_Deductions_Computation_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/Earnings_and_Deductions_Computation_Model.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | PRD-400-Earnings-Model.md, DATA/Entity-Payroll-Item.md, Calculation_Engine, Result_and_Payable_Model, Accumulator_and_Balance_Model, Tax_Classification_and_Obligation_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define how earnings and deductions are computed from worked time, pay
-rates, benefit elections, premium rules, and payroll policy logic. This
-model establishes the ordered transformation from payroll inputs into
-financial result lines.
+Defines how earnings and deductions are computed from worked time, pay rates, benefit elections, premium rules, and payroll policy logic. Establishes the ordered transformation from payroll inputs into financial result lines.
 
-## 2. Computation Scope
+---
+
+## 1. Computation Scope
 
 Computation includes:\
 \
@@ -22,7 +29,7 @@ Employer contributions\
 Taxable wage formation\
 Net pay preparation
 
-## 3. Core Computation Context
+## 2. Core Computation Context
 
 Computation_Context\
 \
@@ -35,7 +42,7 @@ Pay_Period_ID\
 Calendar_Context_ID\
 Computation_Status
 
-## 4. Earnings Computation Inputs
+## 3. Earnings Computation Inputs
 
 Earnings computation consumes:\
 \
@@ -48,7 +55,7 @@ Compensation overrides\
 \
 These inputs generate earnings result lines.
 
-## 5. Deduction Computation Inputs
+## 4. Deduction Computation Inputs
 
 Deduction computation consumes:\
 \
@@ -61,7 +68,7 @@ Arrear or catch-up rules\
 \
 These inputs generate deduction and contribution result lines.
 
-## 6. Ordered Computation Flow
+## 5. Ordered Computation Flow
 
 Typical ordered computation:\
 \
@@ -77,7 +84,7 @@ Typical ordered computation:\
 \
 Computation order must be explicit and auditable.
 
-## 7. Result Line Generation
+## 6. Result Line Generation
 
 Each computation step produces structured result lines.\
 \
@@ -94,7 +101,7 @@ Amount\
 Taxable_Flag\
 Cash_Impact_Flag
 
-## 8. Taxable Wage Formation
+## 7. Taxable Wage Formation
 
 Taxable wages are derived from ordered earnings and deduction outcomes.\
 \
@@ -106,7 +113,7 @@ Jurisdiction-specific tax rules alter taxable treatment\
 \
 Taxable wage formation must remain explicit and reproducible.
 
-## 9. Arrears, Catch-Up, and Partial Processing
+## 8. Arrears, Catch-Up, and Partial Processing
 
 The model must support partial and deferred deductions.\
 \
@@ -119,7 +126,7 @@ Catch-up deduction logic\
 \
 Arrears handling must be traceable and policy-driven.
 
-## 10. Retroactive Recalculation
+## 9. Retroactive Recalculation
 
 Retroactive changes may affect earnings or deductions.\
 \
@@ -133,27 +140,14 @@ Tax rule correction\
 Recalculation must preserve prior history and generate correction-aware
 outputs.
 
-## 11. Audit and Reproducibility
-
-All computation steps must be reproducible.\
-\
-Audit support includes:\
-\
-Input snapshot reference\
-Applied rule reference\
-Generated result lines\
-Calculation ordering trace\
-Correction linkage
-
-## 12. Relationship to Other Models
+## 10. Relationship to Other Models
 
 This model integrates with:\
 \
-Compensation_and_Pay_Rate_Model\
-Time_Entry_and_Worked_Time_Model\
-Overtime_and_Premium_Pay_Model\
-Benefit_and_Deduction_Configuration_Model\
+Calculation_Engine\
+Result_and_Payable_Model\
+Accumulator_and_Balance_Model\
 Tax_Classification_and_Obligation_Model\
-Payroll_Check_Model\
-Code_Classification_and_Mapping_Model\
-Correction_and_Immutability_Model
+Overtime_and_Premium_Pay_Model\
+Correction_and_Immutability_Model\
+Payroll_Check_Model

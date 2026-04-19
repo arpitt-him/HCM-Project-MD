@@ -1,153 +1,57 @@
-Document Title: Monitoring_and_Alerting_Model
+# Monitoring_and_Alerting_Model
 
-Document Version: 0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Payroll Domain |
+| **Location** | `docs/architecture/operations/Monitoring_and_Alerting_Model.md` |
+| **Domain** | Operations |
+| **Related Documents** | Run_Visibility_and_Dashboard_Model, Exception_and_Work_Queue_Model, Payroll_Run_Model, Release_and_Approval_Model |
 
-Status: Draft
+## Purpose
 
-Last Updated: 2026-04-15
+Defines the monitoring, alerting, escalation, and operational visibility model used to detect, surface, and manage time-sensitive payroll processing risks across calculation, approval, export, reconciliation, and work queue workflows.
 
-Description:
+---
 
-Defines the monitoring, alerting, escalation, and operational visibility
-model used to detect, surface, and manage time-sensitive payroll
-processing risks across calculation, approval, export, reconciliation,
-and work queue workflows.
+## 1. Core Design Principles
 
-# 1. Purpose
+Monitoring shall prioritise payroll continuity and deadline protection. Alerts shall be actionable, not merely informational. Alert severity shall reflect business impact and time sensitivity. Monitoring shall be payroll-context-aware. Escalation shall be structured and auditable.
 
-This document defines the monitoring and alerting framework for the
-payroll platform.
+## 2. Monitoring Scope
 
-The Monitoring and Alerting Model ensures that operational issues are
-detected early, surfaced to the appropriate users, prioritized according
-to business impact, and escalated before payroll deadlines are
-endangered.
+Calculation runs, exception queues, retry queues, approval workflows, export delivery, external dependencies, reconciliation status, deadline proximity.
 
-# 2. Core Design Principles
+## 3. Alert Categories
 
-Monitoring and alerting behavior shall follow these principles:
+Run Failure Alert, Queue Aging Alert, Retry Failure Alert, Approval Delay Alert, Release Delay Alert, Export Failure Alert, Reconciliation Variance Alert, External Dependency Outage Alert, Deadline Risk Alert.
 
-• Monitoring shall prioritize payroll continuity and deadline
-protection.\
-• Alerts shall be actionable, not merely informational.\
-• Alert severity shall reflect business impact and time sensitivity.\
-• Monitoring shall be payroll-context-aware.\
-• Escalation shall be structured and auditable.
+## 4. Alert Severity Model
 
-# 3. Monitoring Scope
+Informational, Warning, High, Critical. Severity determination considers deadline proximity, employee impact, and financial exposure.
 
-Monitoring shall cover all major operational domains including:
+## 5. Queue Monitoring Rules
 
-• Calculation runs\
-• Exception queues\
-• Retry queues\
-• Approval workflows\
-• Export delivery\
-• External dependencies\
-• Reconciliation status\
-• Deadline proximity
+Monitor for: queue size, queue aging, retry counts, escalated items, backlog growth.
 
-# 4. Alert Categories
+## 6. Run Monitoring Rules
 
-Typical alert categories include:
+Monitor for: run progress percentage, failed employee counts, fatal errors, rerun frequency.
 
-• Run Failure Alert\
-• Queue Aging Alert\
-• Retry Failure Alert\
-• Approval Delay Alert\
-• Release Delay Alert\
-• Export Failure Alert\
-• Reconciliation Variance Alert\
-• External Dependency Outage Alert\
-• Deadline Risk Alert
+## 7. Export Monitoring
 
-# 5. Alert Severity Model
+Monitor for: export completion, delivery confirmation, transmission failures, retry behaviour.
 
-Typical Alert_Severity values:
+## 8. Escalation Model
 
-• Informational\
-• Warning\
-• High\
-• Critical
+Operational Team → Payroll Supervisor → Finance/Compliance → Executive escalation for critical deadline risk.
 
-Severity determination considers deadline proximity, employee impact,
-and financial exposure.
+## 9. Notification Channels
 
-# 6. Queue Monitoring Rules
+Dashboards, Email, SMS, Collaboration tools.
 
-Exception and work queues shall be actively monitored for:
+## 10. Relationship to Other Models
 
-• Queue size\
-• Queue aging\
-• Retry counts\
-• Escalated items\
-• Backlog growth
-
-# 7. Run Monitoring Rules
-
-Calculation runs shall be monitored for:
-
-• Run progress percentage\
-• Failed employee counts\
-• Fatal errors\
-• Rerun frequency
-
-# 8. Export Monitoring
-
-Outbound interfaces shall be monitored for:
-
-• Export completion\
-• Delivery confirmation\
-• Transmission failures\
-• Retry behavior
-
-# 9. Reconciliation Monitoring
-
-Reconciliation shall be monitored until closure with focus on:
-
-• Pending responses\
-• Variance counts\
-• Open reconciliation exceptions
-
-# 10. Escalation Model
-
-Escalation levels may include:
-
-• Operational Team\
-• Payroll Supervisor\
-• Finance/Compliance\
-• Executive escalation for critical deadline risk
-
-# 11. Notification Channels
-
-Typical notification channels include:
-
-• Dashboards\
-• Email\
-• SMS\
-• Collaboration tools
-
-# 12. Dashboard Requirements
-
-Operational dashboards shall support:
-
-• Payroll context summaries\
-• Run progress views\
-• Queue summaries\
-• Approval status\
-• Deadline risk visibility
-
-# 13. Audit and Traceability
-
-Monitoring activity shall be auditable including:
-
-• Alert creation\
-• Severity assignment\
-• Notification history\
-• Escalation actions\
-• Resolution timestamps
-
-# 14. Key Design Principle
-
-Monitoring converts hidden risk into visible, manageable operational
-work.
+This model integrates with: Run_Visibility_and_Dashboard_Model, Exception_and_Work_Queue_Model, Payroll_Run_Model, Release_and_Approval_Model, Payroll_Reconciliation_Model.

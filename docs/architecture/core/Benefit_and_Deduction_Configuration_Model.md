@@ -1,190 +1,68 @@
 # Benefit_and_Deduction_Configuration_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Benefit_and_Deduction_Configuration_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | Eligibility_and_Enrollment_Lifecycle_Model, Earnings_and_Deductions_Computation_Model, Tax_Classification_and_Obligation_Model, Code_Classification_and_Mapping_Model, Provider_Billing_and_Charge_Model |
 
-## 1. Purpose
+## Purpose
 
-Define configuration structures for employee benefits and deductions,
-including eligibility rules, employer and employee contributions, and
-tax treatment behaviors.
+Defines configuration structures for employee benefits and deductions, including eligibility rules, employer and employee contributions, and tax treatment behaviours.
 
-## 2. Scope of Benefits and Deductions
+---
 
-Supported configurable programs include:\
-\
-Health Insurance\
-Dental Insurance\
-Vision Insurance\
-Life Insurance\
-Disability Insurance\
-Retirement Plans (401k/Roth)\
-Flexible Spending Accounts\
-Health Savings Accounts\
-Voluntary Benefits\
-Employer-Paid Benefits
+## 1. Scope of Benefits and Deductions
 
-## 3. Core Benefit_or_Deduction_Plan Entity
+Supported configurable programs include: Health Insurance, Dental Insurance, Vision Insurance, Life Insurance, Disability Insurance, Retirement Plans (401k/Roth), Flexible Spending Accounts, Health Savings Accounts, Voluntary Benefits, Employer-Paid Benefits.
 
-Benefit_or_Deduction_Plan\
-\
-Plan_ID\
-Plan_Name\
-Plan_Type\
-Organization_ID\
-\
-Effective_Start_Date\
-Effective_End_Date\
-Status\
-\
-Plan_Type examples:\
-\
-HEALTH\
-DENTAL\
-VISION\
-RETIREMENT\
-INSURANCE\
-VOLUNTARY\
-STATUTORY
+## 2. Core Benefit_or_Deduction_Plan Entity
 
-## 4. Plan Component Structure
+Plan_ID, Plan_Name, Plan_Type, Organization_ID, Effective_Start_Date, Effective_End_Date, Status.
+Plan_Type examples: HEALTH, DENTAL, VISION, RETIREMENT, INSURANCE, VOLUNTARY, STATUTORY.
 
-Each plan may include multiple components.\
-\
-Plan_Component\
-\
-Component_ID\
-Plan_ID\
-Component_Name\
-Contribution_Type\
-Tax_Treatment\
-Calculation_Method\
-\
-Contribution_Type examples:\
-\
-EMPLOYEE_CONTRIBUTION\
-EMPLOYER_CONTRIBUTION\
-MATCHING_CONTRIBUTION
+## 3. Plan Component Structure
 
-## 5. Contribution Definitions
+Plan_Component: Component_ID, Plan_ID, Component_Name, Contribution_Type, Tax_Treatment, Calculation_Method.
+Contribution_Type examples: EMPLOYEE_CONTRIBUTION, EMPLOYER_CONTRIBUTION, MATCHING_CONTRIBUTION.
 
-Contribution definitions specify financial behavior.\
-\
-Contribution attributes:\
-\
-Contribution_ID\
-Rate_Type\
-Contribution_Rate\
-Contribution_Limit\
-Contribution_Frequency\
-\
-Rate_Type examples:\
-\
-FIXED_AMOUNT\
-PERCENTAGE_OF_WAGES\
-MATCHING_FORMULA
+## 4. Contribution Definitions
 
-## 6. Eligibility Rules
+Contribution_ID, Rate_Type, Contribution_Rate, Contribution_Limit, Contribution_Frequency.
+Rate_Type examples: FIXED_AMOUNT, PERCENTAGE_OF_WAGES, MATCHING_FORMULA.
 
-Eligibility determines which employees qualify.\
-\
-Eligibility attributes:\
-\
-Eligibility_ID\
-Plan_ID\
-Eligibility_Type\
-Eligibility_Criteria\
-\
-Examples:\
-\
-Full-time status required\
-Minimum service duration\
-Department eligibility\
-Location eligibility
+## 5. Eligibility Rules
 
-## 7. Enrollment Handling
+Eligibility_ID, Plan_ID, Eligibility_Type, Eligibility_Criteria.
+Examples: full-time status required, minimum service duration, department eligibility, location eligibility.
 
-Enrollment records link employees to plans.\
-\
-Employee_Plan_Enrollment\
-\
-Enrollment_ID\
-Employee_ID\
-Plan_ID\
-Enrollment_Date\
-Termination_Date\
-Coverage_Level\
-\
-Coverage_Level examples:\
-\
-EMPLOYEE_ONLY\
-EMPLOYEE_SPOUSE\
-EMPLOYEE_CHILDREN\
-FAMILY
+## 6. Enrollment Handling
 
-## 8. Tax Treatment Integration
+Employee_Plan_Enrollment: Enrollment_ID, Employee_ID, Plan_ID, Enrollment_Date, Termination_Date, Coverage_Level.
+Coverage_Level examples: EMPLOYEE_ONLY, EMPLOYEE_SPOUSE, EMPLOYEE_CHILDREN, FAMILY.
 
-Each benefit or deduction must specify tax handling.\
-\
-Examples:\
-\
-PRE_TAX\
-POST_TAX\
-NON_TAXABLE\
-IMPUTED_INCOME\
-\
-Example mapping:\
-\
-Life Insurance → May generate Imputed Income\
-401k → Pre-Tax Contribution
+## 7. Tax Treatment Integration
 
-## 9. Employer Contribution Handling
+Each benefit or deduction must specify tax handling: PRE_TAX, POST_TAX, NON_TAXABLE, IMPUTED_INCOME.
+Example: Life Insurance may generate Imputed Income. 401k is a Pre-Tax Contribution.
 
-Employer-paid benefits generate employer financial obligations.\
-\
-Examples:\
-\
-Employer Health Contributions\
-Employer Life Insurance\
-Employer Retirement Matching\
-\
-Employer contributions must route to billing and accounting models.
+## 8. Employer Contribution Handling
 
-## 10. Deduction Scheduling
+Employer-paid benefits generate employer financial obligations. Examples: Employer Health Contributions, Employer Life Insurance, Employer Retirement Matching. Employer contributions must route to billing and accounting models.
 
-Defines when deductions occur.\
-\
-Scheduling attributes:\
-\
-Deduction_Frequency\
-Payroll_Period_Association\
-\
-Examples:\
-\
-Every payroll\
-Monthly\
-First payroll of month\
-Special cycle deductions
+## 9. Deduction Scheduling
 
-## 11. Plan Versioning and Governance
+Deduction_Frequency and Payroll_Period_Association define when deductions occur.
+Examples: every payroll, monthly, first payroll of month, special cycle deductions.
 
-Benefit plans must support versioning.\
-\
-Version attributes:\
-\
-Plan_Version_Number\
-Effective_Date\
-Approval_Status\
-Change_Description\
-\
-Historical plan definitions must remain available.
+## 10. Plan Versioning and Governance
 
-## 12. Relationship to Other Models
+Plan_Version_Number, Effective_Date, Approval_Status, Change_Description. Historical plan definitions must remain available for audit and replay.
 
-This model integrates with:\
-\
-Code_Classification_and_Mapping_Model\
-Payroll_Check_Model\
-Tax_Classification_and_Obligation_Model\
-Provider_Billing_and_Charge_Model\
-General_Ledger_and_Accounting_Export_Model\
-Employee_Assignment_Model
+## 11. Relationship to Other Models
+
+This model integrates with: Eligibility_and_Enrollment_Lifecycle_Model, Earnings_and_Deductions_Computation_Model, Tax_Classification_and_Obligation_Model, Code_Classification_and_Mapping_Model, Provider_Billing_and_Charge_Model, Payroll_Check_Model.

@@ -1,15 +1,22 @@
-# 1. Purpose
+# Result_and_Payable_Model
 
-This document defines the structure and behavior of calculation results
-and payable records produced by the payroll calculation engine.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Approved |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/calculation-engine/Result_and_Payable_Model.md` |
+| **Domain** | Calculation Engine |
+| **Related Documents** | DATA/Entity-Payroll-Item.md, ADR-002-Deterministic-Replayability.md, Calculation_Engine, Earnings_and_Deductions_Computation_Model, Accumulator_and_Balance_Model, Payroll_Run_Model, Correction_and_Immutability_Model |
 
-The Result and Payable Model governs how calculated amounts are
-summarized, stored, approved, released, and transmitted to payroll
-processing systems. The model emphasizes summarized participant-level
-payable values rather than detailed transaction-level commission
-breakdowns.
+## Purpose
 
-# 2. Core Design Principles
+Defines the structure and behaviour of calculation results and payable records produced by the payroll calculation engine. Governs how calculated amounts are summarised, stored, approved, released, and transmitted to payroll processing systems.
+
+---
+
+# 1. Core Design Principles
 
 The Result and Payable Model shall follow these principles:
 
@@ -23,7 +30,7 @@ or deduction type per period.\
 • Payable records shall remain traceable to calculation runs and input
 sources.
 
-# 3. Result Record Definition
+# 2. Result Record Definition
 
 A Result Record represents a calculated summarized amount for a
 participant within a payroll period.
@@ -45,7 +52,7 @@ Recommended Result Fields:
 Result records represent the summarized outputs of calculation
 processing.
 
-# 4. Result Granularity Rules
+# 3. Result Granularity Rules
 
 Results shall be summarized at the following minimum level:
 
@@ -67,7 +74,7 @@ Examples of Result_Type values:
 Detailed underlying transaction-level information shall remain in
 upstream systems and shall not be expanded into payroll result detail.
 
-# 5. Payable Record Definition
+# 4. Payable Record Definition
 
 A Payable Record represents an approved result that is eligible for
 payroll processing or payment.
@@ -88,7 +95,7 @@ Recommended Payable Fields:
 Payable records represent payment-ready outcomes derived from
 calculation results.
 
-# 6. Result Status Lifecycle
+# 5. Result Status Lifecycle
 
 Result records shall move through defined lifecycle states.
 
@@ -103,7 +110,7 @@ Typical Result Status values:
 
 Status transitions shall align with calculation run lifecycle stages.
 
-# 7. Relationship to Accumulators
+# 6. Relationship to Accumulators
 
 Results shall feed accumulator updates.
 
@@ -117,82 +124,48 @@ policies.
 Accumulators store persistent balances, while results represent
 transactional outcomes.
 
-# 8. Adjustment Handling
+# 7. Adjustment and Correction Handling
 
-Adjustments to results shall follow defined recalculation and correction
-policies.
+Results may require adjustment after initial calculation.
 
-Adjustment scenarios include:
+Adjustment handling rules:
 
-• Prior-period correction\
-• Supplemental payroll adjustment\
-• Retroactive change\
-• Policy-driven recalculation
+• Adjustments shall generate new result records, not overwrite existing ones.\
+• Original results shall be marked Superseded.\
+• Adjustment records shall carry linkage to superseded originals.\
+• Accumulator corrections shall follow the Correction_and_Immutability_Model.
 
-Adjustments shall produce new result records or correction entries
-rather than silently overwriting released results.
+# 8. Payable Release Controls
 
-# 9. Partial Completion Behavior
+Payable records require explicit release authorization.
 
-When partial completion occurs:
+Release controls include:
 
-• Successful participant results shall proceed through approval when
-policy allows.\
-• Failed participant results shall remain unresolved until corrected.\
-• Payable creation shall include only successful results.\
-• Exception records shall remain visible and actionable.
+• Approval workflow completion before release\
+• Release authorization by designated role\
+• Release timestamp and actor recorded\
+• Released payables become available for transmission
 
-Partial completion shall not compromise result integrity.
+# 9. Traceability Requirements
 
-# 10. External Payroll Interface Alignment
+Every result and payable must be traceable to its origin.
 
-Payable records shall be structured to support integration with
-downstream payroll systems.
+Traceability links include:
 
-Typical interface requirements include:
+• Source calculation run\
+• Source batch or event\
+• Input data snapshot\
+• Rule versions applied\
+• Approval chain
 
-• Participant identifier mapping\
-• Payable type mapping\
-• Currency alignment\
-• Pay-date consistency\
-• Payroll system compatibility
+# 10. Relationship to Other Models
 
-Result formatting shall prioritize summarized payroll-ready values.
-
-# 11. Audit and Traceability
-
-Result and Payable records shall support full traceability.
-
-Required audit relationships include:
-
-• Result linked to Source_Run_ID\
-• Result linked to Source_Batch_ID\
-• Payable linked to Result_ID\
-• Payable linked to Payroll_Context_ID\
-• Adjustment linkage tracking
-
-Audit traceability ensures payment verification and regulatory
-compliance.
-
-# 12. Performance Considerations
-
-Result storage shall support efficient retrieval and reporting.
-
-Design considerations include:
-
-• Indexed participant-level queries\
-• Efficient period-based retrieval\
-• Controlled record growth\
-• Fast lookup for payroll generation
-
-Performance optimizations shall not compromise data correctness.
-
-# 13. Key Design Principle
-
-Payroll systems operate on summarized payable outcomes rather than
-detailed transaction-level data.
-
-The Result and Payable Model ensures that summarized participant-level
-values are produced, approved, and delivered accurately while
-maintaining alignment with calculation, accumulator, and payroll
-lifecycle controls.
+This model integrates with:\
+\
+Calculation_Engine\
+Accumulator_and_Balance_Model\
+Payroll_Run_Model\
+Payroll_Check_Model\
+Payroll_Interface_and_Export_Model\
+Correction_and_Immutability_Model\
+Code_Classification_and_Mapping_Model

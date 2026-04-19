@@ -1,235 +1,57 @@
-# 1. Purpose
+# Payroll_Interface_and_Export_Model
 
-This document defines the structure, lifecycle, and operational behavior
-governing outbound payroll interfaces and export processing.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/interfaces/Payroll_Interface_and_Export_Model.md` |
+| **Domain** | Interfaces |
+| **Related Documents** | PRD-900-Integration-Model.md, Result_and_Payable_Model, Payroll_Run_Model, Integration_and_Data_Exchange_Model, Correction_and_Immutability_Model, Payroll_Reconciliation_Model |
 
-The Payroll Interface and Export Model controls how approved payable
-results are prepared, formatted, transmitted, retried, and confirmed
-with downstream payroll systems or third-party providers.
+## Purpose
 
-The model emphasizes reliability, traceability, and controlled retry
-behavior, especially in the presence of intermittent external system
-availability issues.
+Defines the structure, lifecycle, and operational behaviour governing outbound payroll interfaces and export processing. Controls how approved payable results are prepared, formatted, transmitted, retried, and confirmed with downstream payroll systems or third-party providers.
 
-# 2. Core Design Principles
+---
 
-The interface and export framework shall follow these principles:
+## 1. Core Design Principles
 
-• Export processing shall occur only after results are approved for
-release.\
-• Export units shall be traceable to payroll context and period.\
-• Transmission failures shall be retriable without duplicating delivered
-data.\
-• External dependency failures shall be isolated from internal
-calculation logic.\
-• Export status tracking shall remain visible and auditable.\
-• Successful exports shall not be retransmitted unintentionally.
+Export processing shall occur only after results are approved for release. Export units shall be traceable to payroll context and period. Transmission failures shall be retriable without duplicating delivered data. Successful exports shall not be retransmitted unintentionally.
 
-# 3. Export Unit Definition
+## 2. Export Unit Definition
 
-An Export Unit represents a collection of payable records prepared for
-transmission to a downstream payroll system.
+Export_ID, Payroll_Context_ID, Period_ID, Pay_Date, Export_Type, Source_Run_ID, Export_Status, Creation_Timestamp, Prepared_By.
 
-Recommended Export Unit Fields:
+## 3. Export Record Structure
 
-• Export_ID\
-• Payroll_Context_ID\
-• Period_ID\
-• Pay_Date\
-• Export_Type\
-• Source_Run_ID\
-• Export_Status\
-• Creation_Timestamp\
-• Prepared_By
+Export_Record_ID, Participant_ID, Payable_Type, Payable_Amount, Currency_Code, Pay_Date, Payroll_Context_ID, Period_ID, External_Payroll_Code, Record_Status.
 
-Export units group all eligible payables associated with a defined
-payroll period and context.
+## 4. Supported Export Formats
 
-# 4. Export Record Structure
+CSV, Fixed-Width Files, XML, JSON, Secure API Transmission, SFTP File Delivery. Export format selection shall be configurable per payroll context.
 
-Each export unit contains individual payable records formatted for
-downstream processing.
+## 5. Export Status Lifecycle
 
-Recommended Export Record Fields:
+Prepared, Ready, Sent, Delivered, Failed, Retrying, Confirmed, Closed. Status transitions shall be recorded for audit and operational visibility.
 
-• Export_Record_ID\
-• Participant_ID\
-• Payable_Type\
-• Payable_Amount\
-• Currency_Code\
-• Pay_Date\
-• Payroll_Context_ID\
-• Period_ID\
-• External_Payroll_Code\
-• Record_Status
+## 6. Transmission Processing
 
-Export records represent finalized payroll-ready transactions.
+Target system identification, secure authentication handling, transmission attempt logging, delivery acknowledgment capture, error detection and reporting. Transmission shall not occur without valid export readiness approval.
 
-# 5. Supported Export Formats
+## 7. Retry and Recovery Handling
 
-The platform shall support configurable export formats to match
-downstream payroll requirements.
+Retry behaviour shall address transient external failures. Retry attributes: Retry_Count, Last_Retry_Timestamp, Max_Retry_Limit, Retry_Status. Retries shall not duplicate successfully delivered records.
 
-Typical formats include:
+## 8. Idempotency Controls
 
-• CSV (Comma-Separated Values)\
-• Fixed-Width Files\
-• XML\
-• JSON\
-• Secure API Transmission\
-• SFTP File Delivery
+Each export unit carries a fingerprint. Resubmission of an already-delivered export shall be detected and blocked. Idempotency keys include: Export_ID, Transmission_Fingerprint, Delivery_Confirmation_Reference.
 
-Export format selection shall be configurable per payroll context.
+## 9. Audit and Traceability
 
-# 6. Export Status Lifecycle
+All transmission events shall be logged: attempt timestamp, response received, delivery status, actor. Export history shall remain permanently accessible.
 
-Export units shall move through defined lifecycle states.
+## 10. Relationship to Other Models
 
-Typical Export Status values:
-
-• Prepared\
-• Ready\
-• Sent\
-• Delivered\
-• Failed\
-• Retrying\
-• Confirmed\
-• Closed
-
-Status transitions shall be recorded for audit and operational
-visibility.
-
-# 7. Transmission Processing
-
-Transmission processing governs the delivery of export units to
-downstream systems.
-
-Transmission logic shall include:
-
-• Target system identification\
-• Secure authentication handling\
-• Transmission attempt logging\
-• Delivery acknowledgment capture\
-• Error detection and reporting
-
-Transmission shall not occur without valid export readiness approval.
-
-# 8. Retry and Recovery Handling
-
-Retry behavior shall address transient external failures.
-
-Retry rules shall include:
-
-• Maximum retry attempts\
-• Retry interval scheduling\
-• Escalation thresholds\
-• Notification triggers\
-• Retry logging
-
-Retry eligibility shall apply primarily to external dependency failures
-such as:
-
-• FTP/SFTP endpoint unavailability\
-• API endpoint timeout\
-• Network interruption\
-• Authentication failure subject to correction
-
-Retry logic shall not create duplicate successful exports.
-
-# 9. External Dependency Failure Handling
-
-External system failures shall be handled independently of internal
-payroll calculation logic.
-
-Examples include:
-
-• Failed outbound file delivery\
-• External payroll system downtime\
-• Transmission timeout\
-• Authentication interruption
-
-Internal payroll results shall remain intact even when transmission
-failures occur.
-
-Delivery retries shall resume once external systems become available.
-
-# 10. Duplicate Prevention Controls
-
-The export system shall prevent duplicate delivery.
-
-Duplicate prevention methods may include:
-
-• Export_ID uniqueness validation\
-• Transmission acknowledgment verification\
-• Delivery receipt tracking\
-• Idempotent delivery logic
-
-Duplicate prevention protects payroll integrity and avoids duplicate
-payments.
-
-# 11. Security Requirements
-
-Export transmission shall comply with secure data handling standards.
-
-Security requirements include:
-
-• Secure file transfer protocols (SFTP/HTTPS)\
-• Credential encryption\
-• Access control enforcement\
-• Transmission logging\
-• Data integrity validation
-
-Sensitive payroll data must remain protected during transmission.
-
-# 12. Audit and Traceability
-
-All export processing shall support audit traceability.
-
-Required tracking includes:
-
-• Export creation event\
-• Transmission attempts\
-• Retry activity\
-• Delivery confirmation\
-• Failure details\
-• User or system initiating action
-
-Audit records shall support operational diagnostics and regulatory
-review.
-
-# 13. Partial Export Handling
-
-When partial completion occurs within a payroll run:
-
-• Only successful participant results shall be included in export
-units.\
-• Failed participant records shall remain excluded until resolved.\
-• Exception visibility shall remain available to operational users.
-
-Partial export handling shall maintain payroll continuity while
-preserving data correctness.
-
-# 14. Performance Considerations
-
-Export systems shall support efficient generation and delivery of large
-payroll datasets.
-
-Performance considerations include:
-
-• Efficient batch packaging\
-• Optimized file generation\
-• Controlled retry scheduling\
-• Non-blocking transmission logic
-
-Performance optimization shall not compromise reliability or audit
-visibility.
-
-# 15. Key Design Principle
-
-Payroll export processing shall ensure reliable delivery of approved
-payable results while protecting against duplicate transmissions,
-transmission failure risk, and loss of operational traceability.
-
-External delivery reliability is achieved through controlled export
-lifecycle management, structured retry handling, and strong audit
-visibility.
+This model integrates with: Result_and_Payable_Model, Payroll_Run_Model, Integration_and_Data_Exchange_Model, Payroll_Reconciliation_Model, General_Ledger_and_Accounting_Export_Model, Correction_and_Immutability_Model.

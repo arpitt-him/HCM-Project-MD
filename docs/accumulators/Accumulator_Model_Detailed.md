@@ -1,70 +1,50 @@
-# Accumulator Model --- Detailed Draft v0.3
+# Accumulator_Model_Detailed
 
-This document represents the consolidated Accumulator Model --- Detailed
-Draft v0.3. It integrates prior structures with reconciliation, rollup,
-consumer-group, and cross-scope validation enhancements.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.3 |
+| **Status** | Approved |
+| **Owner** | Core Platform |
+| **Location** | `docs/accumulators/Accumulator_Model_Detailed.md` |
+| **Domain** | Accumulators |
+| **Related Documents** | PRD-500-Accumulator-Strategy.md, Accumulator_and_Balance_Model, Result_and_Payable_Model, Posting_Rules_and_Mutation_Semantics, Multi_Context_Calendar_Model, Correction_and_Immutability_Model |
+
+## Purpose
+
+Provides the detailed accumulator entity structure, rollup behaviour, reconciliation relationships, consumer-group definitions, and rule versioning integration that extend the high-level model in `Accumulator_and_Balance_Model`. Represents the consolidated detailed design as of v0.3.
+
+---
 
 ## 1. Accumulator Core Definition
 
-- AccumulatorID
+AccumulatorID, AccumulatorFamily, Scope, PostingDirection, EffectiveStartDate, EffectiveEndDate, Status.
 
-- AccumulatorFamily
+## 2. Rollup Behaviour Model
 
-- Scope
-
-- PostingDirection
-
-- EffectiveStartDate
-
-- EffectiveEndDate
-
-- Status
-
-## 2. Rollup Behavior Model
-
-- DERIVED --- Calculated dynamically from lower-scope accumulators.
-
-- INDEPENDENT --- Posted directly at each scope level.
-
-- HYBRID --- Combination of derived rollups and independent postings.
+DERIVED — calculated dynamically from lower-scope accumulators.
+INDEPENDENT — posted directly at each scope level.
+HYBRID — combination of derived rollups and independent postings.
 
 ## 3. Reconciliation Relationship Types
 
-- EXACT_SUM --- Higher totals equal sum of lower totals.
-
-- SUM_PLUS_ADJUSTMENTS --- Includes authorized adjustments.
-
-- INFORMATIONAL_ROLLUP --- Reporting rollups without strict
-  reconciliation.
-
-- NO_DIRECT_RELATIONSHIP --- Independent totals.
+EXACT_SUM — higher totals equal sum of lower totals.
+SUM_PLUS_ADJUSTMENTS — includes authorised adjustments.
+INFORMATIONAL_ROLLUP — reporting rollups without strict reconciliation.
+NO_DIRECT_RELATIONSHIP — independent totals.
 
 ## 4. Consumer-Oriented Rollups
 
-- Payroll Operations
-
-- Management Accounting
-
-- Corporate Accounting
-
-- External Reporting
-
-- Carrier Reconciliation
+Payroll Operations, Management Accounting, Corporate Accounting, External Reporting, Carrier Reconciliation. Each consumer group may require distinct rollup views of the same underlying accumulator data.
 
 ## 5. Cross-Scope Validation
 
-- CrossScopeValidationEnabled (Boolean)
-
-- ValidationFrequency
-
-- ExceptionHandlingRule
+CrossScopeValidationEnabled (Boolean), ValidationFrequency, ExceptionHandlingRule. Cross-scope validation detects discrepancies between scope levels and routes exceptions for investigation.
 
 ## 6. Rule Versioning Integration
 
-- RuleVersionID
+RuleVersionID, EffectiveDateRange, EvaluationBasis, ReplayCompatibilityRequirement. Accumulator behaviour may vary by rule version — versioning integration ensures replay reproduces the same accumulator state.
 
-- EffectiveDateRange
+## 7. Relationship to Other Models
 
-- EvaluationBasis
-
-- ReplayCompatibilityRequirement
+This model integrates with: Accumulator_and_Balance_Model, Result_and_Payable_Model, Posting_Rules_and_Mutation_Semantics, Multi_Context_Calendar_Model, Correction_and_Immutability_Model, Rule_Versioning_Model.

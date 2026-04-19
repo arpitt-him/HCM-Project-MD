@@ -1,322 +1,93 @@
-Document Title: Payroll_Provider_Response_Model
+# Payroll_Provider_Response_Model
 
-Document Version: 0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Draft |
+| **Owner** | Architecture Team |
+| **Location** | `docs/architecture/interfaces/Payroll_Provider_Response_Model.md` |
+| **Domain** | Interfaces |
+| **Related Documents** | Payroll_Interface_and_Export_Model, Payroll_Reconciliation_Model, Exception_and_Work_Queue_Model, Correction_and_Immutability_Model, Run_Visibility_and_Dashboard_Model |
 
-Status: Draft
+## Purpose
 
-Last Updated: 2026-04-15
+Defines the structure, lifecycle, and processing rules for inbound responses from downstream payroll providers, including acknowledgments, acceptance results, partial acceptance outcomes, rejections, and response-to-export correlation.
 
-Description:
+---
 
-Defines the structure, lifecycle, and processing rules for inbound
-responses from downstream payroll providers, including acknowledgments,
-acceptance results, partial acceptance outcomes, rejections, and
-response-to-export correlation.
+## 1. Core Design Principles
 
-# 1. Purpose
+Every outbound export shall be eligible for a correlated inbound provider response. Provider responses shall be represented as first-class operational records. Responses shall be traceable to Export_ID and Payroll_Context_ID. Partial acceptance and rejection outcomes shall remain visible and auditable. Provider responses shall trigger reconciliation, exception handling, and corrective workflows where required.
 
-This document defines the inbound response model for downstream payroll
-providers.
+## 2. Response Scope
 
-The Payroll Provider Response Model establishes how provider
-acknowledgments, acceptance outcomes, rejection details, and partial
-processing results are represented, validated, correlated, and used to
-drive reconciliation and corrective workflows.
+Export-level acknowledgment, export-level acceptance or rejection, record-level employee acceptance or rejection, totals-level confirmation, warning or advisory response. The model shall support representation of each scope independently and in combination.
 
-# 2. Core Design Principles
+## 3. Provider Response Definition
 
-Provider response handling shall follow these principles:
+Provider_Response_ID, Export_ID, Payroll_Context_ID, Provider_ID, Response_Type, Response_Status, Received_Timestamp, Provider_Reference_ID (optional), Response_File_Name or Message_Reference (optional), Client_ID (optional), Company_ID (optional).
 
-• Every outbound export shall be eligible for a correlated inbound
-provider response.\
-• Provider responses shall be represented as first-class operational
-records.\
-• Responses shall be traceable to Export_ID and Payroll_Context_ID.\
-• Partial acceptance and rejection outcomes shall remain visible and
-auditable.\
-• Provider responses shall trigger reconciliation, exception handling,
-and corrective workflows where required.\
-• Response handling shall support multi-client and multi-company
-operation.
+## 4. Response Type Classification
 
-# 3. Response Scope
+Transmission Acknowledgment, Accepted, Rejected, Partially Accepted, Accepted with Warnings, Totals Confirmation, Error Detail Response.
 
-Provider responses may occur at multiple scopes.
+## 5. Response Status Model
 
-Typical response scopes include:
+Received, Parsed, Validated, Matched, Variance Detected, Exception Raised, Closed.
 
-• Export-level acknowledgment\
-• Export-level acceptance or rejection\
-• Record-level employee acceptance or rejection\
-• Totals-level confirmation\
-• Warning or advisory response
+## 6. Correlation to Export
 
-The model shall support representation of each scope independently and
-in combination.
+Primary correlation keys: Export_ID, Provider_Reference_ID, Payroll_Context_ID, Period_ID, Pay_Date, Transmission timestamp range. Unmatched responses shall be isolated for operational review and shall not be silently discarded.
 
-# 4. Provider Response Definition
+## 7. Record-Level Response Structure
 
-A Provider Response represents an inbound message or file returned by
-the payroll provider after export submission.
+Provider_Response_Record_ID, Provider_Response_ID, Employment_ID, Response_Record_Status, Provider_Payable_Code, Provider_Amount, Response_Reason_Code, Response_Reason_Description, Warning_Flag.
 
-Recommended Provider_Response fields:
+## 8. Totals-Level Response Structure
 
-• Provider_Response_ID\
-• Export_ID\
-• Payroll_Context_ID\
-• Provider_ID\
-• Response_Type\
-• Response_Status\
-• Received_Timestamp\
-• Provider_Reference_ID (optional)\
-• Response_File_Name or Message_Reference (optional)\
-• Client_ID (optional if applicable)\
-• Company_ID (optional if applicable)
+Employee count, gross pay total, tax totals, deduction totals, net pay total, employer contribution totals. Supports totals-first reconciliation workflows.
 
-Provider responses represent authoritative downstream processing
-feedback.
+## 9. Acceptance and Rejection Handling
 
-# 5. Response Type Classification
+Fully accepted exports proceed to reconciliation closure. Fully rejected exports enter correction and retransmission workflow. Partially accepted exports preserve successful records while isolating failed records. Warning-only responses remain visible but may not block closure depending on policy.
 
-Provider responses shall be classified by type.
+## 10. Partial Acceptance Model
 
-Typical Response_Type values include:
+Accepted employee records remain valid. Rejected records are isolated and may generate exception queue entries. Corrective exports may be generated for failed records only. Original provider response is preserved for audit.
 
-• Transmission Acknowledgment\
-• Accepted\
-• Rejected\
-• Partially Accepted\
-• Accepted with Warnings\
-• Totals Confirmation\
-• Error Detail Response
+## 11. Rejection Reason Handling
 
-Classification supports correct operational routing and follow-up
-behavior.
+Typical rejection categories: invalid employee identifier, invalid payable code, invalid amount, missing required field, duplicate submission, provider-side processing error, regulatory validation failure. Structured rejection reasons support faster correction and trend analysis.
 
-# 6. Response Status Model
+## 12. Warning and Advisory Handling
 
-Provider responses shall maintain lifecycle status.
+Typical warning scenarios: rounding adjustments, non-blocking code translations, informational processing notes, secondary validation advisories. Warnings shall remain visible and auditable even when exports are accepted.
 
-Typical Response_Status values include:
+## 13. Multi-Client and Multi-Company Support
 
-• Received\
-• Parsed\
-• Validated\
-• Matched\
-• Variance Detected\
-• Exception Raised\
-• Closed
+Segmentation dimensions: Client_ID, Company_ID, Payroll_Context_ID. One client or company shall not see another's provider response data without authorisation.
 
-Status progression shall remain visible to operations and audit users.
+## 14. Response Parsing and Validation
 
-# 7. Correlation to Export
+Confirm provider identity, validate response format, confirm correlation eligibility, parse employee and totals data, detect malformed or incomplete responses. Invalid responses shall enter exception handling workflows.
 
-Every provider response shall be correlated to an outbound export
-whenever possible.
+## 15. Interaction with Reconciliation
 
-Primary correlation keys may include:
+Provider responses are primary inputs to reconciliation. Totals-first comparison, employee-level drilldown when variances exist, exception generation for mismatches, closure only after validated response handling.
 
-• Export_ID\
-• Provider_Reference_ID\
-• Payroll_Context_ID\
-• Period_ID\
-• Pay_Date\
-• Transmission timestamp range
+## 16. Interaction with Correction and Immutability
 
-Unmatched responses shall be isolated for operational review and shall
-not be silently discarded.
+Rejected exports may require correction and retransmission. Partially accepted results may require targeted adjustments. Accepted responses do not permit silent overwrite of prior released data. Corrective actions must preserve audit lineage.
 
-# 8. Record-Level Response Structure
+## 17. Operational Visibility
 
-Where provider responses include record-level outcomes, those outcomes
-shall be represented explicitly.
+Typical dashboard indicators: responses pending parsing, responses awaiting reconciliation, rejected exports, partially accepted exports, open provider-response exceptions, aging unmatched responses.
 
-Recommended Provider_Response_Record fields:
+## 18. Audit and Traceability
 
-• Provider_Response_Record_ID\
-• Provider_Response_ID\
-• Employment_ID\
-• Response_Record_Status\
-• Provider_Payable_Code\
-• Provider_Amount\
-• Response_Reason_Code\
-• Response_Reason_Description\
-• Warning_Flag
+All provider response handling shall be auditable: response receipt timestamp, parsing outcomes, correlation decisions, reconciliation linkage, correction activity triggered, responsible user or system.
 
-Record-level response visibility supports targeted correction and
-partial acceptance handling.
+## 19. Relationship to Other Models
 
-# 9. Totals-Level Response Structure
-
-Where provider responses include summary totals, those totals shall be
-represented explicitly.
-
-Typical totals categories include:
-
-• Employee count\
-• Gross pay total\
-• Tax totals\
-• Deduction totals\
-• Net pay total\
-• Employer contribution totals
-
-Totals-level responses support totals-first reconciliation workflows.
-
-# 10. Acceptance and Rejection Handling
-
-Provider responses may communicate full acceptance, full rejection, or
-mixed outcomes.
-
-Handling behaviors include:
-
-• Fully accepted exports proceed to reconciliation closure flow.\
-• Fully rejected exports enter correction and retransmission workflow.\
-• Partially accepted exports preserve successful records while isolating
-failed records.\
-• Warning-only responses remain visible for operator review but may not
-block closure depending on policy.
-
-# 11. Partial Acceptance Model
-
-Partial acceptance shall be supported as a first-class operating state.
-
-Behavior includes:
-
-• Accepted employee records remain valid.\
-• Rejected employee records are isolated.\
-• Rejected records may generate exception queue entries.\
-• Corrective exports may be generated for failed records only.\
-• Original provider response remains preserved for audit and
-traceability.
-
-# 12. Rejection Reason Handling
-
-Provider rejection reasons shall be captured in structured form where
-possible.
-
-Typical rejection categories include:
-
-• Invalid employee identifier\
-• Invalid payable code\
-• Invalid amount\
-• Missing required field\
-• Duplicate submission\
-• Provider-side processing error\
-• Regulatory validation failure
-
-Structured rejection reasons support faster correction and trend
-analysis.
-
-# 13. Warning and Advisory Handling
-
-Provider responses may contain warnings that do not constitute
-rejection.
-
-Typical warning scenarios include:
-
-• Rounding adjustments\
-• Non-blocking code translations\
-• Informational processing notes\
-• Secondary validation advisories
-
-Warnings shall remain visible and auditable even when exports are
-accepted.
-
-# 14. Multi-Client and Multi-Company Support
-
-Provider response handling shall support multi-client and multi-company
-operation.
-
-Required segmentation dimensions include:
-
-• Client_ID\
-• Company_ID\
-• Payroll_Context_ID
-
-Operational visibility and access shall be scoped appropriately so that
-one client or company does not see another\'s provider response data
-without authorization.
-
-# 15. Response Parsing and Validation
-
-Inbound responses shall be parsed and validated before they are
-considered operationally usable.
-
-Validation behaviors include:
-
-• Confirm provider identity\
-• Validate response format\
-• Confirm correlation eligibility\
-• Parse employee and totals data\
-• Detect malformed or incomplete responses
-
-Invalid provider responses shall enter exception handling workflows.
-
-# 16. Interaction with Reconciliation
-
-Provider responses are primary inputs to reconciliation.
-
-Behavior includes:
-
-• Totals-first comparison\
-• Employee-level drilldown when variances exist\
-• Exception generation for mismatches\
-• Closure only after validated response handling
-
-Reconciliation shall not rely on assumed acceptance when explicit
-provider responses are expected.
-
-# 17. Interaction with Correction and Immutability
-
-Provider responses may trigger correction workflows.
-
-Behavior includes:
-
-• Rejected exports may require correction and retransmission\
-• Partially accepted results may require targeted adjustments\
-• Accepted responses do not permit silent overwrite of prior released
-data\
-• Corrective actions must preserve audit lineage
-
-Provider response handling shall align with correction and immutability
-rules.
-
-# 18. Operational Visibility
-
-Provider response activity shall be visible through operational
-dashboards.
-
-Typical visibility indicators include:
-
-• Responses pending parsing\
-• Responses awaiting reconciliation\
-• Rejected exports\
-• Partially accepted exports\
-• Open provider-response exceptions\
-• Aging unmatched responses
-
-Visibility supports timely payroll recovery and completion.
-
-# 19. Audit and Traceability
-
-All provider response handling shall be auditable.
-
-Required audit elements include:
-
-• Provider response receipt\
-• Parsing results\
-• Correlation decisions\
-• Status transitions\
-• Exception creation\
-• Reconciliation linkage\
-• Correction linkage
-
-Auditability supports payroll assurance and compliance transparency.
-
-# 20. Key Design Principle
-
-Outbound payroll export is only half of the provider interaction.
-
-Provider responses complete the interface loop by confirming,
-qualifying, or rejecting downstream payroll processing outcomes, and
-must be modeled as authoritative operational inputs.
+This model integrates with: Payroll_Interface_and_Export_Model, Payroll_Reconciliation_Model, Exception_and_Work_Queue_Model, Correction_and_Immutability_Model, Run_Visibility_and_Dashboard_Model, Integration_and_Data_Exchange_Model.

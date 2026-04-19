@@ -1,140 +1,61 @@
 # Compensation_and_Pay_Rate_Model
 
-Version: v0.1
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.1 |
+| **Status** | Reviewed |
+| **Owner** | Core Platform |
+| **Location** | `docs/architecture/core/Compensation_and_Pay_Rate_Model.md` |
+| **Domain** | Core |
+| **Related Documents** | DATA/Entity-Employee.md, Employee_Event_and_Status_Change_Model, Earnings_and_Deductions_Computation_Model, Overtime_and_Premium_Pay_Model, Correction_and_Immutability_Model |
 
-## 1. Purpose
+## Purpose
 
-Define structures governing employee compensation, pay rate assignment,
-rate history management, and pay determination behavior.
+Defines structures governing employee compensation, pay rate assignment, rate history management, and pay determination behaviour. HRIS owns compensation rate records; Payroll consumes them.
 
-## 2. Scope of Compensation
+---
 
-Supported compensation types include:\
-\
-Hourly Pay\
-Salary Pay\
-Commission Pay\
-Bonus Pay\
-Piece Rate Pay\
-Shift Differential Pay\
-Contract Pay\
-Allowance-Based Pay
+## 1. Scope of Compensation
 
-## 3. Core Pay_Rate Entity
+Supported compensation types: Hourly Pay, Salary Pay, Commission Pay, Bonus Pay, Piece Rate Pay, Shift Differential Pay, Contract Pay, Allowance-Based Pay.
 
-Pay_Rate\
-\
-Pay_Rate_ID\
-Employee_ID\
-Employment_ID\
-Rate_Type\
-Base_Rate\
-Rate_Currency\
-Effective_Start_Date\
-Effective_End_Date\
-Rate_Status
+## 2. Core Pay_Rate Entity
 
-## 4. Rate Type Classification
+Pay_Rate_ID, Employee_ID, Employment_ID, Rate_Type, Base_Rate, Rate_Currency, Effective_Start_Date, Effective_End_Date, Rate_Status.
 
-Rate types include:\
-\
-HOURLY\
-SALARY\
-COMMISSION\
-BONUS\
-PIECE_RATE\
-DIFFERENTIAL\
-CONTRACT
+## 3. Rate Type Classification
 
-## 5. Rate Assignment Model
+Rate types: HOURLY, SALARY, COMMISSION, BONUS, PIECE_RATE, DIFFERENTIAL, CONTRACT.
 
-Employee_Pay_Rate_Assignment\
-\
-Assignment_ID\
-Employee_ID\
-Employment_ID\
-Pay_Rate_ID\
-Assignment_Start_Date\
-Assignment_End_Date\
-Primary_Rate_Flag
+## 4. Rate Assignment Model
 
-## 6. Multiple Rate Handling
+Employee_Pay_Rate_Assignment: Assignment_ID, Employee_ID, Employment_ID, Pay_Rate_ID, Assignment_Start_Date, Assignment_End_Date, Primary_Rate_Flag.
 
-Employees may have multiple rates.\
-\
-Examples:\
-\
-Primary rate\
-Overtime rate\
-Shift differential rate\
-Project-specific rate\
-\
-Multiple rates must support hierarchical resolution rules.
+## 5. Multiple Rate Handling
 
-## 7. Salary Compensation Handling
+Employees may have multiple rates: primary rate, overtime rate, shift differential rate, project-specific rate. Multiple rates must support hierarchical resolution rules.
 
-Salary pay structures include:\
-\
-Annual salary\
-Monthly salary\
-Per-pay-period salary\
-\
-Salary attributes:\
-\
-Annual_Salary\
-Salary_Pay_Frequency\
-Salary_Proration_Method
+## 6. Salary Compensation Handling
 
-## 8. Hourly Compensation Handling
+Salary structures: Annual_Salary, Salary_Pay_Frequency, Salary_Proration_Method. Supports annual, monthly, and per-pay-period salary structures.
 
-Hourly pay structures include:\
-\
-Standard hourly rate\
-Overtime multiplier rate\
-Double-time rate\
-\
-Hourly rates integrate directly with time-entry systems.
+## 7. Hourly Compensation Handling
 
-## 9. Rate Change and Versioning
+Standard hourly rate, overtime multiplier rate, double-time rate. Hourly rates integrate directly with time-entry systems.
 
-Rate changes must preserve historical continuity.\
-\
-Rate change attributes:\
-\
-Change_Date\
-Previous_Rate\
-New_Rate\
-Change_Reason\
-Approval_Status
+## 8. Rate Change and Versioning
 
-## 10. Retroactive Rate Changes
+Change_Date, Previous_Rate, New_Rate, Change_Reason, Approval_Status. Prior rates are preserved and accessible for retroactive payroll processing.
 
-Retroactive changes may require recalculation.\
-\
-Retroactive attributes:\
-\
-Retroactive_Start_Date\
-Affected_Pay_Periods\
-Adjustment_Required_Flag\
-\
-Recalculation must maintain audit history.
+## 9. Retroactive Rate Changes
 
-## 11. Reporting and Audit Support
+Retroactive_Start_Date, Affected_Pay_Periods, Adjustment_Required_Flag. Retroactive rate changes generate downstream recalculation events routed to Payroll. Recalculation must maintain audit history.
 
-Compensation reporting supports:\
-\
-Rate history tracking\
-Compensation summaries\
-Differential reporting\
-Audit verification
+## 10. Reporting and Audit Support
 
-## 12. Relationship to Other Models
+Compensation reporting supports: rate history tracking, compensation summaries, differential reporting, audit verification.
 
-This model integrates with:\
-\
-Time_Entry_and_Worked_Time_Model\
-Overtime_and_Premium_Pay_Model\
-Payroll_Check_Model\
-Employee_Event_and_Status_Change_Model\
-Operational_Reporting_and_Analytics_Model\
-Correction_and_Immutability_Model
+## 11. Relationship to Other Models
+
+This model integrates with: Time_Entry_and_Worked_Time_Model, Overtime_and_Premium_Pay_Model, Payroll_Check_Model, Employee_Event_and_Status_Change_Model, Operational_Reporting_and_Analytics_Model, Correction_and_Immutability_Model.
