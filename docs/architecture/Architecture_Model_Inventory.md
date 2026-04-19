@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v2.0 |
+| **Version** | v3.2 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -21,17 +21,18 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
-| PRD | Platform | PRD-0000_Core_Vision | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §1, §3 |
-| PRD | Platform | PRD-0100_Architecture_Principles | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §2 |
-| PRD | Platform | PRD-0200_Core_Entity_Model | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §4 |
-| PRD | Payroll | PRD-0300_Payroll_Calendar | docs/PRD | Complete | Locked | Payroll Domain | Replaces HCM_Platform_PRD §5 |
-| PRD | Payroll | PRD-0400_Earnings_Model | docs/PRD | Complete | Locked | Payroll Domain | Replaces HCM_Platform_PRD §6, §9 |
-| PRD | Payroll | PRD-0500_Accumulator_Strategy | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §7 |
-| PRD | Compliance | PRD-0600_Jurisdiction_Model | docs/PRD | Complete | Locked | Compliance Domain | Replaces HCM_Platform_PRD §8 |
-| PRD | Platform | PRD-0700_Workflow_Framework | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §10 |
-| PRD | Platform | PRD-0800_Validation_Framework | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §11 |
-| PRD | Platform | PRD-0900_Integration_Model | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §14 |
-| PRD | HRIS | HRIS_Module_PRD | docs/PRD | Complete | Draft | Core Platform | HRIS module specification v0.1 |
+| PRD | Platform | PRD-0000_Core_Vision | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §1, §3. User stories, scope, AC, NFRs added. |
+| PRD | Platform | PRD-0100_Architecture_Principles | docs/PRD | Complete | Locked | Core Platform | Replaces HCM_Platform_PRD §2. Scope, AC, NFRs added. |
+| PRD | Platform | PRD-0200_Core_Entity_Model | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
+| PRD | Payroll | PRD-0300_Payroll_Calendar | docs/PRD | Complete | Locked | Payroll Domain | User stories, scope, AC, NFRs added. |
+| PRD | Payroll | PRD-0400_Earnings_Model | docs/PRD | Complete | Locked | Payroll Domain | User stories, scope, AC, NFRs added. |
+| PRD | Payroll | PRD-0500_Accumulator_Strategy | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
+| PRD | Compliance | PRD-0600_Jurisdiction_Model | docs/PRD | Complete | Locked | Compliance Domain | User stories, scope, AC, NFRs added. |
+| PRD | Platform | PRD-0700_Workflow_Framework | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
+| PRD | Platform | PRD-0800_Validation_Framework | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
+| PRD | Platform | PRD-0900_Integration_Model | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
+| PRD | HRIS | HRIS_Module_PRD | docs/PRD | Complete | Draft | Core Platform | User stories, scope boundaries, 21 AC, 14 NFRs added. |
+| PRD | Platform / Payroll | PRD-1000_Benefits_Boundary | docs/PRD | Complete | Locked | Core Platform | Resolves v1 benefits scope ambiguity; deduction processing in scope, plan admin out of scope |
 
 ### NFR — Non-Functional Requirements
 
@@ -52,20 +53,75 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 |---|---|---|---|---|---|---|---|
 | Data Entity | Core | Entity_Person | docs/DATA | Complete | Draft | Core Platform | |
 | Data Entity | Core | Entity_Employee | docs/DATA | Complete | Draft | Core Platform | Employment entity |
+| Data Entity | Core | Entity_Assignment | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Compensation_Record | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Leave_Request | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Document | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Onboarding_Plan | docs/DATA | Complete | Draft | Core Platform | Includes Onboarding Task |
+| Data Entity | Core | Entity_Org_Unit | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Job | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Position | docs/DATA | Complete | Draft | Core Platform | |
 | Data Entity | Payroll | Entity_Payroll_Item | docs/DATA | Complete | Draft | Payroll Domain | |
+| Data Entity | Payroll | Entity_Payroll_Run | docs/DATA | Complete | Draft | Payroll Domain | |
+| Data Entity | Payroll | Entity_Payroll_Check | docs/DATA | Complete | Draft | Payroll Domain | |
+| Data Entity | Payroll | Entity_Accumulator | docs/DATA | Complete | Draft | Payroll Domain | Includes Contribution history |
+| Data Entity | Compliance | Entity_Legal_Order | docs/DATA | Complete | Draft | Compliance Domain | Garnishments and levies |
+| Data Entity | Compliance | Entity_Jurisdiction | docs/DATA | Complete | Draft | Compliance Domain | |
 
 ### SPEC — Functional Specifications
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
-| Spec | Payroll | External_Earnings | docs/SPEC | Complete | Draft | Payroll Domain | |
-| Spec | Payroll | Residual_Commissions | docs/SPEC | Complete | Draft | Payroll Domain | Extends External_Earnings |
+| Spec | Payroll | External_Earnings | docs/SPEC | Complete | Draft | Payroll Domain | Inputs, outputs, error catalogue added |
+| Spec | Payroll | Residual_Commissions | docs/SPEC | Complete | Draft | Payroll Domain | Extends External_Earnings; inputs, outputs, error catalogue added |
+| Spec | HRIS | Self_Service_Model | docs/SPEC | Complete | Draft | Core Platform / HRIS | ESS/MSS actions, role permission matrix, event model |
+| Spec | HRIS | Onboarding_Workflow | docs/SPEC | Complete | Draft | Core Platform / HRIS | Plan creation, rehire treatment, integration touch points, EXC-ONB |
+| Spec | Platform | API_Contract_Standards | docs/SPEC | Complete | Draft | Core Platform | Authentication, versioning, request/response format, error handling, idempotency, rate limiting |
+| Spec | Payroll | Pay_Statement_Delivery | docs/SPEC | Complete | Draft | Core Platform / Payroll | Content, format, delivery channels, retention, accessibility, security |
+| Spec | Platform | API_Surface_Map | docs/SPEC | Complete | Draft | Core Platform | 21 integration points across HRIS, Payroll, Benefits, Compliance, T&A (future) |
 
 ### Conventions
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
 | Convention | Platform | Requirement_ID_Convention | docs/conventions | Complete | Locked | Core Platform | REQ, STATE, EXC, ENT prefix taxonomy |
+
+### STATE — State Models
+
+| Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
+|---|---|---|---|---|---|---|---|
+| State Model | Platform | STATE-WFL_Workflow_Approval | docs/STATE | Complete | Locked | Core Platform | 7 states; applies to all approval workflows |
+| State Model | Payroll | STATE-RUN_Payroll_Run | docs/STATE | Complete | Locked | Payroll Domain | 19 states; full run lifecycle |
+| State Model | HRIS | STATE-EMP_Employment_Lifecycle | docs/STATE | Complete | Locked | Core Platform / HRIS | 14 states across Person, Employment, Position |
+| State Model | HRIS | STATE-LEV_Leave_Request | docs/STATE | Complete | Locked | Core Platform / HRIS | 7 states |
+| State Model | HRIS | STATE-DOC_Document | docs/STATE | Complete | Locked | Core Platform / HRIS | 4 states |
+| State Model | HRIS | STATE-ONB_Onboarding_Task | docs/STATE | Complete | Locked | Core Platform / HRIS | 5 states |
+| State Model | Payroll | STATE-TIM_Timecard | docs/STATE | Complete | Locked | Payroll Domain | 6 states |
+| State Model | Payroll | STATE-DED_Benefits_Deductions | docs/STATE | Complete | Locked | Core Platform | 5 states |
+| State Model | Compliance | STATE-GAR_Garnishment | docs/STATE | Complete | Locked | Compliance Domain | 6 states |
+| State Model | Compliance | STATE-TAX_Tax_Elections | docs/STATE | Complete | Locked | Compliance Domain | 4 states |
+| State Model | Payroll | STATE-RET_Retro_Adjustments | docs/STATE | Complete | Locked | Payroll Domain | 5 states |
+| State Model | Payroll | STATE-GL_General_Ledger_Posting | docs/STATE | Complete | Locked | Payroll Domain | 5 states |
+| State Model | Compliance | STATE-YEP_Year_End_Processing | docs/STATE | Complete | Locked | Compliance Domain | 5 states |
+| State Model | Payroll | STATE-EXP_Export | docs/STATE | Complete | Locked | Architecture Team | 8 states |
+| State Model | Compliance | STATE-REC_Reconciliation | docs/STATE | Complete | Locked | Compliance Domain | 8 states |
+| State Model | Payroll | STATE-PRV_Provider_Response | docs/STATE | Complete | Locked | Architecture Team | 7 states |
+
+### EXC — Exception Catalogues
+
+| Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
+|---|---|---|---|---|---|---|---|
+| Exception Catalogue | Platform | EXC-VAL_Validation_Exceptions | docs/EXC | Complete | Draft | Core Platform | 10 rules; EXC-VAL-001 to 024 |
+| Exception Catalogue | Payroll | EXC-CAL_Calculation_Exceptions | docs/EXC | Complete | Draft | Payroll Domain | 7 rules; EXC-CAL-001 to 007 |
+| Exception Catalogue | Platform | EXC-CFG_Configuration_Exceptions | docs/EXC | Complete | Draft | Core Platform | 6 rules; EXC-CFG-001 to 006 |
+| Exception Catalogue | Payroll | EXC-RUN_Payroll_Run_Exceptions | docs/EXC | Complete | Draft | Payroll Domain | 6 rules; EXC-RUN-001 to 006 |
+| Exception Catalogue | Platform | EXC-INT_Integration_Exceptions | docs/EXC | Complete | Draft | Core Platform | 7 rules; EXC-INT-001 to 007 |
+| Exception Catalogue | Compliance | EXC-TAX_Taxation_Exceptions | docs/EXC | Complete | Draft | Compliance Domain | 6 rules; EXC-TAX-001 to 006 |
+| Exception Catalogue | Payroll | EXC-TIM_Time_Attendance_Exceptions | docs/EXC | Complete | Draft | Payroll Domain | 5 rules; EXC-TIM-001 to 005 |
+| Exception Catalogue | Platform | EXC-DED_Benefits_Deductions_Exceptions | docs/EXC | Complete | Draft | Core Platform | 5 rules; EXC-DED-001 to 005 |
+| Exception Catalogue | Payroll | EXC-COR_Correction_Exceptions | docs/EXC | Complete | Draft | Payroll Domain | 5 rules; EXC-COR-001 to 005 |
+| Exception Catalogue | Compliance | EXC-AUD_Audit_Retention_Exceptions | docs/EXC | Complete | Draft | Compliance Domain | 4 rules; EXC-AUD-001 to 004 |
+| Exception Catalogue | Compliance | EXC-SEC_Security_Access_Exceptions | docs/EXC | Complete | Draft | Compliance Domain | 4 rules; EXC-SEC-001 to 004 |
 
 ### Architecture Models — Accumulators
 
@@ -99,7 +155,9 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Model | Core | Organizational_Structure_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
 | Model | Core | Overtime_and_Premium_Pay_Model | docs/architecture/core | Complete | Draft | Core Platform | Yes | High |
 | Model | Core | Plan_and_Rule_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
+| Model | Core | Position_Management_Model | docs/architecture/core | Complete | Draft | Core Platform / HRIS | Yes | High | Advisory position control; headcount at position and dept level |
 | Model | Core | Reference_Data_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
+| Model | Core | Reporting_Hierarchy_Model | docs/architecture/core | Complete | Draft | Core Platform / HRIS | Yes | High | E-to-E manager relationship; org chart; v1 primary only |
 | Model | Core | Scheduling_and_Shift_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
 | Model | Core | Time_Entry_and_Worked_Time_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
 
@@ -177,7 +235,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
-| Control Artifact | Architecture Control | Architecture_Model_Inventory | docs/architecture | Active | Draft | Core Platform | This document |
+| Control Artifact | Architecture Control | Architecture_Model_Inventory | docs/architecture | Active | Draft | Core Platform | This document — v3.0 |
 | Control Artifact | Architecture Control | PRD_to_Architecture_Coverage_Map | docs/architecture | Active | Draft | Core Platform | Traceability artifact |
 
 ---

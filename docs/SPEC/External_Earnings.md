@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/SPEC/External_Earnings.md` |
@@ -11,7 +11,7 @@
 
 ## Purpose
 
-Specifies the import format, validation rules, processing workflow, and audit requirements for externally calculated earnings entering the payroll platform. This document applies to all external earning types. Residual commission-specific behaviour is detailed further in `SPEC/Residual_Commissions.md`.
+Specifies the import format, validation rules, processing workflow, inputs, outputs, and audit requirements for externally calculated earnings entering the payroll platform. This document applies to all external earning types. Residual commission-specific behaviour is detailed further in `SPEC/Residual_Commissions.md`.
 
 ---
 
@@ -52,29 +52,33 @@ Multiple earning types per employee in the same period are supported and expecte
 
 ---
 
-## 4. CSV File Structure
+## 4. Inputs
 
-### Required Fields
+### 4.1 File Upload Inputs
 
-| Field | Type | Notes |
-|---|---|---|
-| Participant_ID | String | Must match an active Employment_ID in the platform |
-| Earning_Type | String | Must map to a valid canonical earning code |
-| Period_ID | String | Format: YYYY-MM; must match an open payroll period |
-| Amount | Decimal | Positive or negative; two decimal places |
-| Source_System | String | Identifier of the originating system |
-| Source_Batch_ID | String | Unique identifier for this submission batch |
+| Field | Type | Required | Validation | Notes |
+|---|---|---|---|---|
+| Participant_ID | String | Yes | Must match an active Employment_ID | Internal platform key |
+| Earning_Type | String | Yes | Must map to a valid canonical earning code | See Code_Classification_and_Mapping_Model |
+| Period_ID | String | Yes | Format YYYY-MM; must match an open payroll period | Closed periods reject the record |
+| Amount | Decimal | Yes | Valid decimal; two decimal places; positive or negative | Negative values represent recoveries or chargebacks |
+| Source_System | String | Yes | Non-empty string | Identifier of the originating system |
+| Source_Batch_ID | String | Yes | Non-empty string; unique within submission | Used for deduplication and replay |
+| Source_Record_Count | Integer | No | Positive integer | Number of source transactions summarised |
+| Description | String | No | Must fit within pay statement character limit | Appears on pay statement if provided |
+| Source_Total_Basis_Amount | Decimal | No | Valid decimal | Basis amount for reconciliation |
+| Currency_Code | String | No | ISO 4217; defaults to USD | Required in multi-currency environments |
 
-### Recommended Fields
+### 4.2 Approval Action Inputs
 
-| Field | Type | Notes |
-|---|---|---|
-| Source_Record_Count | Integer | Number of source transactions summarised |
-| Description | String | Appears on pay statement; must fit within character limit |
-| Source_Total_Basis_Amount | Decimal | Basis amount for reconciliation (e.g., revenue base for residual) |
-| Currency_Code | String | Defaults to USD if omitted in single-currency environments |
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| Approver_User_ID | String | Yes | Must hold the Import Approver role |
+| Approval_Timestamp | Datetime | Yes | System-generated at approval action |
+| Approval_Decision | Enum | Yes | APPROVE or REJECT |
+| Rejection_Reason | String | Conditional | Required if Approval_Decision = REJECT |
 
-### Example File
+### 4.3 Example File
 
 ```csv
 Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Source_Record_Count,Description
@@ -85,20 +89,7 @@ Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Sourc
 
 ---
 
-## 5. Adjustment Model
-
-Multiple submissions for the same `Participant_ID + Earning_Type + Period_ID` are permitted. Each subsequent record is treated as an **adjustment**, not a replacement.
-
-- Original records are never overwritten.
-- Adjustment records may carry positive or negative amounts.
-- Each adjustment must reference its own `Source_Batch_ID`.
-- The net effect across all batches for a given combination represents the final import position.
-
-This preserves audit history and prevents silent data replacement.
-
----
-
-## 6. Processing Workflow
+## 5. Processing Workflow
 
 ```
 Upload → Validate → Stage → Approve → Commit
@@ -116,32 +107,114 @@ Partial posting is not permitted. A file must either fully commit or be rejected
 
 ---
 
-## 7. Validation Rules
+## 6. Success Outputs
 
-| Rule | Level | Behaviour on Failure |
+### 6.1 Records Created
+
+| Output | Entity | Description |
 |---|---|---|
-| All required fields present | Row | Row rejected |
-| Amount is valid decimal | Row | Row rejected |
-| Period_ID format is YYYY-MM | Row | Row rejected |
-| Earning_Type maps to valid canonical code | Row | Row rejected; routes to exception queue |
-| Participant_ID matches active Employment | Row | Row rejected; routes to exception queue |
-| Duplicate record within same batch | Row | Row rejected |
-| Control total matches batch sum (if provided) | File | File rejected |
-| File is structurally valid CSV | File | File rejected |
+| Staged Earning Record | External_Earning_Staging | One record per accepted import row, held pending approval |
+| Committed Earning Record | Payroll_Item (External) | Created at commit; one per Participant_ID + Earning_Type + Period_ID |
+| Batch Receipt | Import_Batch_Receipt | Created at each stage transition; contains record counts and totals |
+| Audit Record | Import_Audit_Log | Created at upload, validation, approval, and commit |
+
+### 6.2 Events Published
+
+| Event | Trigger | Consumers |
+|---|---|---|
+| ExternalEarningsStaged | Records pass validation and enter staging | Payroll run eligibility check |
+| ExternalEarningsApproved | Approver confirms batch | Payroll calculation engine |
+| ExternalEarningsCommitted | Records committed to payroll period | Payroll run, accumulator engine |
+
+### 6.3 Side Effects
+
+| Side Effect | Description |
+|---|---|
+| Payroll period availability | Committed records become available for inclusion in the next payroll run for the matching Period_ID |
+| Batch fingerprint retained | File fingerprint stored to prevent duplicate ingestion of the same file |
+| Pay statement line reserved | Description field reserved for display on employee pay statement at calculation time |
+
+### 6.4 Accumulator Impact (at payroll calculation)
+
+| Earning Type | Accumulator | Direction |
+|---|---|---|
+| Any positive earning code | Gross Wages (PTD, QTD, YTD, LTD) | Positive |
+| Any negative earning code (e.g. RECOVERY) | Gross Wages (PTD, QTD, YTD, LTD) | Negative |
+
+Note: accumulators are updated at payroll posting, not at import commit.
 
 ---
 
-## 8. Error Handling
+## 7. Error Outputs
 
-**File-level errors** (structural failures) reject the entire file. No records are staged.
+### 7.1 File-Level Errors
 
-**Row-level errors** reject individual records. Behaviour for partially valid files (some rows pass, some fail) is configurable per deployment policy — default is reject all.
+| Error Code | Condition | Behaviour | Output Record |
+|---|---|---|---|
+| ERR-EXT-001 | File is not valid CSV | Entire file rejected; no records staged | Import_Error_Log with error code and description |
+| ERR-EXT-002 | Required header columns missing | Entire file rejected | Import_Error_Log |
+| ERR-EXT-003 | Control total mismatch (if provided) | Entire file rejected | Import_Error_Log with submitted vs computed totals |
+| ERR-EXT-004 | Duplicate file fingerprint detected | Entire file rejected as duplicate | Import_Error_Log with reference to prior submission |
 
-Rejected records must be corrected in the source system and resubmitted. The platform does not provide a UI for editing imported records directly.
+### 7.2 Row-Level Errors
+
+| Error Code | Field | Condition | Behaviour |
+|---|---|---|---|
+| ERR-EXT-010 | Participant_ID | No active Employment record found | Row rejected; routes to exception queue |
+| ERR-EXT-011 | Earning_Type | Does not map to a valid canonical code | Row rejected; routes to exception queue |
+| ERR-EXT-012 | Period_ID | Format invalid (not YYYY-MM) | Row rejected |
+| ERR-EXT-013 | Period_ID | Period is closed or does not exist | Row rejected; routes to exception queue |
+| ERR-EXT-014 | Amount | Not a valid decimal value | Row rejected |
+| ERR-EXT-015 | Source_Batch_ID | Missing or empty | Row rejected |
+| ERR-EXT-016 | Description | Exceeds pay statement character limit | Row accepted with warning; description truncated |
+| ERR-EXT-017 | (row) | Duplicate Participant_ID + Earning_Type + Period_ID within same batch | Row rejected |
+
+### 7.3 Error Record Structure
+
+Each error produces an Import_Error_Record containing:
+
+| Field | Description |
+|---|---|
+| Error_ID | Unique identifier |
+| Batch_ID | Source_Batch_ID from the submission |
+| Row_Number | CSV row number (file-level errors: 0) |
+| Error_Code | ERR-EXT-NNN |
+| Error_Message | Human-readable description |
+| Offending_Value | The field value that caused the failure (where applicable) |
+| Severity | FILE_REJECT / ROW_REJECT / WARNING |
+| Timestamp | When the error was detected |
 
 ---
 
-## 9. Reconciliation Controls
+## 8. Adjustment Model
+
+Multiple submissions for the same `Participant_ID + Earning_Type + Period_ID` are permitted. Each subsequent record is treated as an **adjustment**, not a replacement.
+
+- Original records are never overwritten.
+- Adjustment records may carry positive or negative amounts.
+- Each adjustment must reference its own `Source_Batch_ID`.
+- The net effect across all batches for a given combination represents the final import position.
+
+This preserves audit history and prevents silent data replacement.
+
+---
+
+## 9. Validation Rules
+
+| Rule | Level | Error Code | Behaviour on Failure |
+|---|---|---|---|
+| All required fields present | Row | ERR-EXT-010 to 015 | Row rejected |
+| Amount is valid decimal | Row | ERR-EXT-014 | Row rejected |
+| Period_ID format is YYYY-MM | Row | ERR-EXT-012 | Row rejected |
+| Earning_Type maps to valid canonical code | Row | ERR-EXT-011 | Row rejected; routes to exception queue |
+| Participant_ID matches active Employment | Row | ERR-EXT-010 | Row rejected; routes to exception queue |
+| Duplicate record within same batch | Row | ERR-EXT-017 | Row rejected |
+| Control total matches batch sum (if provided) | File | ERR-EXT-003 | File rejected |
+| File is structurally valid CSV | File | ERR-EXT-001 | File rejected |
+
+---
+
+## 10. Reconciliation Controls
 
 Each batch should supply reconciliation anchors:
 
@@ -155,7 +228,7 @@ The platform retains the batch fingerprint to prevent duplicate ingestion of the
 
 ---
 
-## 10. Audit Requirements
+## 11. Audit Requirements
 
 The platform records the following for every import batch:
 
@@ -172,7 +245,7 @@ Audit records are retained per the `Data_Retention_and_Archival_Model`.
 
 ---
 
-## 11. Security
+## 12. Security
 
 - Upload and approval functions are restricted to authorised roles per the `Security_and_Access_Control_Model`.
 - Imported files containing employee financial data are encrypted at rest and in transit.
@@ -180,7 +253,7 @@ Audit records are retained per the `Data_Retention_and_Archival_Model`.
 
 ---
 
-## 12. Future Expansion
+## 13. Future Expansion
 
 Future enhancements planned but not in v0.1 scope:
 

@@ -55,15 +55,42 @@ ADRs document significant architectural decisions — the context, the decision 
 
 ## DATA — Entity Specifications
 
-DATA documents define the canonical data entities — attributes, status values, relationships, and governance rules at the field level.
+Entity specification documents define the canonical attributes, status values, relationships, and governance rules for every significant entity in the platform.
+
+### HRIS Entities
 
 | Document | Entity |
 |---|---|
-| [Entity_Person.md](docs/DATA/Entity_Person.md) | Person — the enduring human identity record |
-| [Entity_Employee.md](docs/DATA/Entity_Employee.md) | Employment — the payroll-recognised employment relationship |
-| [Entity_Payroll_Item.md](docs/DATA/Entity_Payroll_Item.md) | Payroll Item — a single computed earning, deduction, tax, or contribution line |
+| [Entity_Person.md](docs/DATA/Entity_Person.md) | Person — enduring human identity record |
+| [Entity_Employee.md](docs/DATA/Entity_Employee.md) | Employment — HR and payroll operational record |
+| [Entity_Assignment.md](docs/DATA/Entity_Assignment.md) | Assignment — Employment linkage to Job, Position, Department, Location |
+| [Entity_Compensation_Record.md](docs/DATA/Entity_Compensation_Record.md) | Compensation Record — pay rate and structure |
+| [Entity_Leave_Request.md](docs/DATA/Entity_Leave_Request.md) | Leave Request — absence request lifecycle |
+| [Entity_Document.md](docs/DATA/Entity_Document.md) | Document — HR documents associated with Person or Employment |
+| [Entity_Onboarding_Plan.md](docs/DATA/Entity_Onboarding_Plan.md) | Onboarding Plan and Tasks — new hire readiness workflow |
+| [Entity_Org_Unit.md](docs/DATA/Entity_Org_Unit.md) | Org Unit — organisational hierarchy nodes |
+| [Entity_Job.md](docs/DATA/Entity_Job.md) | Job — role classification with FLSA and EEO attributes |
+| [Entity_Position.md](docs/DATA/Entity_Position.md) | Position — headcount slot linked to Job and Org Unit |
+
+### Payroll Entities
+
+| Document | Entity |
+|---|---|
+| [Entity_Payroll_Item.md](docs/DATA/Entity_Payroll_Item.md) | Payroll Item — atomic earnings, deduction, or tax result line |
+| [Entity_Payroll_Run.md](docs/DATA/Entity_Payroll_Run.md) | Payroll Run — discrete payroll execution event |
+| [Entity_Payroll_Check.md](docs/DATA/Entity_Payroll_Check.md) | Payroll Check — atomic accounting unit per employee per run |
+| [Entity_Accumulator.md](docs/DATA/Entity_Accumulator.md) | Accumulator — running balance and contribution history |
+
+### Compliance Entities
+
+| Document | Entity |
+|---|---|
+| [Entity_Legal_Order.md](docs/DATA/Entity_Legal_Order.md) | Legal Order — garnishments, levies, and court-ordered withholdings |
+| [Entity_Jurisdiction.md](docs/DATA/Entity_Jurisdiction.md) | Jurisdiction — government authority with taxing or regulatory power |
 
 ---
+
+
 
 ## SPEC — Functional Specifications
 
@@ -73,6 +100,11 @@ SPEC documents define detailed behaviour for specific features or integration pa
 |---|---|
 | [External_Earnings.md](docs/SPEC/External_Earnings.md) | Import format, validation, workflow, and audit for externally calculated earnings |
 | [Residual_Commissions.md](docs/SPEC/Residual_Commissions.md) | Payroll treatment, tax handling, and reconciliation for residual commission earning types |
+| [Self_Service_Model.md](docs/SPEC/Self_Service_Model.md) | ESS/MSS action specifications, role permission matrix, and event model |
+| [Onboarding_Workflow.md](docs/SPEC/Onboarding_Workflow.md) | Onboarding plan creation, task lifecycle, rehire treatment, and integration touch points |
+| [API_Contract_Standards.md](docs/SPEC/API_Contract_Standards.md) | Authentication, versioning, request/response format, error handling, idempotency, rate limiting |
+| [Pay_Statement_Delivery.md](docs/SPEC/Pay_Statement_Delivery.md) | Pay statement content, format, delivery channels, retention, accessibility, and security |
+| [API_Surface_Map.md](docs/SPEC/API_Surface_Map.md) | Domain-by-domain catalogue of all 21 integration points with direction, trigger, inputs, outputs, and SLAs |
 
 ---
 
@@ -106,7 +138,9 @@ Architecture models define *how* the system implements the requirements. They ar
 | [Organizational_Structure_Model.md](docs/architecture/core/Organizational_Structure_Model.md) | Org hierarchy, legal entity, department, and location structures |
 | [Overtime_and_Premium_Pay_Model.md](docs/architecture/core/Overtime_and_Premium_Pay_Model.md) | Overtime eligibility, premium pay rules, and FLSA compliance |
 | [Plan_and_Rule_Model.md](docs/architecture/core/Plan_and_Rule_Model.md) | Plan definitions and rule structures governing payroll behaviour |
+| [Position_Management_Model.md](docs/architecture/core/Position_Management_Model.md) | Headcount budgeting, vacancy tracking, and position control rules |
 | [Reference_Data_Model.md](docs/architecture/core/Reference_Data_Model.md) | Standardised code sets, versioning, and reference data governance |
+| [Reporting_Hierarchy_Model.md](docs/architecture/core/Reporting_Hierarchy_Model.md) | Manager-employee reporting relationships, org chart structure, and hierarchy traversal |
 | [Scheduling_and_Shift_Model.md](docs/architecture/core/Scheduling_and_Shift_Model.md) | Work schedule and shift definitions consumed by time and payroll |
 | [Time_Entry_and_Worked_Time_Model.md](docs/architecture/core/Time_Entry_and_Worked_Time_Model.md) | Time entry structure and worked time records for payroll consumption |
 
@@ -190,6 +224,51 @@ Convention documents define the naming, numbering, and structural standards that
 | Document | Purpose |
 |---|---|
 | [Requirement_ID_Convention.md](docs/conventions/Requirement_ID_Convention.md) | Defines REQ, STATE, EXC, and ENT prefix taxonomies, numbering rules, severity levels, and known state/exception values |
+
+---
+
+## STATE — State Models
+
+State model documents define the named states, valid transitions, guard conditions, and invalid transitions for every significant lifecycle in the platform. Each document is referenced by the PRD or architecture model that owns the domain.
+
+| Document | Lifecycle |
+|---|---|
+| [STATE-WFL_Workflow_Approval.md](docs/STATE/STATE-WFL_Workflow_Approval.md) | All platform approval workflows |
+| [STATE-RUN_Payroll_Run.md](docs/STATE/STATE-RUN_Payroll_Run.md) | Payroll run — creation through closure, failure, reversal |
+| [STATE-EMP_Employment_Lifecycle.md](docs/STATE/STATE-EMP_Employment_Lifecycle.md) | Person, Employment, and Position records |
+| [STATE-LEV_Leave_Request.md](docs/STATE/STATE-LEV_Leave_Request.md) | Leave requests — all leave types |
+| [STATE-DOC_Document.md](docs/STATE/STATE-DOC_Document.md) | HR documents associated with Person or Employment |
+| [STATE-ONB_Onboarding_Task.md](docs/STATE/STATE-ONB_Onboarding_Task.md) | Individual onboarding plan tasks |
+| [STATE-TIM_Timecard.md](docs/STATE/STATE-TIM_Timecard.md) | Timecards and timesheets |
+| [STATE-DED_Benefits_Deductions.md](docs/STATE/STATE-DED_Benefits_Deductions.md) | Benefit plan enrollments and deduction elections |
+| [STATE-GAR_Garnishment.md](docs/STATE/STATE-GAR_Garnishment.md) | Garnishments and legal orders |
+| [STATE-TAX_Tax_Elections.md](docs/STATE/STATE-TAX_Tax_Elections.md) | Tax withholding elections and jurisdiction assignments |
+| [STATE-RET_Retro_Adjustments.md](docs/STATE/STATE-RET_Retro_Adjustments.md) | Retroactive pay adjustments |
+| [STATE-GL_General_Ledger_Posting.md](docs/STATE/STATE-GL_General_Ledger_Posting.md) | GL journal entries from payroll |
+| [STATE-YEP_Year_End_Processing.md](docs/STATE/STATE-YEP_Year_End_Processing.md) | Year-end tax forms (W-2, 1099, etc.) |
+| [STATE-EXP_Export.md](docs/STATE/STATE-EXP_Export.md) | Outbound payroll export units |
+| [STATE-REC_Reconciliation.md](docs/STATE/STATE-REC_Reconciliation.md) | Payroll reconciliation lifecycle |
+| [STATE-PRV_Provider_Response.md](docs/STATE/STATE-PRV_Provider_Response.md) | Inbound provider response processing |
+
+---
+
+## EXC — Exception Catalogues
+
+Exception catalogue documents define production-grade validation and exception rules with addressable EXC codes, severity levels, system behaviour, and operator actions. Each document covers one exception domain.
+
+| Document | Domain |
+|---|---|
+| [EXC-VAL_Validation_Exceptions.md](docs/EXC/EXC-VAL_Validation_Exceptions.md) | Payroll result validation, HR record validation, configuration readiness |
+| [EXC-CAL_Calculation_Exceptions.md](docs/EXC/EXC-CAL_Calculation_Exceptions.md) | Calculation engine failures, rule resolution, accumulator errors |
+| [EXC-CFG_Configuration_Exceptions.md](docs/EXC/EXC-CFG_Configuration_Exceptions.md) | Missing objects, broken references, effective date gaps, code mapping |
+| [EXC-RUN_Payroll_Run_Exceptions.md](docs/EXC/EXC-RUN_Payroll_Run_Exceptions.md) | Run initiation failures, stuck states, aborts, deadline risk |
+| [EXC-INT_Integration_Exceptions.md](docs/EXC/EXC-INT_Integration_Exceptions.md) | Inbound file failures, outbound transmission failures, provider response anomalies |
+| [EXC-TAX_Taxation_Exceptions.md](docs/EXC/EXC-TAX_Taxation_Exceptions.md) | Invalid elections, missing jurisdictions, reciprocity conflicts, engine failures |
+| [EXC-TIM_Time_Attendance_Exceptions.md](docs/EXC/EXC-TIM_Time_Attendance_Exceptions.md) | Missing punches, invalid timecard states, overtime violations, cutoff issues |
+| [EXC-DED_Benefits_Deductions_Exceptions.md](docs/EXC/EXC-DED_Benefits_Deductions_Exceptions.md) | Invalid deductions, missing enrollments, tax treatment conflicts, garnishment priority |
+| [EXC-COR_Correction_Exceptions.md](docs/EXC/EXC-COR_Correction_Exceptions.md) | Immutability violations, correction sequencing, retro scope, year-end corrections |
+| [EXC-AUD_Audit_Retention_Exceptions.md](docs/EXC/EXC-AUD_Audit_Retention_Exceptions.md) | Audit trail gaps, retention expiry, legal hold violations, archival failures |
+| [EXC-SEC_Security_Access_Exceptions.md](docs/EXC/EXC-SEC_Security_Access_Exceptions.md) | Unauthorised actions, cross-tenant violations, separation of duties, sensitive field access |
 
 ---
 

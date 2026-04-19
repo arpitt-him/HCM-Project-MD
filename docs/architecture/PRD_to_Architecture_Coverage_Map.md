@@ -102,6 +102,22 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 | Operational Visibility | PRD-0000 | Dashboards and monitoring | Run_Visibility_and_Dashboard_Model | Monitoring_and_Alerting_Model; Operational_Reporting_and_Analytics_Model | Strong | Low | Medium | High | In Design | No |
 | System Lifecycle Management | PRD-0000 | Support bootstrap, upgrade, maintenance | System_Maintenance_and_Upgrade_Model | System_Initialization_and_Bootstrap_Model; Configuration_and_Metadata_Management_Model | Strong | Medium | High | Medium | In Design | No |
 
+### New Capabilities — HRIS Gap Resolution
+
+| PRD Capability | Source Document | Description | Primary Model Owner | Supporting Architecture Models | Coverage Status | Risk Rating | Implementation Priority | Architecture Confidence | Implementation Status | Gap Identified |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Reporting Hierarchy | HRIS_Module_PRD | Manager-employee reporting relationships and org chart | Reporting_Hierarchy_Model | Organizational_Structure_Model; Employee_Event_and_Status_Change_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Position Management | HRIS_Module_PRD | Headcount budgeting, vacancy tracking, advisory position control | Position_Management_Model | Organizational_Structure_Model; Employee_Assignment_Model; Operational_Reporting_and_Analytics_Model | Strong | Low | Medium | High | In Design | No |
+| Employee Self-Service | HRIS_Module_PRD | ESS actions — view record, contact update, leave, pay statements, onboarding | SPEC/Self_Service_Model | Security_and_Access_Control_Model; Release_and_Approval_Model; Reporting_Hierarchy_Model | Strong | Low | High | High | In Design | No |
+| Manager Self-Service | HRIS_Module_PRD | MSS actions — view team, approve leave, initiate events, org chart | SPEC/Self_Service_Model | Reporting_Hierarchy_Model; Security_and_Access_Control_Model; Release_and_Approval_Model | Strong | Low | High | High | In Design | No |
+| Onboarding Workflow | HRIS_Module_PRD | Plan creation, task lifecycle, payroll gate, rehire treatment | SPEC/Onboarding_Workflow | DATA/Entity_Onboarding_Plan; Employee_Event_and_Status_Change_Model; Release_and_Approval_Model | Strong | Low | High | High | In Design | No |
+
+| Benefits Deduction Processing | PRD-1000_Benefits_Boundary | Payroll deduction calculation for benefit elections; pre/post-tax classification | Benefit_and_Deduction_Configuration_Model | Eligibility_and_Enrollment_Lifecycle_Model; Earnings_and_Deductions_Computation_Model; Accumulator_and_Balance_Model | Strong | Low | High | High | In Design | No |
+| API Contract Standards | SPEC/API_Contract_Standards | Authentication, versioning, error handling, idempotency, rate limiting | Integration_and_Data_Exchange_Model | Security_and_Access_Control_Model; Monitoring_and_Alerting_Model | Strong | Low | High | High | In Design | No |
+| Pay Statement Delivery | SPEC/Pay_Statement_Delivery | Electronic delivery, mobile access, paper suppression, retention, accessibility | Pay_Statement_Model | Net_Pay_and_Disbursement_Model; Pay_Statement_Template_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+
+| API Surface Map | SPEC/API_Surface_Map | 21 integration points across HRIS, Payroll, Benefits, Compliance | Integration_and_Data_Exchange_Model | Payroll_Interface_and_Export_Model; General_Ledger_and_Accounting_Export_Model; Net_Pay_and_Disbursement_Model | Strong | Low | High | High | In Design | No |
+
 ---
 
 ## Legend

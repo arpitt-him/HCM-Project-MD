@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/SPEC/Residual_Commissions.md` |
@@ -11,7 +11,7 @@
 
 ## Purpose
 
-Specifies the payroll treatment of residual commissions — a specific external earning type where amounts are calculated by a commission management system based on recurring revenue and imported into the platform for payroll processing. This document extends `SPEC/External_Earnings.md` with residual-specific rules.
+Specifies the payroll treatment of residual commissions — a specific external earning type where amounts are calculated by a commission management system based on recurring revenue and imported into the platform for payroll processing. This document extends `SPEC/External_Earnings.md` with residual-specific inputs, outputs, error handling, and side effects.
 
 ---
 
@@ -55,11 +55,25 @@ The platform does **not**:
 
 ---
 
-## 4. Import Granularity
+## 4. Inputs
 
-One record per `Participant_ID + RESIDUAL + Period_ID`.
+### 4.1 Import Inputs
 
-If an employee has both a base residual amount and a chargeback recovery in the same period, these must be submitted as separate records:
+All standard external earnings inputs from `SPEC/External_Earnings.md` §4 apply. The following residual-specific constraints additionally apply:
+
+| Field | Type | Required | Residual-Specific Rule |
+|---|---|---|---|
+| Participant_ID | String | Yes | Must match an active Employment_ID with an active commission-eligible assignment |
+| Earning_Type | String | Yes | Must be RESIDUAL, COMMISSION, or RECOVERY |
+| Period_ID | String | Yes | Must match an open payroll period; must not exceed the payroll input cutoff |
+| Amount | Decimal | Yes | RESIDUAL and COMMISSION: typically positive. RECOVERY: must be negative |
+| Source_Batch_ID | String | Yes | RESIDUAL and RECOVERY for the same period should use distinct batch IDs |
+| Description | String | Recommended | Period-specific description (e.g., "January residual commissions"). Appears on pay statement |
+| Source_Total_Basis_Amount | Decimal | Recommended | Revenue basis used to calculate the residual; supports source system reconciliation |
+
+### 4.2 Import Granularity
+
+One record per `Participant_ID + Earning_Type + Period_ID`. If an employee has both a residual amount and a chargeback recovery in the same period, these must be submitted as separate records:
 
 ```csv
 Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Description
@@ -67,20 +81,36 @@ Participant_ID,Earning_Type,Period_ID,Amount,Source_System,Source_Batch_ID,Descr
 10025,RECOVERY,2026-01,-420.00,COMM_SYS,BATCH-2026-01-ADJ,Chargeback adjustments
 ```
 
-The platform calculates the net pay effect but retains both lines independently in the payroll result and on the pay statement.
+### 4.3 Timing Constraint
+
+Residual commission imports must be submitted and approved before the payroll input cutoff for the relevant period. Imports received after cutoff will be staged but will not be included in the current period's payroll run. They will be available for the next period unless the operator initiates an off-cycle correction run.
 
 ---
 
-## 5. Negative Residual Handling
+## 5. Processing Workflow
 
-When a RECOVERY amount exceeds the RESIDUAL amount for the same period, the employee's net residual earnings for that period may be zero or negative.
+Follows the standard workflow from `SPEC/External_Earnings.md` §5:
+
+```
+Upload → Validate → Stage → Approve → Commit
+```
+
+No residual-specific workflow steps are added. The negative residual handling check (§6 below) occurs during the Validate stage.
+
+---
+
+## 6. Negative Residual Handling
+
+When a RECOVERY amount exceeds the RESIDUAL amount for the same employee and period, the net residual earnings may be zero or negative.
+
+**Detection:** During validation, the system computes the net position across all RESIDUAL and RECOVERY records for each Participant_ID + Period_ID combination.
 
 **Behaviour:**
 
 - A net negative residual earning does not automatically create a deduction from other earnings.
-- The platform flags the condition as a validation exception (Warning level) for operator review.
+- The platform flags the condition as a Warning-level validation exception for operator review.
 - The operator decides whether to:
-  - Accept zero net residual for the period (the negative balance carries forward as a recovery balance in the source system)
+  - Accept zero net residual for the period (negative balance carries forward in the source system)
   - Manually override with an adjustment earning
   - Return the batch to the source system for correction
 
@@ -88,33 +118,49 @@ The platform does not autonomously create deductions to recover negative residua
 
 ---
 
-## 6. Pay Statement Display
+## 7. Success Outputs
 
-Residual commissions appear on the pay statement as distinct earning lines:
+### 7.1 Records Created
+
+| Output | Entity | Condition | Description |
+|---|---|---|---|
+| Staged RESIDUAL Record | External_Earning_Staging | Per accepted RESIDUAL row | Held pending approval |
+| Staged RECOVERY Record | External_Earning_Staging | Per accepted RECOVERY row | Held pending approval |
+| Committed RESIDUAL Payroll Item | Payroll_Item | At commit, per RESIDUAL row | Earning line available to payroll run |
+| Committed RECOVERY Payroll Item | Payroll_Item | At commit, per RECOVERY row | Negative earning line available to payroll run |
+| Batch Receipt | Import_Batch_Receipt | At each stage transition | Record counts and totals |
+| Audit Record | Import_Audit_Log | At upload, validation, approval, commit | Full processing trail |
+
+### 7.2 Pay Statement Lines
+
+Both RESIDUAL and RECOVERY appear as distinct earning lines on the employee pay statement:
 
 | Line | Code | Description | Amount |
 |---|---|---|---|
 | Earning | RESIDUAL | Residual Commission — Jan 2026 | 3,104.22 |
 | Earning | RECOVERY | Commission Recovery — Jan 2026 | (420.00) |
 
-Description values are sourced from the import file. They must fit within the pay statement character limit (defined per template). Descriptions that exceed the limit are truncated; operators are warned at import time.
+Description values are sourced from the import file. Descriptions that exceed the pay statement character limit are truncated; operators are warned at import time.
 
----
+### 7.3 Events Published
 
-## 7. Accumulator Impact
-
-| Earning Code | Accumulator Target | Notes |
+| Event | Trigger | Consumers |
 |---|---|---|
-| RESIDUAL | Gross Wages (PTD, QTD, YTD, LTD) | Positive contribution |
-| RECOVERY | Gross Wages (PTD, QTD, YTD, LTD) | Negative contribution; reduces gross |
+| ExternalEarningsStaged | Records pass validation | Payroll run eligibility check |
+| ExternalEarningsApproved | Approver confirms batch | Payroll calculation engine |
+| ExternalEarningsCommitted | Records committed | Payroll run, accumulator engine |
+| NegativeResidualDetected | Net position negative for any Participant_ID + Period_ID | Exception work queue, operator notification |
+
+### 7.4 Accumulator Impact (at payroll calculation)
+
+| Earning Code | Accumulator | Direction | Scope |
+|---|---|---|---|
+| RESIDUAL | Gross Wages | Positive | PTD, QTD, YTD, LTD |
+| RECOVERY | Gross Wages | Negative (reduces gross) | PTD, QTD, YTD, LTD |
 
 Both codes affect gross wages accumulators. They do not feed separate residual-specific accumulator families unless configured otherwise.
 
----
-
-## 8. Tax Treatment
-
-Residual commissions are treated as **supplemental wages** for federal income tax purposes under IRS rules. The platform must apply the applicable supplemental withholding rate unless the employer has configured an alternative treatment.
+### 7.5 Tax Treatment Triggered
 
 | Tax | Treatment |
 |---|---|
@@ -122,29 +168,53 @@ Residual commissions are treated as **supplemental wages** for federal income ta
 | FICA (Social Security / Medicare) | Subject to standard FICA rates |
 | State Income Tax | Jurisdiction-specific; resolved per `Tax_Classification_and_Obligation_Model` |
 
-Tax treatment is governed by the `Tax_Classification_and_Obligation_Model` and the active rule version at the time of the payroll run.
+Tax treatment is governed by the `Tax_Classification_and_Obligation_Model` and the active rule version at the time of the payroll run. Residual commissions are treated as supplemental wages for federal income tax purposes under IRS rules.
+
+### 7.6 Reconciliation Outputs
+
+The platform provides the following outputs to support source system reconciliation:
+
+| Output | Description |
+|---|---|
+| Batch-level import receipt | Accepted record counts and total amounts per batch |
+| Per-employee per-period payroll result extract | Confirms amounts as processed in payroll |
+| YTD accumulator totals for RESIDUAL and RECOVERY codes | Supports cumulative reconciliation against source system |
 
 ---
 
-## 9. Timing and Cutoff
+## 8. Error Outputs
 
-Residual commission imports must be submitted and approved before the payroll input cutoff for the relevant period. Imports received after cutoff will be staged but will not be included in the current period's payroll run. They will be available for the next period unless the operator initiates an off-cycle correction run.
+### 8.1 Standard Import Errors
+
+All standard error codes from `SPEC/External_Earnings.md` §7 apply. The following residual-specific errors additionally apply:
+
+| Error Code | Condition | Severity | Behaviour |
+|---|---|---|---|
+| ERR-RES-001 | RECOVERY amount is positive (should be negative) | Row Reject | Row rejected; operator notified |
+| ERR-RES-002 | RESIDUAL amount is negative without a corresponding RECOVERY record | Warning | Row accepted; operator warned; exception queue entry created |
+| ERR-RES-003 | Net RESIDUAL + RECOVERY position is negative for a Participant_ID + Period_ID | Warning | Batch accepted; NegativeResidualDetected event published; exception queue entry created |
+| ERR-RES-004 | Description exceeds pay statement character limit | Warning | Row accepted; description truncated to limit; operator warned |
+| ERR-RES-005 | Import submitted after payroll input cutoff for the Period_ID | Warning | Batch staged; will not be included in current period run; operator notified |
+
+### 8.2 Error Record Structure
+
+Each residual-specific error produces an Import_Error_Record (structure per `SPEC/External_Earnings.md` §7.3) with the Error_Code prefixed ERR-RES-NNN and the following additional fields:
+
+| Field | Description |
+|---|---|
+| Net_Position | Computed net amount for Participant_ID + Period_ID (for ERR-RES-003) |
+| Cutoff_Date | The payroll input cutoff date for the period (for ERR-RES-005) |
+| Truncated_Description | The truncated description value (for ERR-RES-004) |
 
 ---
 
-## 10. Reconciliation
+## 9. Reconciliation
 
-The commission source system is responsible for reconciling total residual payout against revenue data. The HCM platform supports reconciliation from its side by providing:
-
-- Batch-level import receipts with accepted record counts and total amounts
-- Per-employee per-period payroll result extracts
-- YTD accumulator totals for residual earning codes
-
-These outputs allow the commission system to verify that the amounts it submitted were accurately received and processed.
+The commission source system is responsible for reconciling total residual payout against revenue data. The HCM platform supports reconciliation from its side via the outputs defined in §7.6 above.
 
 ---
 
-## 11. Open Items
+## 10. Open Items
 
 - **Recovery balance tracking:** Whether the platform should maintain a recovery balance ledger (to track cumulative unrecovered chargebacks) is an open design decision. Currently the platform does not own this; it remains in the commission system.
-- **Multi-period adjustments:** The handling of adjustments that span multiple prior periods (retroactive chargeback from 6 months ago) requires further specification in collaboration with the correction and immutability model.
+- **Multi-period adjustments:** The handling of adjustments that span multiple prior periods (retroactive chargeback from 6 months ago) requires further specification in collaboration with the Correction_and_Immutability_Model.
