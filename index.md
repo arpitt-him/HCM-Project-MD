@@ -71,6 +71,7 @@ Entity specification documents define the canonical attributes, status values, r
 | [Entity_Org_Unit.md](docs/DATA/Entity_Org_Unit.md) | Org Unit — organisational hierarchy nodes |
 | [Entity_Job.md](docs/DATA/Entity_Job.md) | Job — role classification with FLSA and EEO attributes |
 | [Entity_Position.md](docs/DATA/Entity_Position.md) | Position — headcount slot linked to Job and Org Unit |
+| [Entity_Run_Scope.md](docs/DATA/Entity_Run_Scope.md) | Run Scope — structure used to delimit payroll processing populations |
 
 ### Payroll Entities
 
@@ -197,6 +198,10 @@ Architecture models define *how* the system implements the requirements. They ar
 | [Error_Handling_and_Isolation_Model.md](docs/architecture/processing/Error_Handling_and_Isolation_Model.md) | Error isolation, failure containment, and recovery patterns |
 | [Payroll_Check_Model.md](docs/architecture/processing/Payroll_Check_Model.md) | Payroll check structure and its relationship to results and disbursement |
 | [Payroll_Run_Model.md](docs/architecture/processing/Payroll_Run_Model.md) | Payroll run entity, execution model, and approval governance |
+| [Processing_Lineage_Validation_Model.md] (docs/architecture/processing/Processing_Lineage_Validation_Model.md) | Defines controls used to verify integrity of the payroll run lineage chains |
+| [Run_Lineage_Model.md] (docs/architecture/processing/Run_Lineage_Model.md) | Defines how payroll runs are related across standard execution, scoped catch-up processing, retroactive correction and recovery activity |
+| [Run_Scope_Model.md] (docs/architecture/processing/Run_Scope_Model.md) | Defines scoped execution boundaries enabling catch-up, retro, and recovery payroll runs without requiring full population reprocessing |
+
 
 ### Rules
 
@@ -233,6 +238,8 @@ State model documents define the named states, valid transitions, guard conditio
 
 | Document | Lifecycle |
 |---|---|
+| [STATE-RSC_Run_Lineage.md](docs/STATE/STATE-RSC_Run_Lineage.md) | Payroll run — draft, linked, verified, active, closed and invalid |
+| [STATE-RSC_Run_Scope.md](docs/STATE/STATE-RSC_Run_Scope.md) | Payroll run — draft, validated, ready, running, completed, failed and cancelled |
 | [STATE-WFL_Workflow_Approval.md](docs/STATE/STATE-WFL_Workflow_Approval.md) | All platform approval workflows |
 | [STATE-RUN_Payroll_Run.md](docs/STATE/STATE-RUN_Payroll_Run.md) | Payroll run — creation through closure, failure, reversal |
 | [STATE-EMP_Employment_Lifecycle.md](docs/STATE/STATE-EMP_Employment_Lifecycle.md) | Person, Employment, and Position records |

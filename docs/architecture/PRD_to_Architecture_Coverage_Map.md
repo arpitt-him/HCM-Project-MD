@@ -101,6 +101,7 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 |---|---|---|---|---|---|---|---|---|---|---|
 | Operational Visibility | PRD-0000 | Dashboards and monitoring | Run_Visibility_and_Dashboard_Model | Monitoring_and_Alerting_Model; Operational_Reporting_and_Analytics_Model | Strong | Low | Medium | High | In Design | No |
 | System Lifecycle Management | PRD-0000 | Support bootstrap, upgrade, maintenance | System_Maintenance_and_Upgrade_Model | System_Initialization_and_Bootstrap_Model; Configuration_and_Metadata_Management_Model | Strong | Medium | High | Medium | In Design | No |
+| Scoped Payroll Recovery Processing | PRD-0100 | Targeted payroll recovery without full-run reprocessing | Run_Scope_Model | Payroll_Run_Model; Error_Handling_and_Isolation_Model; Payroll_Reconciliation_Model; Correction_and_Immutability_Model | Strong | Low | High | High | In Design | No |
 
 ### New Capabilities — HRIS Gap Resolution
 

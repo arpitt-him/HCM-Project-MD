@@ -61,6 +61,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Data Entity | Core | Entity_Org_Unit | docs/DATA | Complete | Draft | Core Platform | |
 | Data Entity | Core | Entity_Job | docs/DATA | Complete | Draft | Core Platform | |
 | Data Entity | Core | Entity_Position | docs/DATA | Complete | Draft | Core Platform | |
+| Data Entity | Core | Entity_Run_Scope | docs/DATA | Complete | Draft | Core Platform | |
 | Data Entity | Payroll | Entity_Payroll_Item | docs/DATA | Complete | Draft | Payroll Domain | |
 | Data Entity | Payroll | Entity_Payroll_Run | docs/DATA | Complete | Draft | Payroll Domain | |
 | Data Entity | Payroll | Entity_Payroll_Check | docs/DATA | Complete | Draft | Payroll Domain | |
@@ -90,6 +91,8 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
+| State Model | Payroll | STATE-RLN_Run_Lineage | docs/STATE | Complete | Locked | Payroll Domain | 19 states; full run lifecycle |
+| State Model | Payroll | STATE-RSC_Run_Scope | docs/STATE | Complete | Locked | Payroll Domain | 19 states; full run lifecycle |
 | State Model | Platform | STATE-WFL_Workflow_Approval | docs/STATE | Complete | Locked | Core Platform | 7 states; applies to all approval workflows |
 | State Model | Payroll | STATE-RUN_Payroll_Run | docs/STATE | Complete | Locked | Payroll Domain | 19 states; full run lifecycle |
 | State Model | HRIS | STATE-EMP_Employment_Lifecycle | docs/STATE | Complete | Locked | Core Platform / HRIS | 14 states across Person, Employment, Position |
@@ -217,6 +220,9 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Model | Processing | Error_Handling_and_Isolation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Payroll_Check_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Payroll_Run_Model | docs/architecture/processing | Complete | Approved | Payroll Domain | Yes | High |
+| Model | Processing | Processing_Lineage_Validation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Run_Scope_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Run_Linkage_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 
 ### Architecture Models — Rules
 

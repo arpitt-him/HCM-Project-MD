@@ -8,6 +8,73 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April 2026
 
+### 2026-04-19 — Processing Lineage architecture model added
+
+**New document: `docs/architecture/processing/Processing_Lineage_Validation_Model.md`**
+Model supports:
+- Lineage integrity verification
+- Replay sequencing validation
+- Parent-child relationship checks
+- Root run consistency checks
+- Scope-to-lineage consistency validation
+- Recovery and replacement chain safety
+
+### 2026-04-19 — Processing architecture models updated
+
+**Processing document update: `docs/architecture/processing/Payroll_Run_Model.md`**
+- Normalizes processing taxonomy by distinguishing:
+	operational run type
+	scoped population type
+	lineage relationship type
+
+**Processing document update: `docs/architecture/processing/Error_Handling_and_Isolation_Model.md`**
+- Adds the missing scope-level error class 
+- Aligns containment rules across:
+	participant
+	scope
+	batch
+	run/system
+- Also ties error handling back to:
+	immutable parent runs
+	additive child-run recovery
+	lineage-aware replay
+
+**Processing document update: `docs/architecture/processing/Calculation_Run_Lifecycle.md`**
+- Splits pre-finalization rerun behavior out from post-finalization additive correction
+- Adds the Run_Scope_ID
+- Adds the scope validation before Ready
+- Defines scope-level failure isolation
+- Ties lifecycle behavior to lineage-aware replay
+
+### 2026-04-19 — Run Scope processing architecture model added
+
+**State model documents — 2 new STATE files added to `docs/STATE/`:**
+- Payroll: STATE-RSC, STATE-RLN
+
+### 2026-04-19 — Run Lineage processing architecture model added
+
+**New document: `docs/architecture/processing/Run_Lineage_Model.md`**
+- Establishes explicit parent-child run relationships between payroll runs
+
+### 2026-04-19 — Run Scope processing architecture model added
+
+**New Entity specification — 1 new DATA file added:**
+- Payroll: Entity_Run_Scope
+
+**New document: `docs/architecture/processing/Run_Scope_Model.md`**
+- Introduces scoped payroll execution capability
+- Enables post-finalization catch-up batch processing
+- Supports explicit employee selection and query-based population
+- Establishes parent-child payroll run lineage structure
+- Enables adjustment-only correction processing
+- Improves deterministic replay compatibility
+- Reduces operational risk during recovery scenarios
+
+**Control artifact updates:**
+- index.md updated — Processing section expanded
+- Architecture_Model_Inventory.md updated — Run Scope model registered
+- PRD_to_Architecture_Coverage_Map.md updated — Scoped recovery capability added
+
 ### 2026-04-19 — API surface map added
 
 **New document: `docs/SPEC/API_Surface_Map.md`**
