@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/processing/Run_Scope_Model.md` |
@@ -55,6 +55,34 @@ Run Scope operates within the following architecture models:
 Run Scope SHALL NOT modify finalized payroll results.
 
 Run Scope SHALL produce additive adjustment results only.
+
+---
+
+## Relationship to Payroll Context
+
+Run Scope operates within the population boundaries defined by Payroll Context.
+
+Relationship:
+
+Payroll_Context
+        ↓
+Eligible Population
+        ↓
+Run_Scope
+        ↓
+Payroll_Run
+
+A Run Scope SHALL select subjects only from within the population governed by the associated Payroll Context.
+
+Run Scope SHALL NOT introduce subjects outside the context-defined population.
+
+This constraint ensures:
+
+- population integrity
+- jurisdictional correctness
+- accumulator alignment
+- reporting consistency
+- audit traceability
 
 ---
 
@@ -182,6 +210,30 @@ Exceptions affecting one employee SHALL NOT terminate unrelated employees.
 
 ---
 
+## Period Alignment Rules
+
+All Run Scope activity SHALL remain anchored to a valid Payroll Calendar Period.
+
+Scoped runs SHALL inherit:
+
+- Payroll_Context_ID
+- Period_ID
+- Pay_Date
+
+from the referenced parent Payroll Run.
+
+Run Scope SHALL NOT create alternate period assignments unless explicitly permitted through governed correction policy.
+
+This ensures:
+
+- correct period attribution
+- replay consistency
+- accumulator alignment
+- reporting correctness
+- funding and remittance integrity
+
+---
+
 ## Lifecycle States
 
 Run Scope SHALL progress through the following states:
@@ -201,7 +253,12 @@ Run Scope SHALL progress through the following states:
 This model depends on:
 
 - Payroll_Run_Model
-- Payroll_Check_Model
+- Payroll_Context_Model
+- Payroll_Calendar_Model
+- Employee_Payroll_Result_Model
+- Payroll_Run_Result_Set_Model
+- Payroll_Adjustment_and_Correction_Model
+- Accumulator_Impact_Model
 - Calculation_Run_Lifecycle_Model
 - Exception_and_Work_Queue_Model
 - Payroll_Reconciliation_Model

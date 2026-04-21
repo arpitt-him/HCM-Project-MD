@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Approved |
 | **Owner** | Architecture Team |
 | **Location** | `docs/architecture/calculation-engine/Net_Pay_and_Disbursement_Model.md` |
@@ -34,6 +34,9 @@ Net_Pay\
 \
 Net_Pay_ID\
 Payroll_Check_ID\
+Payroll_Run_Result_Set_ID\
+Employee_Payroll_Result_ID\ 
+Run_Scope_ID\
 Employee_ID\
 Employment_ID\
 \
@@ -41,6 +44,7 @@ Gross_Pay\
 Total_Deductions\
 Total_Taxes\
 Net_Pay_Amount\
+Net_Pay_Disbursement_ID\
 \
 Net_Pay_Status
 
@@ -62,6 +66,15 @@ DIRECT_DEPOSIT\
 CHECK\
 PAYCARD\
 WIRE
+
+## 3.1 Payment Instruction Profile Association
+
+Payment routing attributes shall be referenced through Payment Instruction Profiles.
+
+```text
+Net Pay
+   └── Payment Instruction Profile (1..n)
+```
 
 ## 4. Split Payment Handling
 
@@ -121,7 +134,20 @@ Final pay\
 Manual payroll events\
 Emergency payments\
 \
-Off-cycle runs must remain fully traceable.
+Off-cycle runs must remain fully traceable\
+\
+Off-cycle payments shall be associated with Payroll Run types including:\
+\
+- Off-Cycle Run\
+- Adjustment Run\
+- Correction Run\
+- Supplemental Run\
+\
+Each off-cycle payment must remain traceable to:\
+\
+- Payroll_Run_ID\
+- Payroll_Run_Result_Set_ID\
+- Employee_Payroll_Result_ID
 
 ## 9. Payment Status Lifecycle
 
@@ -169,4 +195,11 @@ Earnings_and_Deductions_Computation_Model\
 Payroll_Interface_and_Export_Model\
 General_Ledger_and_Accounting_Export_Model\
 Security_and_Access_Control_Model\
-Correction_and_Immutability_Model
+Correction_and_Immutability_Model\
+Payroll_Run_Result_Set_Model\
+Employee_Payroll_Result_Model\
+Run_Scope_Model\
+Payment_Instruction_Profile_Data_Model\
+Net_Pay_Disbursement_Data_Model\
+Funding_Profile_Data_Model\
+Remittance_Profile_Data_Model

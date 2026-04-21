@@ -1,25 +1,29 @@
-Purpose. Define the deterministic runtime mechanism that selects exactly
-one applicable rule version for a payroll event, explains why it was
-selected, and supports auditability, replayability, and simulation.
+# Rule_Resolution_Engine
 
-  -----------------------------------------------------------------------
-  **Design Principle**                **Resolution must be deterministic:
-                                      same context + same rule set + same
-                                      effective date = same selected
-                                      rule.**
-  ----------------------------------- -----------------------------------
-  Primary outcome                     Exactly one rule version selected,
-                                      unless the rule is optional by
-                                      design.
+| Field | Detail |
+|---|---|
+| **Document Type** | Architecture Model |
+| **Version** | v0.2 |
+| **Status** | Reviewed |
+| **Owner** | Rules Domain |
+| **Location** | `docs/rules/Rule_Resolution_Engine.md` |
+| **Domain** | Rules |
+| **Related Documents** | Rule_Versioning_Model, Policy_and_Rule_Execution_Model, Code_Classification_and_Mapping_Model, Tax_Classification_and_Obligation_Model, Employee_Payroll_Result_Model, Accumulator_Impact_Model, Payroll_Adjustment_and_Correction_Model |
 
-  Failure conditions                  Coverage gap, ambiguity, invalid
-                                      precedence chain, or malformed
-                                      applicability context.
+## Purpose
 
-  Precedence model                    Hybrid: specificity evaluated
-                                      first, then explicit priority used
-                                      to break ties.
-  -----------------------------------------------------------------------
+Define the deterministic runtime mechanism that selects exactly one applicable rule version for a payroll event, explains why it was selected, and supports auditability, replayability, and simulation.
+
+The Rule Resolution Engine governs how effective-dated rules become operational decisions that drive:
+
+- payroll calculation outcomes
+- tax treatment
+- accumulator impacts
+- remittance obligations
+- export behavior
+- correction and replay results
+
+Without rule resolution, rule models remain stored definitions only. With rule resolution, governed rules become deterministic payroll outcomes.
 
 # 1. Resolution Context Model
 
@@ -57,6 +61,17 @@ A resolution context should include, at minimum:
 The resolution engine should treat the context snapshot as immutable for
 the duration of a single resolution decision.
 
+Where applicable, the resolution context should also preserve lineage to the governed payroll execution artifacts within which resolution occurs, including:
+
+- Payroll_Run_ID
+- Payroll_Run_Result_Set_ID
+- Employee_Payroll_Result_ID
+- Run_Scope_ID
+- Source_Period_ID
+- Execution_Period_ID
+
+These references ensure that rule resolution can be reconstructed not only from business attributes, but also from the exact execution context in which the decision was made.
+
 # 2. Candidate Rule Selection Pipeline
 
 Resolution should occur through a narrowing pipeline rather than an
@@ -82,6 +97,34 @@ Recommended pipeline:
 This pipeline should be implemented identically in both production
 payroll processing and Rule Impact Simulation so that the same logic
 governs both real and simulated outcomes.
+
+# 2.1 Relationship to Payroll Result Generation
+
+Rule resolution decisions are consumed by payroll execution to generate governed result lines and downstream effects.
+
+Relationship:
+
+Resolution Context
+        ↓
+Rule Resolution
+        ↓
+Selected Rule Version
+        ↓
+Employee Payroll Result Line
+        ↓
+Accumulator Impact / Tax / Liability / Export Consequence
+
+Selected rule versions may influence:
+
+- earnings calculation
+- deduction treatment
+- tax classification and obligation handling
+- employer contribution treatment
+- accumulator routing
+- remittance relevance
+- export and accounting consequences
+
+This ensures that rule resolution is understood as an execution input, not merely a rules-domain utility.
 
 # 3. Applicability Matching Logic
 
@@ -176,6 +219,17 @@ Primary failure modes:
 Coverage gaps and ambiguities should be treated as critical unless the
 rule family is explicitly modeled as optional.
 
+Coverage gaps, ambiguities, and invalid rule data shall generate governed exception records consistent with Payroll_Exception_Model where payroll execution depends on successful resolution.
+
+Exception handling shall preserve:
+
+- rule family
+- context snapshot
+- candidate set
+- failure type
+- consuming process
+- downstream impact scope
+
 # 7. Performance and Caching Strategy
 
 Rule resolution will be called repeatedly during payroll calculation,
@@ -197,6 +251,12 @@ Recommended strategy:
 
 Caching must improve speed without compromising determinism or
 traceability.
+
+Caching shall not change the logical basis of rule selection.
+
+Replay operations must resolve using the same effective context, rule-set reference, and rule-version eligibility rules that were applicable at the original execution moment.
+
+Cached results may improve performance, but they must never replace traceable historical resolution semantics.
 
 # 8. Alternate Rule Set Support for RIS
 
@@ -237,6 +297,15 @@ Determinism requires:
 The platform should be able to answer: given this exact context at that
 historical moment, which rule version applied and why?
 
+Determinism must also hold across:
+
+- retroactive recalculation
+- correction runs
+- additive adjustment runs
+- simulation against alternate rule sets
+
+The platform should be able to answer not only which rule applied originally, but also which rule applied during a later correction or simulation, and why that outcome differed or remained the same.
+
 # 10. Illustrative Precedence Example
 
 The following example shows how hybrid precedence works when several
@@ -254,6 +323,21 @@ consideration.
   PA_SIT_BONUS_PGH   PA + bonus +        3                 10             Wins
                      Pittsburgh                                           
   --------------------------------------------------------------------------------------
+
+# 10.1 Relationship to Other Models
+
+This model integrates with:
+
+- Rule_Versioning_Model
+- Policy_and_Rule_Execution_Model
+- Code_Classification_and_Mapping_Model
+- Tax_Classification_and_Obligation_Model
+- Employee_Payroll_Result_Model
+- Accumulator_Impact_Model
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Exception_Model
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
 
 # 11. Concluding Principle
 

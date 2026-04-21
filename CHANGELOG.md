@@ -4,9 +4,540 @@ All significant documentation changes to this repository are recorded here. Entr
 
 Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
----
+--- 
 
 ## April 2026
+
+### 2026-04-21 — Accrual & entitlement model document updated
+
+**Document update:  /docs/architecture/core/Accrual_and_Entitlement_Model.md
+- Replaced Purpose section with updated text including mutation and replay language
+- Updated section 2 to expand Core Entitlement_Plan Entity with policy lineage
+- Updated section 3 to strengthen Accrual Rule Definition with execution semantics
+- Updated section 4 to expand Entitlement Balance Entity with lineage fields
+- Replaced section 5 to strengthen Accrual Triggers with governed source-event language
+- Replaced section 6 to strengthenConsumption and Deduction with leave/payroll linkage
+- Updated section 7 to expand Carryover and Expiration with calendar and jurisdiction lineage
+- Updated section 8 to strengthen Service-Tier and Eligibility Interaction with rule resolution linkage
+- Replaced section 9 to expand Manual Adjustments and Corrections with correction model linkage
+- Replaced section 10 to expand Reporting and Audit Support with replay expectations
+- Replaced section 11 with expanded Relationship to Other Models
+
+### 2026-04-21 — Leave & absence management model document updated
+
+**Document update:  /docs/architecture/core/Leave_and_Absence_Management_Model.md
+- Replaced Purpose section with updated text making leave execution-aware
+- Updated section 2 to expand Core Leave_Request Entity with lineage attributes
+- Updated section 3 to expand Leave_Type Definition with payroll behaviour references
+- Updated section 4 to strengthen Leave Status Lifecycle with consumption gating
+- Replaced section 6 - Payroll Impact Handling becomes structured output model
+- Updated section 7 to strengthen Accrual Integration with mutation semantics
+- Updated section 8 to expand Compliance Leave Handling with jurisdiction resolution 
+- Updated section 9 to expand Return to Work Handling with payroll reactivation semantics
+- Replaced section 10 to strengthen Historical Tracking — critical replay dependency
+- Replaced section 11 with expanded Relationship to Other Models
+
+### 2026-04-21 — Holiday & special calendar model document updated
+
+**Document update:  /docs/architecture/payroll/Holiday_and_Special_Calendar_Model.md
+- Replaced Purpose section with updated text to make calendar authoritative
+- Updated section 2 to expand Core Holiday Entity with version lineage
+- Updated section 3 to strengthen Observed Date Rules with deterministic logic
+- Replaced section 4 to expand Holiday Eligibility into rule-driven resolution
+- Replaced section 5 to strengthen Payroll Impact Handling with result lineage
+- Replaced section 6 to strengthen Leave Interaction — critical edge case domain
+- Updated section 7 to expand Jurisdiction Integration into hierarchical model
+- Updated section 8 to strengthen Special Calendar Events
+- Replaced section 9 with expanded Relationship to Other Models
+
+### 2026-04-21 — Scheduling & shift model document updated
+
+**Document update:  /docs/architecture/core/Scheduling_and_Shift_Model.md
+- Replaced Purpose section with updated text including execution consequences
+- Updated section 2 to expand Core Schedule Entity with lineage/versioning attributes
+- Updated section 3 to expand Shift Definition with compliance and premium semantics
+- Updated section 5 to strengthen Employee Schedule Assignment with traceability
+- Replaced section 6 to strengthen Planned vs Actual Time with payroll lineage
+- Replaced section 7 to strengthen Shift Premium Interaction with rule resolution
+- Replaced section 8 to expand Schedule Changes with correction semantics
+- Updated section 9 to expand Compliance and Labour Rules with validation semantics
+- Replaced section 10 with expanded Relationship to Other Models
+
+### 2026-04-21 — Time entry & worked time model document updated
+
+**Document update:  /docs/architecture/core/Time_Entry_and_Worked_Time_Model.md
+- Replaced Purpose section with updated text including execution lineage language
+- Updated section 2 to expand Core Time_Entry Entity with lineage identifiers
+- Updated section 4 to strengthen Approval Lifecycle with governance linkage
+- Updated section 5 to strengthen Aggregation Discipline
+- Replaced section 6 to strengthen Payroll Integration with result lineage
+- Updated section 7 to strengthen Premium Rule Triggering
+- Replaced section 8 to expand Retro Correction Handling
+- Replaced section 11 with expanded Relationship to Other Models
+
+### 2026-04-21 — Overtime & premium pay model document updated
+
+**Document update:  /docs/architecture/core/Overtime_and_Premium_Pay_Model.md
+- Replaced Purpose section with updated text including result-line discipline
+- Updated section 2 to expand Core Premium_Rule Entity with resolution lineage
+- Updated section 3 to strengthen threshold definitions with context lineage
+- Updated section 6 to expand Premium Calculation Flow with result-line identity
+- Added sub-section 6.1 to add explicit interaction with taxable wage formation 
+- Updated section 7 to strengthen time-entry interaction with lineage
+- Replaced section 8 with expanded retroactive adjustment handling
+- Replaced section 9 with expanded Relationship to Other Models
+
+### 2026-04-21 — Earnings & deductions computation model document updated
+
+**Document update:  /docs/architecture/calculation-engine/Earnings_and_Deductions_Computation.md
+- Replaced Purpose section with updated text including execution-artifact language
+- Updated section 2 to expand Core Computation Context with result lineage
+- Updated section 6 to strengthen Result Line Generation with canonical structure linkage
+- Added sub-section 6.1 on Relationship to Accumulator Impact
+- Updated section 7 to strengthen taxable wage formation with jurisdiction linkage
+- Updated section 8 to expand arrears and catch-up handling with posting alignment
+- Updated section 9 to strengthen retroactive recalculation semantics
+- Replaced section 10 with expanded Relationship to Other Models
+
+### 2026-04-21 — posting rules & mutation semantics model document updated
+
+**Document update:  /docs/rules/Posting_Rules_and_Mutation_Semantics.md
+- Replaced Purpose section with updated text including execution-artifact language
+- Added sub-section 2.1 on Relationship to Payroll Execution Results
+- Updated section 3 to strengthen posting trigger classes with result-line lineage
+- Updated section 4 to expand atomic transaction boundary with exception integration
+- Updated section 6 to replace `Accumulator and liability mutation order` with explicit impact language
+- Updated section 7 to strengthen correction behavior with correction-model linkage
+- Updated section 8 to strengthen replay with execution lineage and review controls
+- Updated section 9 to expand finalization semantics with downstream models
+- Added sub-section 9.1 on Relationship to Other Models
+
+### 2026-04-21 — policy & rule execution model document updated
+
+**Document update:  /docs/rules/Policy_and_Rule_Execution_Model.md
+- Replaced Purpose section with updated text including execution outcomes
+- Updated section 2 to expand Policy Execution Context with execution lineage
+- Updated section 3 to expand Rule Invocation Framework to include mutation targets
+- Replaced section 4 with stronger phase sequencing model
+- Updated section 5 to expand Conditional Rule Evaluation with classification linkage
+- Updated section 6 to strengthen Rule Chaining discipline 
+- Replaced section 7 with updated text to expand Execution Logging into Execution Trace discipline
+- Replaced section 8 with updated text to strengthen Error Handling with exception model integration
+- Replaced section 9  with updated text to expand Integration Points 
+
+### 2026-04-21 — rule resolution model document updated
+
+**Document update:  /docs/rules/Rule_Resolution_Engine.md
+- Updated Related Documents entry in document info table
+- Replaced Purpose section with updated text which includes execution consequences
+- Updated section 1 to expand Resolution Context Model with run/result lineage
+- Added sub-section 2.1 on Relationship to Payroll Result Generation
+- Updated section 6 to strengthen Failure Handling with exception integration 
+- Updated section 7 to strengthen caching section with replay restrictions
+- Updated section 9 to expand determinism guarantees with correction handling
+- Added sub-section 10.1 on Relationship to Other Models
+
+### 2026-04-21 — code classification & mapping model document updated
+
+**Document update:  /docs/rules/Code_Classification_and_Mapping_Model.md
+- Replaced Purpose section with updated text to explicitly mention payroll results, accumulator impacts, and downstream financial consequences
+- Updated section 4 to expand canonical classification attributes with rule/version lineage
+- Added sub-section 4.1 on Relationship to Employee Payroll Result
+- Replaced section 7 with updated text to strengthen accumulator routing with newer accumulator architecture 
+- Added sub-section 9.1 on Replay and Correction Handling
+- Updated section 10 to expand error handling for downstream impact
+- Replaced section 11 with updated Relationship to Other Models
+
+### 2026-04-20 — Tax classification & obligation model document updated
+
+**Document update:  /docs/rules/Tax_Classification_and_Obligation.md
+- Replaced Purpose section with updated text to include downstream reporting, remittance, export, and correction consequences
+- Updated section 5 to expand Tax Component Attributes to include obligation semantics
+- Added sub-section 5.1 on Relationship to Employee Payroll Result
+- Replaced section 7 with newer accumulator architecture in Tax Accumulator Alignment
+- Added sub-section 10.1 on Correction and Reversal Handling
+- Added sub-section 10.2 on Downstream Obligation Alignment
+- Replaced section 11 with updated Relationship to Other Models
+
+### 2026-04-20 — Payroll-to-accounting model document updated
+
+**Document update:  /docs/architecture/interfaces/General_Ledger_and_Accounting_Export_Model.md
+- Replaced Purpose section with updated text to include execution lineage
+- Updated section 2 to expand Journal_Entry entity with result-set lineage
+- Updated section 3 to expand Journal_Line entity with worker/result lineage
+- Added sub-section 5.1 on Accounting Export Source Lineage
+- Updated section 7 to add explicit balancing treatment for correction runs
+- Updated section 10 to add correction-aware export behavior
+- Replaced section 11 with strengthened reconciliation and validation
+- Replaced section 12 with updated Relationship to Other Models
+
+### 2026-04-20 — Payroll provider response model document updated
+
+**Document update:  /docs/architecture/interfaces/Payroll_Provider_Response_Model.md
+- Updated section 1 with appended text on preserving lineage
+- Updated section 3 with additional lineage fields
+- Updated section 6 to strengthen correlation keys with result-set lineage
+- Added sub-section 6.1 on Response Lineage Classification
+- Updated section 7 with additional record-level lineage fields
+- Replaced section 15 with Interaction with Reconciliation
+- Updated section 16 with appended text for lineage linkage 
+- Updated section 18 with appended text for lineage depth 
+- Replaced section 19 with updated Relationship to Other Models
+
+### 2026-04-20 — Payroll interface & export model document updated
+
+**Document update:  /docs/architecture/interfaces/Payroll_Interface_and_Export_Model.md
+- Updated Purpose section to include result-set lineage
+- Updated section 2 to add Payroll_Run_Result_Set_ID to Export Unit Definition
+- Updated section 3 to strengthen Export Record Structure with worker/result lineage
+- Added sub-section 3.1 on Export Source Lineage
+- Added sub-section 4.1 on Export Type Classification
+- Updated section 7, 8 & 9 with appended text
+- Replaced section 10 with updated Relationship to Other Models
+
+### 2026-04-20 — Payroll reconciliation model document updated
+
+**Document update:  /docs/architecture/governance/Payroll_Reconciliation_Model.md
+- Updated Purpose section
+- Added sub-section 1.1 on Reconciliation Anchors
+- Added sub-section 4.1 on Financial Reconciliation Dimensions
+- Updated section 4 with Additional matching criteria
+- Updated section 6, 7 & 8 with appended text
+- Replaced section 9 with updated Relationship to Other Models
+
+### 2026-04-20 — Payroll net pay model document updated
+
+**Document update:  /docs/architecture/calculation-engine/Net_Pay_and_Disbursement_Model.md
+- Updated section 2 on Core Net_Pay Entity
+- Added sub-section 3.1 on Payment Instruction Profile Association
+- Updated section 8 on Off-cycle payments to associate Payroll Run types
+- Updated section 12 to reference Payroll_Run_Result_Set_Model
+
+### 2026-04-20 — Payroll run scope model document updated
+
+**Document update:  /docs/architecture/processing/Run_Scope_Model.md
+- Added section on Relationship to Payroll Context
+- Added section on Period Alignment Rules
+- Updated section on Dependencies
+
+### 2026-04-20 — Payroll context model document updated
+
+**Document update:  /docs/architecture/payroll/Payroll_Context_Model.md
+- Added sub-section 3.1 on Processing Population Scope
+- Added sub-section 4.1 on Funding and Remittance Configuration Association
+- Updated sub-section 8 on Relationship to Other Models
+
+### 2026-04-20 — Payroll calendar model document updated
+
+**Document update:  /docs/architecture/payroll/Payroll_Calendar_Model.md
+- Added sub-section 6.1 on Source Period vs Execution Period
+- Added sub-section 7.1 on Multiple Payroll Runs Per Period
+- Updated sub-section 8 on Relationship to Other Models
+
+### 2026-04-20 — Architectural accumulator data model document added
+
+**New document: `docs/architecture/processing/Accumulator_Impact_Model.md`**
+Model supports:
+- Deterministic replay
+- Accumulator traceability
+- Tax and reporting reconstruction
+- Retroactive recalculation
+- Reversal and correction integrity
+- Cross-scope rollup validation
+- Auditability of accumulator mutation
+
+### 2026-04-20 — Payroll run model document updated
+
+**Document update:  /docs/architecture/processing/Payroll_Run_Model.md
+- Added sub-section 13.1 on processing outcome relationships
+
+### 2026-04-20 — Core Platform accumulator document updated
+
+**Document update:  /docs/accumulators/Accumulator_Model_Detailed.md
+- Added new Sections 7, 7.1 on relationships to other accumulator model files
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Accumulator_Definition_Model.md`**
+Model defines:
+- What an accumulator represents
+- What kinds of results feed it
+- How it resets
+- How it is scoped
+- How it participates in payroll calculation and reporting
+- How correction and replay logic affect it
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Payroll_Adjustment_and_Correction_Model.md`**
+Model preserves:
+- Correction lineage
+- Reversal logic
+- Replacement logic
+- Supplementary payroll outcomes
+- Audit and replay integrity
+- Accumulator correction traceability
+- Payment and remittance correction handling
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Payroll_Exception_Model.md`**
+Model preserves:
+- Validation failures
+- Calculation anomalies
+- Funding issues
+- Remittance issues
+- Disbursement issues
+- Configuration issues
+- Approval holds
+- Manual review requirements
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Employee_Payroll_Result_Model.md`**
+Model preserves:
+- Earnings detail
+- Deduction detail
+- Tax detail
+- Employer contribution detail
+- Net pay derivation
+- Accumulator impacts
+- Jurisdictional splits
+- Pay-statement-ready output structure
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Payroll_Run_Result_Set_Model.md`**
+Model preserves:
+- Calculation outputs
+- Employee-level results
+- Funding outcomes
+- Remittance outputs
+- Disbursement results
+- Audit and reconciliation artifacts
+
+### 2026-04-20 — Architectural payment data model document added
+
+**New document: `docs/architecture/data/Net_Pay_Disbursement_Data_Model.md`**
+Model supports:
+- Direct deposit
+- Split deposit
+- Live check
+- Payroll card delivery
+- Mixed-method payment
+- Off-cycle payments
+- Returned or rejected payments
+- Reversal and reissue handling
+- Employee-specific payment preferences
+
+### 2026-04-20 — Architectural payroll processing data model document added
+
+**New document: `docs/architecture/processing/Payroll_Run_Funding_and_Remittance_Map.md`**
+Distinguishes between:
+- Structural payroll context
+- Governed configuration
+- Actual run-time funding behavior
+- Actual run-time remittance behavior
+- Actual payment-release and delivery behavior
+
+### 2026-04-20 — Architectural payment data model document added
+
+**New document: `docs/architecture/data/Payment_Instruction_Profile_Data_Model.md`**
+Model defines:
+- Where money is sent
+- How money is sent
+- Which banking or settlement instructions apply
+- Which payment formatting rules apply
+- Which release constraints or approval controls apply
+- Which payment channel is used
+
+### 2026-04-20 — Architectural payment data model document added
+
+**New document: `docs/architecture/data/Remittance_Profile_Data_Model.md`**
+Model defines:
+- Which obligations are remitted
+- To whom they are remitted
+- By what method they are remitted
+- On what cadence they are remitted
+- Which filing and payment rules apply
+- Which delivery instructions govern the obligation
+
+### 2026-04-20 — Architectural funding data model document added
+
+**New document: `docs/architecture/data/Funding_Profile_Data_Model.md`**
+Model defines:
+- Where payroll funding is sourced from
+- How funding is segmented
+- Which funding rules apply
+- Which obligations are covered by which funding arrangements
+- How payroll funding behavior is controlled for a payroll population or run context
+
+### 2026-04-20 — Architectural location data model document added
+
+**New document: `docs/architecture/data/Work_Location_Data_Model.md`**
+Model supports:
+- physical worksites
+- remote work locations
+- hybrid work patterns
+- jurisdictional refinement for payroll and labor rules
+- time and attendance context
+- scheduling context
+- reporting and analytics by workplace
+- operational assignment and cost allocation
+
+### 2026-04-20 — Architectural authorization data model document added
+
+**New document: `docs/architecture/data/Role_and_Permission_Model.md`**
+Model defines:
+- What a user is allowed to do
+- Where a user is allowed to do it
+- How access is granted
+- How access is constrained
+- How access changes are audited
+
+### 2026-04-20 — Architectural identity data model document added
+
+**New document: `docs/architecture/data/User_Account_Data_Model.md`**
+Model represents:
+- System access identity
+- Authentication credential linkage
+- Role-based authorization anchor
+- Tenant-scoped access boundary
+- Session-enabled platform participation
+
+### 2026-04-20 — Architectural identity data model document added
+
+**New document: `docs/architecture/data/Address_Association_Model.md`**
+Model defines:
+- Who the address belongs to
+- How the address is used
+- When the address is effective
+- Whether the address is primary for that use
+- How historical address usage is preserved
+
+### 2026-04-20 — Architectural identity data model document added
+
+**New document: `docs/architecture/data/Address_Data_Model.md`**
+Model supports:
+- person residential and mailing addresses
+- employment-related work addresses
+- legal entity registered and operational addresses
+- client company business addresses
+- tenant-level commercial or administrative addresses
+- jurisdictional and payroll-relevant location references
+- correspondence and document delivery
+
+### 2026-04-20 — Architectural identity data model document added
+
+**New document: `docs/architecture/data/Document_Data_Model.md`**
+Document is a record associated with:
+- Person
+- Employment
+- Legal Entity
+- Client Company
+- Tenant
+- Onboarding process
+- Compliance workflow
+
+### 2026-04-20 — Architectural identity data model document added
+
+**New document: `docs/architecture/data/Person_Data_Model.md`**
+Model supports:
+- rehire scenarios
+- concurrent employments
+- cross-entity movement
+- historical continuity of identity
+- document linkage
+- self-service identity continuity
+- secure handling of personally identifiable information
+
+### 2026-04-20 — Architectural organization data model document added
+
+**New document: `docs/architecture/data/Employment_Data_Model.md`**
+Defines Employment explicitly as:
+- Operational relationship between Person and Legal Entity
+- Distinct from Assignment, Compensation, and Payroll
+- Place where rehire and concurrent employment are anchored
+- Entry point into downstream payroll and jurisdiction traversal
+
+### 2026-04-20 — Core Platform structure document updated
+
+**New document: `docs/architecture/core/Tenant_Client_Company_Legal_Entity_and_Jurisdiction_Structural_Relationship_Map.md`**
+- Ties together four core structural models:
+	Tenant
+	Client Company
+	Legal Entity
+	Jurisdiction Registration and Jurisdiction Profile
+
+### 2026-04-20 — Architectural organization data model document added
+
+**New document: `docs/architecture/data/Tenant_Data_Model.md`**
+Model exists to support:
+- data isolation
+- security scoping
+- configuration ownership
+- operational separation
+- billing separation
+- environment-level governance
+- module enablement and service activation
+
+### 2026-04-20 — Architectural organization data model document added
+
+**New document: `docs/architecture/data/Client_Company_Data_Model.md`**
+Model formalizes Client Company as:
+- Grouping layer under Tenant
+- Parent of one or more Legal Entities
+- Preferred level for reporting and billing segmentation
+- Distinct from employer-of-record and jurisdiction authority
+
+### 2026-04-20 — Architectural legal entity data model document added
+
+**New document: `docs/architecture/data/Legal_Entity_Data_Model.md`**
+Model establishes:
+- employer-of-record identity
+- statutory compliance
+- payroll jurisdiction resolution
+- employer registration relationships
+- remittance and reporting accountability
+
+### 2026-04-20 — Architectural Rules model document added
+
+**New document: `docs/rules/Rule_Pack_Model.md`**
+Model separates:
+- Jurisdictional context
+- Rule packaging
+- Rule execution
+- Version control
+- Override behavior
+
+### 2026-04-20 — Architectural jurisdiction data model document added
+
+**New document: `docs/architecture/data/Jurisdiction_Registration_and_Profile_Data_Model.md`**
+Model introduces:
+- Jurisdiction Registration
+- Jurisdiction Profile
+- Allows a Legal Entity to operate in one or more jurisdictions
+- Maintains accurate statutory compliance and audit traceability
+
+### 2026-04-20 — Core Platform jurisdiction document updated
+
+**Core document update: `docs/architecture/core/Jurisdiction_and_Compliance_Rules_Model.md`**
+Updates enable:
+- Multi-country operation
+- Effective-dated rule changes
+- Deterministic replay
+- Audit reconstruction
+
+### 2026-04-20 — Core Platform composition document added
+
+**New document: `docs/architecture/core/Platform_Composition_and_Extensibility_Model.md`**
+Model establishes:
+- HRIS Core System as the canonical platform center
+- Optional plug-in modules as domain extensions
+- Client Company as a first-class grouping construct
+- Legal Entity as the statutory compliance boundary
+- Jurisdiction resolution anchored to Employer-of-Record entities
+- Internal extension seams supporting jurisdictional and provider variability
 
 ### 2026-04-19 — Processing Lineage architecture model added
 

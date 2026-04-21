@@ -122,7 +122,7 @@ Architecture models define *how* the system implements the requirements. They ar
 | [Earnings_and_Deductions_Computation_Model.md](docs/architecture/calculation-engine/Earnings_and_Deductions_Computation_Model.md) | Ordered computation of earnings and deductions from inputs to result lines |
 | [External_Result_Import_Specification.md](docs/architecture/calculation-engine/External_Result_Import_Specification.md) | Structure and processing rules for externally calculated earnings imports |
 | [Net_Pay_and_Disbursement_Model.md](docs/architecture/calculation-engine/Net_Pay_and_Disbursement_Model.md) | Net pay finalisation, payment methods, split deposits, and disbursement lifecycle |
-| [Result_and_Payable_Model.md](docs/architecture/calculation-engine/Result_and_Payable_Model.md) | Result record structure, payable promotion, status lifecycle, and accumulator feeding |
+| [Result_and_Payable_Model.md](docs/architecture/calculation-engine/Result_and_Payable_Model.md) | Result record structure, payable promotion, status lifecycle, and accumulator feeding |l compliance and rule resolution |
 
 ### Core
 
@@ -139,11 +139,34 @@ Architecture models define *how* the system implements the requirements. They ar
 | [Organizational_Structure_Model.md](docs/architecture/core/Organizational_Structure_Model.md) | Org hierarchy, legal entity, department, and location structures |
 | [Overtime_and_Premium_Pay_Model.md](docs/architecture/core/Overtime_and_Premium_Pay_Model.md) | Overtime eligibility, premium pay rules, and FLSA compliance |
 | [Plan_and_Rule_Model.md](docs/architecture/core/Plan_and_Rule_Model.md) | Plan definitions and rule structures governing payroll behaviour |
+| [Platform_Composition_and_Extensibility_Model.md](docs/architecture/core/Platform_Composition_and_Extensibility_Model.md) | Defines how the platform is structurally composed and how extensibility is achieved across the system |
 | [Position_Management_Model.md](docs/architecture/core/Position_Management_Model.md) | Headcount budgeting, vacancy tracking, and position control rules |
 | [Reference_Data_Model.md](docs/architecture/core/Reference_Data_Model.md) | Standardised code sets, versioning, and reference data governance |
 | [Reporting_Hierarchy_Model.md](docs/architecture/core/Reporting_Hierarchy_Model.md) | Manager-employee reporting relationships, org chart structure, and hierarchy traversal |
 | [Scheduling_and_Shift_Model.md](docs/architecture/core/Scheduling_and_Shift_Model.md) | Work schedule and shift definitions consumed by time and payroll |
+| [Tenant_Client_Company_Legal_Entity_and_Jurisdiction_Structural_Relationship_Map.md](docs/architecture/core/Tenant_Client_Company_Legal_Entity_and_Jurisdiction_Structural_Relationship_Map.md) | Ties together four core models that define the administrative, statutory, and compliance backbone of the platform |
 | [Time_Entry_and_Worked_Time_Model.md](docs/architecture/core/Time_Entry_and_Worked_Time_Model.md) | Time entry structure and worked time records for payroll consumption |
+
+### Data Model
+
+| Document | Purpose |
+|---|---|
+| [Address_Association_Model.md](docs/architecture/data/Address_Association_Model.md) | Defines the core data structure for **Address Association** as the effective-dated linkage between a governed owning object and an Address record |
+| [Address_Data_Model.md](docs/architecture/data/Address_Data_Model.md) | Defines the core data structure for **Address** as a reusable, governed postal and location reference object within the platform |
+| [Client_Company_Data_Model.md](docs/architecture/data/Client_Company_Data_Model.md) | Defines the core data structure for **Client Company** as a first-class grouping and administrative construct |
+| [Document_Data_Model.md](docs/architecture/data/Document_Data_Model.md) | Defines the core data structure for **Document** as a governed record object within the platform |
+| [Funding_Profile_Data_Model.md](docs/architecture/data/Funding_Profile_Data_Model.md) | Defines the core data structure for **Funding Profile** as the payroll funding configuration for determining how payroll obligations are financially sourced and prepared for disbursement |
+| [Employment_Data_Model.md](docs/architecture/data/Employment_Data_Model.md) | Defines the core data structure for **Employment** as the operational relationship between a Person and an employer-of-record Legal Entity |
+| [Jurisdiction_Registration_and_Profile_Data_Model.md](docs/architecture/data/Jurisdiction_Registration_and_Profile_Data_Model.md) | Defines core data structures for jurisdictional compliance and rule resolution |
+| [Legal_Entity_Data_Model.md](docs/architecture/data/Legal_Entity_Data_Model.md) | Defines the core data structure for **Legal Entity** as a first-class organizational and compliance construct within the platform |
+| [Net_Pay_Disbursement_Data_Model.md](docs/architecture/data/Net_Pay_Disbursement_Data_Model.md) | Defines the core data structure for **Net Pay Disbursement** as the governed and execution-linked structure used to deliver employee net pay |
+| [Payment_Instruction_Profile_Data_Model.md](docs/architecture/data/Payment_Instruction_Profile_Data_Model.md) | Defines the core data structure for **Payment Instruction Profile** as the configuration used to describe how a payment or remittance is routed, formatted, and released to an external financial or settlement destination |
+| [Person_Data_Model.md](docs/architecture/data/Person_Data_Model.md) | Defines the core data structure for **Person** as the durable human identity record within the platform |
+| [Remittance_Profile_Data_Model.md](docs/architecture/data/Remittance_Profile_Data_Model.md) | Defines the core data structure for **Remittance Profile** as the configuration used to determine how payroll-related obligations are delivered to authorities, providers, garnishment recipients, and other external parties |
+| [Role_and_Permission_Model.md](docs/architecture/data/Role_and_Permission_Model.md) | Defines the core data structures for **Role**, **Permission**, and **Role Assignment** as the authorization framework of the platform |
+| [Tenant_Data_Model.md](docs/architecture/data/Tenant_Data_Model.md) | Defines the core data structure for **Tenant** as the primary security, configuration, and operational isolation boundary within the platform |
+| [User_Account_Data_Model.md](docs/architecture/data/User_Account_Data_Model.md) | Defines the core data structure for **User Account** as the governed authentication and platform-access identity associated with a Person |
+| [Work_Location_Data_Model.md](docs/architecture/data/Work_Location_Data_Model.md) | Defines the core data structure for **Work Location** as the operational workplace reference used by the platform |
 
 ### Governance
 
@@ -194,14 +217,20 @@ Architecture models define *how* the system implements the requirements. They ar
 
 | Document | Purpose |
 |---|---|
+| [Accumulator_Definition_Model.md](docs/architecture/processing/Accumulator_Definition_Model.md) | Defines the core data structure for **Accumulator Definition** as the specification of payroll totals, balances, and reporting counters used across calculation, remittance, reporting, and audit processes |
+| [Accumulator_Impact_Model.md](docs/architecture/processing/Accumulator_Impact_Model.md) | Defines the core data structure for **Accumulator Impact** as the mutation record that connects payroll results to accumulator value changes |
 | [Calculation_Run_Lifecycle.md](docs/architecture/processing/Calculation_Run_Lifecycle.md) | Payroll run states, transitions, and lifecycle management |
+| [Employee_Payroll_Result_Model.md](docs/architecture/processing/Employee_Payroll_Result_Model.md) | Defines the core data structure for **Employee Payroll Result** as the detailed payroll outcome for an individual Employment within a Payroll Run Result Set |
 | [Error_Handling_and_Isolation_Model.md](docs/architecture/processing/Error_Handling_and_Isolation_Model.md) | Error isolation, failure containment, and recovery patterns |
+| [Payroll_Adjustment_and_Correction_Model.md](docs/architecture/processing/Payroll_Adjustment_and_Correction_Model.md) | Defines the core data structure for **Payroll Adjustment and Correction** as the mechanism used to repair, reverse, replace, or supplement payroll outcomes without overwriting finalized results |
 | [Payroll_Check_Model.md](docs/architecture/processing/Payroll_Check_Model.md) | Payroll check structure and its relationship to results and disbursement |
+| [Payroll_Exception_Model.md](docs/architecture/processing/Payroll_Exception_Model.md) | Defines the core data structure for **Payroll Exception** as the record used to capture, classify, route, and resolve payroll-related failures, warnings, holds, and operational review conditions |
+| [Payroll_Run_Funding_and_Remittance_Map.md](docs/architecture/processing/Payroll_Run_Funding_and_Remittance_Map.md) | Defines how **Payroll Run** relates to the funding and remittance configuration models at execution time |
 | [Payroll_Run_Model.md](docs/architecture/processing/Payroll_Run_Model.md) | Payroll run entity, execution model, and approval governance |
+| [Payroll_Run_Result_Set_Model.md](docs/architecture/processing/Payroll_Run_Result_Set_Model.md) | Defines the **Payroll Run Result Set** as the governed container for all results generated during a Payroll Run |
 | [Processing_Lineage_Validation_Model.md] (docs/architecture/processing/Processing_Lineage_Validation_Model.md) | Defines controls used to verify integrity of the payroll run lineage chains |
 | [Run_Lineage_Model.md] (docs/architecture/processing/Run_Lineage_Model.md) | Defines how payroll runs are related across standard execution, scoped catch-up processing, retroactive correction and recovery activity |
 | [Run_Scope_Model.md] (docs/architecture/processing/Run_Scope_Model.md) | Defines scoped execution boundaries enabling catch-up, retro, and recovery payroll runs without requiring full population reprocessing |
-
 
 ### Rules
 
@@ -210,6 +239,7 @@ Architecture models define *how* the system implements the requirements. They ar
 | [Code_Classification_and_Mapping_Model.md](docs/rules/Code_Classification_and_Mapping_Model.md) | External code classification into canonical result classes |
 | [Policy_and_Rule_Execution_Model.md](docs/rules/Policy_and_Rule_Execution_Model.md) | Policy evaluation and rule execution framework |
 | [Posting_Rules_and_Mutation_Semantics.md](docs/rules/Posting_Rules_and_Mutation_Semantics.md) | How validated results become durable postings; correction behaviour |
+| [Rule_Pack_Model.md](docs/rules/Rule_Pack_Model.md) | How executable rule logic is packaged, versioned, activated, and resolved within the platform |
 | [Rule_Resolution_Engine.md](docs/rules/Rule_Resolution_Engine.md) | Rule candidate selection, precedence model, and resolution tracing |
 | [Rule_Versioning_Model.md](docs/rules/Rule_Versioning_Model.md) | Rule version lifecycle, effective dating, and historical preservation |
 | [Tax_Classification_and_Obligation_Model.md](docs/rules/Tax_Classification_and_Obligation_Model.md) | Tax type classification, obligation structure, and jurisdiction linkage |

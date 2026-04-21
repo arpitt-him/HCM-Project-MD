@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Approved |
 | **Owner** | Architecture Team |
 | **Location** | `docs/architecture/calculation-engine/Earnings_and_Deductions_Computation_Model.md` |
@@ -12,7 +12,19 @@
 
 ## Purpose
 
-Defines how earnings and deductions are computed from worked time, pay rates, benefit elections, premium rules, and payroll policy logic. Establishes the ordered transformation from payroll inputs into financial result lines.
+Defines how earnings and deductions are computed from worked time, pay rates, benefit elections, premium rules, and payroll policy logic.
+
+Establishes the ordered transformation from governed payroll inputs into structured payroll result lines associated with Employee Payroll Results.
+
+This model governs how computation outputs become:
+
+- earnings result lines
+- deduction result lines
+- tax-triggering wage values
+- employer contribution results
+- net-pay preparation inputs
+
+All computation outputs must remain deterministic, traceable, and replayable across original processing, simulation, and correction workflows.
 
 ---
 
@@ -41,6 +53,16 @@ Employment_ID\
 Pay_Period_ID\
 Calendar_Context_ID\
 Computation_Status
+
+Additional lineage fields may include:
+
+Payroll_Run_Result_Set_ID  
+Employee_Payroll_Result_ID  
+Run_Scope_ID  
+Source_Period_ID  
+Execution_Period_ID  
+
+These identifiers ensure that computation outputs remain traceable to governed payroll execution artifacts.
 
 ## 3. Earnings Computation Inputs
 
@@ -101,6 +123,36 @@ Amount\
 Taxable_Flag\
 Cash_Impact_Flag
 
+Result lines shall be governed by canonical classification semantics defined in Code_Classification_and_Mapping_Model.
+
+Additional lineage attributes may include:
+
+Canonical_Result_Class  
+Employee_Payroll_Result_ID  
+Rule_Version_ID  
+Computation_Phase  
+Source_Input_Reference  
+
+These fields ensure that result lines remain explainable and reproducible across replay and audit scenarios.
+
+## 6.1 Relationship to Accumulator Impact
+
+Result lines generated during computation do not directly mutate accumulators.
+
+Instead, validated result lines become inputs to governed accumulator mutation.
+
+Relationship:
+
+Result Line
+        ↓
+Posting Rule
+        ↓
+Accumulator Impact
+        ↓
+Accumulator Value / Liability State
+
+This separation preserves replayability, auditability, and correction safety.
+
 ## 7. Taxable Wage Formation
 
 Taxable wages are derived from ordered earnings and deduction outcomes.\
@@ -112,6 +164,15 @@ Imputed income increases taxable wages\
 Jurisdiction-specific tax rules alter taxable treatment\
 \
 Taxable wage formation must remain explicit and reproducible.
+
+Taxable wage formation shall reference governed tax classification logic defined in Tax_Classification_and_Obligation_Model.
+
+Jurisdiction-specific wage-base adjustments must remain:
+
+- explicit
+- versioned
+- traceable
+- reproducible across replay cycles
 
 ## 8. Arrears, Catch-Up, and Partial Processing
 
@@ -125,6 +186,14 @@ Deferred collection\
 Catch-up deduction logic\
 \
 Arrears handling must be traceable and policy-driven.
+
+Arrears processing may generate deferred liabilities that are later converted into payable obligations during posting.
+
+Deferred deduction state must remain traceable to:
+
+- original computation cycle
+- affected result lines
+- subsequent recovery events
 
 ## 9. Retroactive Recalculation
 
@@ -140,14 +209,29 @@ Tax rule correction\
 Recalculation must preserve prior history and generate correction-aware
 outputs.
 
+Retroactive recalculation must generate correction-aware result outputs consistent with Payroll_Adjustment_and_Correction_Model.
+
+Corrective outputs must preserve:
+
+- original result lineage
+- recalculated result lineage
+- delta differences
+- affected accumulator impacts
+
 ## 10. Relationship to Other Models
 
-This model integrates with:\
-\
-Calculation_Engine\
-Result_and_Payable_Model\
-Accumulator_and_Balance_Model\
-Tax_Classification_and_Obligation_Model\
-Overtime_and_Premium_Pay_Model\
-Correction_and_Immutability_Model\
-Payroll_Check_Model
+This model integrates with:
+
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
+- Code_Classification_and_Mapping_Model
+- Tax_Classification_and_Obligation_Model
+- Accumulator_Definition_Model
+- Accumulator_Impact_Model
+- Posting_Rules_and_Mutation_Semantics
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Exception_Model
+- Overtime_and_Premium_Pay_Model
+- Correction_and_Immutability_Model
+- Payroll_Interface_and_Export_Model

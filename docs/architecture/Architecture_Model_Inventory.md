@@ -158,11 +158,32 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Model | Core | Organizational_Structure_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
 | Model | Core | Overtime_and_Premium_Pay_Model | docs/architecture/core | Complete | Draft | Core Platform | Yes | High |
 | Model | Core | Plan_and_Rule_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
+| Model | Core | Platform_Composition_and_Extensibility_Model | docs/architecture/core | Complete | Draft | Core Platform | Yes | High |
 | Model | Core | Position_Management_Model | docs/architecture/core | Complete | Draft | Core Platform / HRIS | Yes | High | Advisory position control; headcount at position and dept level |
 | Model | Core | Reference_Data_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
 | Model | Core | Reporting_Hierarchy_Model | docs/architecture/core | Complete | Draft | Core Platform / HRIS | Yes | High | E-to-E manager relationship; org chart; v1 primary only |
 | Model | Core | Scheduling_and_Shift_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
+| Model | Core | Tenant_Client_Company_Legal_Entity_and_Jurisdiction_Structural_Relationship_Map | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
 | Model | Core | Time_Entry_and_Worked_Time_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
+
+### Architecture Models — Data
+
+| Model | Core | Address_Association_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Address_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Client_Company_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Document_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Employment_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Funding_Profile_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Jurisdiction_Registration_and_Profile_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Legal_Entity_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Net_Pay_Disbursement_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Payment_Instruction_Profile_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Person_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Remittance_Profile_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Role_and_Permission_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Tenant_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | User_Account_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
+| Model | Core | Work_Location_Data_Model | docs/architecture/data | Complete | Draft | Core Platform / HRIS | Yes | High |
 
 ### Architecture Models — Governance
 
@@ -216,13 +237,20 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 
 | Artifact Type | Domain | Model Name | Folder Location | Status | Lifecycle Status | Owner | PRD Coverage | Confidence |
 |---|---|---|---|---|---|---|---|---|
+| Model | Processing | Accumulator_Definition_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Accumulator_Impact_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Calculation_Run_Lifecycle | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Employee_Payroll_Result_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Error_Handling_and_Isolation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Payroll_Adjustment_and_Correction_Model.md | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Payroll_Check_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Payroll_Exception_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | processing | Payroll_Run_Funding_and_Remittance_Map | docs/architecture/processing | Complete | Draft | Payroll Domain  | Yes | High |
 | Model | Processing | Payroll_Run_Model | docs/architecture/processing | Complete | Approved | Payroll Domain | Yes | High |
+| Model | Processing | Payroll_Run_Result_Set_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Processing_Lineage_Validation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
-| Model | Processing | Run_Scope_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Run_Linkage_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Run_Scope_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 
 ### Architecture Models — Rules
 
@@ -231,6 +259,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Model | Rules | Code_Classification_and_Mapping_Model | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
 | Model | Rules | Policy_and_Rule_Execution_Model | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
 | Model | Rules | Posting_Rules_and_Mutation_Semantics | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
+| Model | Rules | Rule_Pack_Model | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
 | Model | Rules | Rule_Resolution_Engine | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
 | Model | Rules | Rule_Versioning_Model | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
 | Model | Rules | Tax_Classification_and_Obligation_Model | docs/rules | Complete | Reviewed | Compliance Domain | Yes | High |
