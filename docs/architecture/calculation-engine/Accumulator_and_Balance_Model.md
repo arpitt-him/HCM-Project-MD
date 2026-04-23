@@ -3,14 +3,12 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Approved |
 | **Owner** | Architecture Team |
 | **Location** | `docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md` |
 | **Domain** | Calculation Engine |
 | **Related Documents** | PRD-500-Accumulator-Strategy.md, ADR-002-Deterministic-Replayability.md, Result_and_Payable_Model, Payroll_Calendar_Model, Correction_and_Immutability_Model |
-
-## Purpose
 
 ## Purpose
 
@@ -26,7 +24,7 @@ The model ensures accurate payroll outcomes, rerun safety, correction traceabili
 
 ---
 
-# 1. Core Design Principles
+## 1. Core Design Principles
 
 The accumulator model shall follow these principles:
 
@@ -39,19 +37,21 @@ than once.\
 periods.\
 • Historical traceability shall remain intact after release.
 
-# 2. Relationship to Definition and Impact Models
+## 2. Relationship to Definition and Impact Models
 
-Accumulator runtime behavior is governed through three distinct layers:
+Accumulator runtime behavior is governed through four distinct layers:
 
 ```text
 Accumulator Definition
-    ↓
+        ↓
 Accumulator Impact
-    ↓
+        ↓
+Accumulator Contribution
+        ↓
 Accumulator Balance / Value
 ```
 
-# 3. Accumulator Balance Structure
+## 3. Accumulator Balance Structure
 
 Accumulator Balance records represent the current authoritative persisted value for a governed accumulator definition at a defined scope.
 
@@ -73,13 +73,17 @@ Balance records are optimized for quick lookup and update operations.
 
 Balance records do not define accumulator meaning independently; they persist the current state of a governed accumulator definition.
 
-# 4. Accumulator Contribution History Structure
+## 4. Accumulator Contribution History Structure
 
 Contribution History records represent persisted historical balance-affecting entries derived from governed accumulator impacts.
 
 Recommended Contribution Fields:
 
 • Contribution_ID\
+• Parent_Contribution_ID\
+• Root_Contribution_ID\
+• Contribution_Lineage_Sequence\
+• Correction_Reference_ID where applicable\
 • Accumulator_Definition_ID\
 • Accumulator_Impact_ID\
 • Scope_Keys\
@@ -100,7 +104,7 @@ Contribution records provide traceability and reconstruction capability.
 
 Contribution history shall remain derived from governed accumulator impacts rather than acting as an independent mutation model.
 
-# 5. Accumulator Scope Types
+## 5. Accumulator Scope Types
 
 Accumulators may operate at multiple scopes.
 
@@ -115,7 +119,7 @@ Common Scope Types:
 
 Scope determines storage keys, reset logic, update eligibility, and retrieval behavior.
 
-# 6. Time Dimensions
+## 6. Time Dimensions
 
 Accumulators operate across defined time dimensions.
 
@@ -130,7 +134,7 @@ Supported Dimensions:
 
 Time alignment shall reference governed calendar context, including Payroll_Context_ID, Period_ID, and the applicable calendar interpretation defined through Payroll_Calendar_Model and Multi_Context_Calendar_Model.
 
-# 7. Reset Rules
+## 7. Reset Rules
 
 Accumulator reset behavior shall be explicitly defined.
 
@@ -145,7 +149,7 @@ Supported Reset Types:
 Reset logic shall execute at defined calendar boundaries and shall
 preserve historical traceability.
 
-# 8. Update Timing Rules
+## 8. Update Timing Rules
 
 Accumulator updates occur during controlled lifecycle stages.
 
@@ -163,7 +167,7 @@ Accumulator updates shall remain traceable to:
 • Employee_Payroll_Result_ID where applicable\
 • Accumulator_Impact_ID
 
-# 9. Rerun and Recalculation Safety
+## 9. Rerun and Recalculation Safety
 
 Accumulator design shall support safe recalculation.
 
@@ -178,7 +182,7 @@ Rerun and recalculation behavior shall preserve source lineage between original 
 
 Historical rerun behavior shall remain reconstructable through run, result-set, and accumulator-impact lineage.
 
-# 10. Correction Handling
+## 10. Correction Handling
 
 Corrections may affect accumulator balances.
 
@@ -196,7 +200,20 @@ Correction-linked accumulator behavior shall preserve linkage to:
 • correction-generated payroll result lineage\
 • resulting balance state
 
-# 11. Accumulator Family Classification
+Contribution lineage shall be explicitly preserved across
+correction operations.
+
+Each correction-generated contribution shall:
+
+• reference the prior contribution through Parent_Contribution_ID  
+• retain the original Root_Contribution_ID  
+• increment Contribution_Lineage_Sequence  
+• reference the governing correction through Correction_Reference_ID  
+
+Existing contribution records shall not be modified during
+correction. New lineage-linked records shall be created instead.
+
+## 11. Accumulator Family Classification
 
 Accumulators are organized into functional families.
 
@@ -214,7 +231,7 @@ Example families:
 
 Family classification supports reporting, compliance thresholds, and cross-scope validation.
 
-# 12. Cross-Scope Validation
+## 12. Cross-Scope Validation
 
 Accumulator integrity may be validated across scopes.
 
@@ -226,7 +243,7 @@ Validation examples:
 
 Cross-scope validation supports compliance and audit readiness.
 
-# 13. Deterministic Replay Requirements
+## 13. Deterministic Replay Requirements
 
 Accumulator balance reconstruction shall remain deterministic.
 
@@ -242,7 +259,7 @@ the platform shall reconstruct the same balance state and contribution history.
 
 Later rule, configuration, or calendar changes shall not silently reinterpret historical accumulator state.
 
-# 14. Audit and Traceability
+## 14. Audit and Traceability
 
 Accumulator systems shall support complete audit reconstruction.
 
@@ -254,13 +271,13 @@ Required audit capabilities:
 • Record timestamps and origin sources\
 • Maintain historical continuity across recalculations
 
-# 15. Performance Considerations
+## 15. Performance Considerations
 
 Balance and contribution separation supports performance optimization.
 
 Balance records shall support fast lookup, minimal contention, and efficient update behavior. Contribution history shall support indexed retrieval, efficient filtering, and historical reconstruction. Performance tuning shall not compromise data integrity.
 
-# 16. Relationship to Other Models
+## 16. Relationship to Other Models
 
 This model integrates with:
 
@@ -276,7 +293,7 @@ This model integrates with:
 • Correction_and_Immutability_Model\
 • Regulatory_and_Compliance_Reporting_Model
 
-# 17. Dependencies
+## 17. Dependencies
 
 This model depends on:
 
@@ -290,7 +307,7 @@ This model depends on:
 • Payroll_Adjustment_and_Correction_Model\
 • Correction_and_Immutability_Model
 
-# 18. Key Design Principle
+## 18. Key Design Principle
 
 Accumulator balances represent current persisted accumulator state, while contribution history represents how that state was produced.
 

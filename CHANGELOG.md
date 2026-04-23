@@ -8,6 +8,13 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-23 — Accumulator & balance model document updated
+
+**Document update: docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md**
+- Updated section 2 to increase number of layers governing Accumulator runtime behavior
+- Updated section 4 to add 4 new Recommended Contribution Fields
+- Updated section 10 to explicitly preserve Contribution lineage
+
 ### 2026-04-22 — Payroll run result set model document updated
 
 **Document update: `docs/architecture/processing/Payroll_Run_Result_Set_Model.md`**
