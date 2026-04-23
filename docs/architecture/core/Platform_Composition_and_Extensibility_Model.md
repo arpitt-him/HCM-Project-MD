@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Architecture Team |
 | **Domain** | Core Platform Architecture |
@@ -12,7 +12,7 @@
 
 ---
 
-# 1. Purpose
+# Purpose
 
 This document defines how the platform is structurally composed and how extensibility is achieved across the system.
 
@@ -38,7 +38,7 @@ without architectural redesign.
 
 ---
 
-# 2. Platform Composition Model
+# 1. Platform Composition Model
 
 The platform consists of a **Platform Core** and optional **plug-in modules**.
 
@@ -72,11 +72,42 @@ Modules are deployable independently.
 
 ---
 
+# 2. Platform Execution Context Model
+
+The platform supports governed execution contexts that operate across modules.
+
+Execution contexts include:
+
+• Workflow execution contexts  
+• Payroll run contexts  
+• Calculation execution contexts  
+• Integration processing contexts  
+• Reporting execution contexts  
+
+Execution contexts shall:
+
+• operate within Tenant boundaries  
+• respect Client Company segmentation  
+• resolve Legal Entity jurisdiction context  
+• preserve lineage across module boundaries  
+
+Execution behavior shall remain traceable across:
+
+• module execution boundaries  
+• jurisdiction resolution  
+• correction and replay sequences  
+
+Execution context awareness enables consistent governance across modular platform execution.
+
+---
+
 # 3. HRIS Core System Responsibilities
 
 The HRIS Core System owns canonical platform records.
 
 These records represent stable enterprise identity and employment relationships.
+
+---
 
 ## 3.1 Core Domains
 
@@ -119,11 +150,26 @@ Jurisdiction-specific logic shall not be embedded directly into the canonical co
 
 ---
 
+## 3.4 Platform Stability Boundary
+
+Stable platform components shall:
+
+• preserve canonical data ownership  
+• resist jurisdiction-specific branching within core domains  
+• isolate variability into governed extension seams  
+• preserve backward compatibility where operationally required  
+
+Platform stability ensures extensibility without structural fragmentation.
+
+---
+
 # 4. Plug-In Module Model
 
 Plug-in modules provide optional domain capabilities.
 
 They extend platform functionality without destabilizing the core.
+
+---
 
 ## 4.1 Plug-In Definition
 
@@ -157,6 +203,23 @@ Plug-ins must not depend on internal implementation details of other modules.
 
 ---
 
+## 4.3 Cross-Module Dependency Constraints
+
+Plug-in modules may depend on platform services and shared contracts.
+
+Dependencies shall:
+
+• be explicitly declared  
+• be version-aware  
+• not assume undocumented internal behavior  
+• preserve compatibility across module upgrades  
+
+Circular dependencies between modules shall not be permitted.
+
+Module dependency structures shall remain auditable.
+
+---
+
 # 5. Integration Surface Model
 
 The Integration Surface defines the formal boundary between the HRIS Core System and plug-in modules.
@@ -182,6 +245,15 @@ Modules respond to published events.
 Query interfaces provide controlled read access.
 
 Mutation rights remain governed.
+
+Integration events shall preserve:
+
+• source module identity  
+• execution context identity  
+• lineage reference identifiers  
+• jurisdiction resolution context  
+
+Events must remain reconstructable across replay and audit scenarios.
 
 ---
 
@@ -234,6 +306,28 @@ Typical extension seams include:
 
 ---
 
+## 6.3 Extensibility Governance Lifecycle
+
+Extensible components shall follow governed lifecycle stages.
+
+Typical lifecycle:
+
+Draft → Review → Approved → Activated → Versioned → Retired
+
+Extensible artifacts include:
+
+• jurisdiction rule packs  
+• provider adapters  
+• reporting generators  
+• calculation handlers  
+• integration adapters  
+
+Extensibility deployment shall not bypass governance approval workflows.
+
+Version lineage of extensible components shall remain reconstructable.
+
+---
+
 # 7. Employer-of-Record and Jurisdiction Model
 
 Jurisdictional responsibility originates from statutory nexus boundaries.
@@ -280,6 +374,10 @@ Jurisdiction resolution follows:
 4. Additional statutory rules
 
 Country labels alone are insufficient.
+
+Jurisdiction resolution shall remain traceable to the originating legal entity and employment assignment context.
+
+Resolution outputs shall remain reconstructable during replay, audit, and correction workflows.
 
 ---
 
@@ -404,6 +502,8 @@ Tenant isolation remains intact.
 
 Modules must support jurisdiction-driven variation.
 
+---
+
 ## 10.1 Payroll Example
 
 Payroll module structure:
@@ -465,7 +565,55 @@ Optional modules must not destabilize core behavior.
 
 ---
 
-# 13. Summary
+# 13. Relationship to Other Models
+
+This model integrates with:
+
+• Employment_and_Person_Identity_Model  
+• Organizational_Structure_Model  
+• Jurisdiction_and_Compliance_Rules_Model  
+• Integration_and_Data_Exchange_Model  
+• Payroll_Run_Model  
+• Run_Lineage_Model  
+• Calculation_Engine  
+• Security_and_Access_Control_Model  
+• Configuration_and_Metadata_Management_Model  
+• Release_and_Approval_Model  
+
+---
+
+# 14. Dependencies
+
+This model depends on:
+
+• Employment_and_Person_Identity_Model  
+• Organizational_Structure_Model  
+• Jurisdiction_and_Compliance_Rules_Model  
+• Integration_and_Data_Exchange_Model  
+• Security_and_Access_Control_Model  
+• Configuration_and_Metadata_Management_Model  
+• Release_and_Approval_Model  
+• Run_Lineage_Model  
+• Calculation_Run_Lifecycle  
+
+---
+
+# 15. Deterministic Platform Behavior Guarantee
+
+Platform composition shall support deterministic operational behavior.
+
+Where identical inputs, configuration states, and execution contexts are supplied, platform outcomes shall remain reproducible.
+
+Deterministic platform behavior supports:
+
+• regulatory compliance  
+• operational reconciliation  
+• cross-module audit reconstruction  
+• governed correction workflows  
+
+---
+
+# 16. Summary
 
 This document establishes the structural truth of the platform:
 

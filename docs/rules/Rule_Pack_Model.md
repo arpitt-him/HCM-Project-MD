@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Rules Domain |
 | **Location** | docs/rules/Rule_Pack_Model.md |
@@ -366,6 +366,12 @@ This model integrates with:
 - Jurisdiction_Registration_and_Profile_Data_Model
 - Tax_Classification_and_Obligation_Model
 - Regulatory_and_Compliance_Reporting_Model
+- Run_Lineage_Model
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Correction_and_Immutability_Model
+- Posting_Rules_and_Mutation_Semantics
+- Configuration_and_Metadata_Management_Model
 
 ---
 
@@ -381,3 +387,71 @@ Key principles:
 - Rule selection is context-driven, not geography-only
 - Rule override behavior must be explicit and governed
 - The model supports statutory, employer, provider, and validation logic without destabilizing the core platform
+
+---
+
+## 17. Rule Pack Lineage and Version Traceability
+
+Rule Packs shall maintain lineage relationships across version transitions.
+
+Each Rule Pack version shall record:
+
+- Parent_Rule_Pack_Version_ID
+- Root_Rule_Pack_ID
+- Replacement_Reason_Code
+- Effective_Date_Transition
+
+All payroll executions shall record:
+
+- Rule_Pack_ID
+- Rule_Pack_Version_ID
+- Activation_Context_ID
+
+Rule Pack lineage shall remain reconstructable across legislative transitions and correction scenarios.
+
+---
+
+## 18. Rule Resolution Execution Trace
+
+Each payroll execution shall record:
+
+- Resolved_Rule_Pack_List
+- Resolution_Path
+- Override_Decisions_Applied
+- Effective_Date_Context
+- Jurisdiction_Context
+
+Resolution trace shall be stored as part of run lineage records.
+
+This ensures that rule selection behavior remains auditable and reproducible.
+
+---
+
+## 19. Rule Pack Dependency Integrity
+
+Rule Packs shall declare dependencies on:
+
+- referenced rule components
+- decision tables
+- rate tables
+- external mappings
+- jurisdiction definitions
+
+Activation shall validate that all dependencies exist and are compatible.
+
+Invalid dependencies shall prevent activation.
+
+---
+
+## 20. Deterministic Replay Guarantee
+
+Rule Pack execution shall produce identical outcomes when replayed using:
+
+- identical Rule Pack version
+- identical jurisdiction context
+- identical input data
+- identical calculation engine configuration
+
+Replay capability shall remain a mandatory platform guarantee.
+
+---

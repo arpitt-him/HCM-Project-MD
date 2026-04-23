@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/processing/Run_Lineage_Model.md` |
@@ -183,6 +183,13 @@ A lineage structure SHALL include at minimum:
 - Scope_Reference
 - Replay_Sequence_Number
 
+Lineage records may also support traceability to downstream execution artifacts, including:
+
+- Payroll_Run_Result_Set_ID
+- Employee_Payroll_Result_ID where scoped or corrective lineage requires worker-level reconstruction
+
+This supports replay, correction, reconciliation, and audit analysis across both run identity and run-produced results.
+
 ---
 
 ## Root Run Concept
@@ -212,6 +219,8 @@ Replay_Sequence_Number values where present.
 
 Where chronological timestamps and explicit sequence values differ,
 the persisted replay sequence SHALL govern.
+
+Replay sequencing shall preserve business-correct correction order, not merely raw execution timestamp order.
 
 ---
 
@@ -304,6 +313,16 @@ Auditability SHALL support both run-level and chain-level review.
 
 ---
 
+## Relationship to Approval and Release
+
+Child runs with financial or compliance impact may require independent approval and release handling.
+
+Lineage linkage does not imply automatic approval inheritance from the parent run.
+
+Approval and release decisions must remain traceable per run in the lineage chain.
+
+---
+
 ## Failure and Isolation Considerations
 
 Failure of a Child Run SHALL NOT invalidate the existence of its Parent Run.
@@ -319,6 +338,10 @@ Failure handling SHALL remain additive and auditable.
 
 This model depends on:
 
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
+- Calculation_Run_Lifecycle
+- Error_Handling_and_Isolation_Model
 - Payroll_Run_Model
 - Run_Scope_Model
 - Entity_Run_Scope

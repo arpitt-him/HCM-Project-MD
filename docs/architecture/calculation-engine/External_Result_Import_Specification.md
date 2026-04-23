@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Approved |
 | **Owner** | Architecture Team |
 | **Location** | `docs/architecture/calculation-engine/External_Result_Import_Specification.md` |
@@ -58,7 +58,12 @@ Recommended Fields:
 • Source_Record_Count\
 • Description\
 • Source_Total_Basis_Amount (optional)\
-• Currency_Code (optional if single-currency environment)
+• Currency_Code (optional if single-currency environment)\
+• Source_Period_ID (optional)\
+• External_Result_Line_ID (optional but strongly recommended)\
+• External_Adjustment_Reference_ID (optional)\
+• Jurisdiction_Code (optional where jurisdiction-sensitive earnings apply)\
+• Legal_Entity_Code (optional where multi-entity imports apply)
 
 Example Structure:
 
@@ -84,6 +89,16 @@ reference the appropriate Source_Batch_ID.
 
 This preserves audit history and prevents silent data replacement.
 
+Each adjustment submission shall preserve lineage to the previously committed imported result context where such context exists.
+
+Adjustment handling shall support:
+
+• Parent_Import_Record_ID  
+• Root_Import_Record_ID  
+• Adjustment_Sequence_Number  
+
+This ensures imported-result history remains reconstructable across replay, correction, and audit workflows.
+
 # 5. File Processing Workflow
 
 The following staged workflow shall be used:
@@ -99,7 +114,22 @@ Authorized user reviews validation results and confirms processing.
 Commit:\
 Records become available for calculation and payroll processing.
 
-# 6. Validation Rules
+# 6. Relationship to Payroll Execution Artifacts
+
+Committed external result imports shall remain traceable to governed payroll execution artifacts.
+
+Where imported results are consumed by payroll processing, the platform shall preserve linkage to:
+
+• Payroll_Run_ID  
+• Payroll_Run_Result_Set_ID  
+• Employee_Payroll_Result_ID where applicable  
+• Run_Scope_ID where applicable  
+
+Imported results do not replace governed payroll execution artifacts.
+
+They become governed payroll inputs that may later be expressed through result sets, employee payroll results, payables, accumulator impacts, and downstream exports.
+
+# 7. Validation Rules
 
 The system shall validate:
 
@@ -109,12 +139,17 @@ The system shall validate:
 • Earning_Type validity\
 • Duplicate detection within batch\
 • Participant_ID existence validation\
-• Batch-level totals integrity when provided
+• Batch-level totals integrity when provided\
+• Legal_Entity compatibility validation where provided\
+• Jurisdiction compatibility validation where provided\
+• Duplicate detection against previously committed external result lineage where applicable\
+• Import compatibility with the target Payroll_Context_ID and Period_ID\
+• That negative adjustments are permitted for the supplied Earning_Type where policy requires
 
 Files failing validation shall be rejected or partially accepted
 according to configured policy.
 
-# 7. Error Handling
+# 8. Error Handling
 
 Errors shall be reported at both:
 
@@ -126,7 +161,11 @@ Individual records rejected with error logging.
 
 Rejected records shall not be committed until corrected and resubmitted.
 
-# 8. Reconciliation Controls
+Rejected and corrected import records shall remain historically visible where governance policy requires.
+
+External result import error handling shall not permit silent replacement of previously committed imported results.
+
+# 9. Reconciliation Controls
 
 Each batch should support reconciliation using:
 
@@ -137,7 +176,14 @@ Each batch should support reconciliation using:
 These controls allow confirmation that imported totals match source
 system expectations.
 
-# 9. Audit Requirements
+Where imported results are later consumed by payroll execution, reconciliation shall support traceability between:
+
+• Source_Batch_ID  
+• committed import records  
+• Payroll_Run_Result_Set_ID  
+• downstream Employee_Payroll_Result records where applicable
+
+# 10. Audit Requirements
 
 The system shall record:
 
@@ -148,11 +194,17 @@ The system shall record:
 • Approving user\
 • Record counts\
 • Batch identifiers\
-• Validation results
+• Validation results\
+• Import lineage references\
+• Adjustment sequence history\
+• commit actor\
+• target payroll context\
+• target period\
+• downstream execution linkage where applicable
 
 Audit records must be retained according to retention policy.
 
-# 10. Security Controls
+# 11. Security Controls
 
 Access to upload and approval functions shall be restricted to
 authorized roles.
@@ -162,7 +214,7 @@ Files shall be protected against unauthorized viewing or modification.
 Sensitive financial data shall be handled according to platform security
 standards.
 
-# 11. Future Expansion Considerations
+# 12. Future Expansion Considerations
 
 Future enhancements may include:
 
@@ -174,7 +226,35 @@ Future enhancements may include:
 These enhancements shall not change the core summarized-record ingestion
 model.
 
-# 12. Key Design Principle
+# 13. Deterministic Replay Requirements
+
+Committed external result imports shall remain replay-safe.
+
+Replay operations shall preserve:
+
+• original imported values
+• original adjustment sequence
+• original source batch lineage
+• original approval and commit history
+
+Later resubmissions or corrections shall not silently reinterpret historical imported-result state.
+
+# 14. Relationship to Other Models
+
+This model integrates with:
+
+- Result_and_Payable_Model
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Interface_and_Export_Model
+- Integration_and_Data_Exchange_Model
+- Exception_and_Work_Queue_Model
+- Security_and_Access_Control_Model
+- Data_Retention_and_Archival_Model
+
+# 15. Key Design Principle
 
 This platform accepts summarized externally calculated earnings suitable
 for payroll processing.

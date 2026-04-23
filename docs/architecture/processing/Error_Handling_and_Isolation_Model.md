@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/architecture/processing/Error_Handling_and_Isolation_Model.md` |
@@ -140,6 +140,10 @@ Every error record SHALL include:
 - Containment_Boundary
 - Recovery_Action_Type (optional)
 - Parent_Error_ID (optional)
+- Payroll_Run_Result_Set_ID (if applicable)
+- Employee_Payroll_Result_ID (if applicable)
+- Source_Period_ID (if applicable)
+- Execution_Period_ID (if applicable)
 
 This structure SHALL support participant-level, scope-level, and run-level diagnostic reconstruction.
 
@@ -181,6 +185,8 @@ Remediate the environment and rerun from a safe restart point. Infrastructure re
 ### 6.5 Configuration Recovery
 
 Repair configuration, revalidate readiness, and re-attempt processing only after dependency integrity is restored.
+
+Configuration recovery SHALL require successful revalidation through Configuration_and_Metadata_Management_Model before processing is re-attempted.
 
 ---
 
@@ -276,9 +282,17 @@ Escalation routing SHALL integrate with Monitoring_and_Alerting_Model and Except
 
 ---
 
+## 12.1 Relationship to Release Readiness
+
+Blocking and unresolved high-severity errors SHALL be considered during release readiness evaluation.
+
+Error states that affect payroll correctness, funding, remittance, reconciliation, or legal compliance SHALL prevent release unless explicitly overridden through governed approval workflows.
+
+---
+
 ## 13. Relationship to Other Models
 
-This model integrates with: Calculation_Run_Lifecycle, Exception_and_Work_Queue_Model, Payroll_Run_Model, Monitoring_and_Alerting_Model, Correction_and_Immutability_Model, Run_Scope_Model, Run_Lineage_Model, Payroll_Reconciliation_Model.
+This model integrates with: Calculation_Run_Lifecycle, Exception_and_Work_Queue_Model, Payroll_Run_Model, Monitoring_and_Alerting_Model, Correction_and_Immutability_Model, Run_Scope_Model, Run_Lineage_Model, Payroll_Reconciliation_Model, Payroll_Run_Result_Set_Model, Employee_Payroll_Result_Model, Release_and_Approval_Model, Configuration_and_Metadata_Management_Model.
 
 ---
 

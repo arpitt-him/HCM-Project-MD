@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Reviewed |
 | **Owner** | Rules Domain |
 | **Location** | `docs/rules/Rule_Resolution_Engine.md` |
@@ -196,6 +196,8 @@ A resolution trace should capture:
 
 - Resolution timestamp
 
+- Result_Line_Reference_ID (optional)
+
 The trace is not a debugging luxury. It is an operational and audit
 requirement.
 
@@ -229,6 +231,10 @@ Exception handling shall preserve:
 - failure type
 - consuming process
 - downstream impact scope
+
+Generated Payroll_Exception records SHALL preserve linkage to the originating Resolution Trace identifier.
+
+This linkage ensures trace continuity between rule resolution failure and operational exception handling workflows.
 
 # 7. Performance and Caching Strategy
 
@@ -338,6 +344,9 @@ This model integrates with:
 - Payroll_Exception_Model
 - Payroll_Run_Model
 - Payroll_Run_Result_Set_Model
+- Run_Lineage_Model
+- Calculation_Run_Lifecycle
+- Error_Handling_and_Isolation_Model
 
 # 11. Concluding Principle
 

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Governance Domain |
 | **Location** | docs/architecture/core/Tenant_Client_Company_Legal_Entity_and_Jurisdiction_Structural_Relationship_Map.md |
@@ -271,9 +271,25 @@ But employer-of-record and jurisdiction logic resolve downward from Legal Entity
 
 ---
 
-## 5. Why the Layers Must Remain Distinct
+## 5. Structural Lineage Principle
 
-### 5.1 Tenant must remain separate from Client Company
+Structural relationships across Tenant, Client Company, Legal Entity, Jurisdiction Registration, and Jurisdiction Profile shall preserve lineage across time.
+
+The platform must support reconstruction of:
+
+- which Legal Entity governed an Employment at a given effective date
+- which Jurisdiction Registration applied at a given effective date
+- which Jurisdiction Profile supplied statutory rule context at a given effective date
+
+Later structural changes shall not reinterpret previously executed payroll, reporting, remittance, or compliance outcomes.
+
+All structural traversal shall remain reconstructable for audit and replay workflows.
+
+---
+
+## 6. Why the Layers Must Remain Distinct
+
+### 6.1 Tenant must remain separate from Client Company
 
 Because one Tenant may contain:
 
@@ -285,7 +301,7 @@ If Tenant and Client Company are collapsed, customer segmentation and PEO struct
 
 ---
 
-### 5.2 Client Company must remain separate from Legal Entity
+### 6.2 Client Company must remain separate from Legal Entity
 
 Because one Client Company may contain:
 
@@ -298,7 +314,7 @@ If Client Company and Legal Entity are collapsed, statutory accountability becom
 
 ---
 
-### 5.3 Legal Entity must remain separate from Jurisdiction Registration
+### 6.3 Legal Entity must remain separate from Jurisdiction Registration
 
 Because one Legal Entity may register with:
 
@@ -311,7 +327,7 @@ If Legal Entity and Jurisdiction Registration are collapsed, foreign-employer an
 
 ---
 
-### 5.4 Jurisdiction Registration must remain separate from Jurisdiction Profile
+### 6.4 Jurisdiction Registration must remain separate from Jurisdiction Profile
 
 Because registration presence and rule context are related but not identical.
 
@@ -328,9 +344,9 @@ Separating these concepts supports:
 
 ---
 
-## 6. Supported Operating Patterns
+## 7. Supported Operating Patterns
 
-### 6.1 Direct Employer Pattern
+### 7.1 Direct Employer Pattern
 
 ```text
 Tenant
@@ -342,7 +358,7 @@ Tenant
 
 ---
 
-### 6.2 Multi-Entity Employer Pattern
+### 7.2 Multi-Entity Employer Pattern
 
 ```text
 Tenant
@@ -357,7 +373,7 @@ Tenant
 
 ---
 
-### 6.3 PEO Pattern
+### 7.3 PEO Pattern
 
 ```text
 Tenant (PEO)
@@ -375,7 +391,7 @@ Each Legal Entity may hold its own registrations and profiles.
 
 ---
 
-### 6.4 Foreign Employer Exception Pattern
+### 7.4 Foreign Employer Exception Pattern
 
 ```text
 Tenant
@@ -390,7 +406,27 @@ This supports the limited cases where one Legal Entity is permitted to register 
 
 ---
 
-## 7. Responsibility Matrix
+## 8. Deterministic Structural Resolution Guarantee
+
+Structural traversal across Tenant, Client Company, Legal Entity, Jurisdiction Registration, and Jurisdiction Profile shall remain deterministic.
+
+Given identical structural state and effective date context, the platform shall resolve the same:
+
+- employer-of-record identity
+- jurisdiction registration context
+- jurisdiction profile
+- reporting aggregation path
+
+Deterministic structural resolution is required to support:
+
+- payroll replay
+- compliance reconstruction
+- reporting defensibility
+- audit review
+
+---
+
+## 9. Responsibility Matrix
 
 | Layer | Primary Responsibility | Must Not Be Used As |
 |---|---|---|
@@ -402,7 +438,7 @@ This supports the limited cases where one Legal Entity is permitted to register 
 
 ---
 
-## 8. Core Structural Rules
+## 10. Core Structural Rules
 
 The following rules shall govern the combined structure:
 
@@ -417,7 +453,23 @@ The following rules shall govern the combined structure:
 
 ---
 
-## 9. Relationship to Other Models
+## 11. Dependencies
+
+This structural map depends on:
+
+- Tenant_Data_Model
+- Client_Company_Data_Model
+- Legal_Entity_Data_Model
+- Jurisdiction_Registration_and_Profile_Data_Model
+- Jurisdiction_and_Compliance_Rules_Model
+- Rule_Pack_Model
+- Employment_and_Person_Identity_Model
+- Platform_Composition_and_Extensibility_Model
+- Security_and_Access_Control_Model
+
+---
+
+## 12. Relationship to Other Models
 
 This structural map integrates with:
 
@@ -432,7 +484,7 @@ This structural map integrates with:
 
 ---
 
-## 10. Summary
+## 13. Summary
 
 This document makes explicit the combined structural meaning of four critical platform constructs.
 

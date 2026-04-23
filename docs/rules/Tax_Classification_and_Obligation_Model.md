@@ -3,14 +3,14 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Reviewed |
 | **Owner** | Rules Domain |
 | **Location** | `docs/rules/Tax_Classification_and_Obligation_Model.md` |
 | **Domain** | Rules |
 | **Related Documents** | 
 
-## 1. Purpose
+## Purpose
 
 Define classification and handling of employee tax withholdings and employer statutory tax obligations.
 
@@ -26,7 +26,7 @@ This model governs how taxes are:
 
 This model ensures correct treatment of jurisdictional taxes, wage bases, liabilities, correction activity, and downstream financial and reporting consequences.
 
-## 2. Tax Actors
+## 1. Tax Actors
 
 Two primary actors exist:\
 \
@@ -36,7 +36,7 @@ Taxes withheld from employee wages.\
 Employer Statutory Obligation\
 Taxes paid by employer based on payroll activity.
 
-## 3. Tax Classification Types
+## 2. Tax Classification Types
 
 Canonical tax classifications:\
 \
@@ -49,7 +49,7 @@ STATE_UNEMPLOYMENT\
 LOCAL_TAX\
 OTHER_STATUTORY_TAX
 
-## 4. Jurisdiction Model
+## 3. Jurisdiction Model
 
 Each tax is associated with a jurisdiction:\
 \
@@ -63,7 +63,7 @@ Federal\
 Georgia\
 Local Municipality
 
-## 5. Tax Component Attributes
+## 4. Tax Component Attributes
 
 Each tax definition includes:\
 \
@@ -88,7 +88,7 @@ Effective_End_Date
 
 These attributes support downstream remittance, reporting, replay, and correction handling.
 
-## 5.1 Relationship to Employee Payroll Result
+### 4.1 Relationship to Employee Payroll Result
 
 Tax classifications are expressed operationally through Tax Result Lines produced within Employee Payroll Results.
 
@@ -105,7 +105,23 @@ Liability / Reporting / Remittance
 
 This ensures that tax definitions remain governed rules, while payroll execution produces explicit result-line instances of those rules.
 
-## 6. Wage Base Handling
+### 4.2 Rule Pack Association
+
+Each tax definition shall be associated with one or more Rule Packs.
+
+Rule Pack binding shall define:
+
+- jurisdiction-specific tax behavior
+- calculation logic
+- exemption handling
+- reporting configuration
+- remittance handling
+
+Rule Pack selection shall be governed through:
+
+Legal Entity → Jurisdiction Profile → Rule Pack → Tax Classification
+
+## 5. Wage Base Handling
 
 Certain taxes include annual wage limits.\
 \
@@ -118,7 +134,7 @@ State Unemployment Wage Base\
 System must track cumulative wages and stop calculation once limits are
 reached.
 
-## 7. Tax Accumulator Alignment
+## 6. Tax Accumulator Alignment
 
 Tax accumulators may track:
 
@@ -136,7 +152,7 @@ Each accumulator must be governed through:
 
 Tax-related accumulator values reset according to the appropriate governed tax or reporting calendar and must remain traceable to the payroll results and tax result lines that produced them.
 
-## 8. Imputed Income Interaction
+## 7. Imputed Income Interaction
 
 Certain employer-paid benefits generate taxable wages.\
 \
@@ -146,7 +162,7 @@ Group-Term Life Insurance (IRC §79)\
 \
 Imputed income increases taxable wages for applicable tax calculations.
 
-## 9. External Code Mapping Examples
+## 8. External Code Mapping Examples
 
 Based on observed datasets:\
 \
@@ -158,7 +174,7 @@ TaxU / OASDI → SOCIAL_SECURITY\
 ConB / FUTA → FUTA\
 ConB / State Unemployment → STATE_UNEMPLOYMENT
 
-## 10. Tax Lifecycle
+## 9. Tax Lifecycle
 
 Tax processing lifecycle:\
 \
@@ -169,7 +185,7 @@ Post Tax Results\
 Update Accumulators\
 Report Liabilities
 
-## 10.1 Correction and Reversal Handling
+## 9.1 Correction and Reversal Handling
 
 Tax obligations may require adjustment through:
 
@@ -190,7 +206,7 @@ Corrective handling must preserve lineage to:
 
 This supports replay, audit, reporting defensibility, and remittance correction workflows.
 
-## 10.2 Downstream Obligation Alignment
+## 9.2 Downstream Obligation Alignment
 
 Tax classifications and obligations may drive downstream outputs including:
 
@@ -210,7 +226,7 @@ A governed tax obligation may therefore produce consequences in:
 
 This model defines the governed tax semantics that those downstream models consume.
 
-## 11. Relationship to Other Models
+## 10. Relationship to Other Models
 
 This model integrates with:
 
@@ -227,3 +243,53 @@ This model integrates with:
 - Payroll_Adjustment_and_Correction_Model
 - Multi_Context_Calendar_Model
 - Provider_Billing_and_Charge_Model
+
+## 11. Multi-Jurisdiction Tax Applicability
+
+Employees may be subject to multiple simultaneous tax jurisdictions.
+
+Applicable tax determination shall consider:
+
+- work location jurisdiction
+- residency jurisdiction
+- legal entity jurisdiction
+- special authority jurisdictions
+
+Resolution shall remain:
+
+- deterministic
+- traceable
+- reproducible
+
+Each applied tax obligation shall reference the originating jurisdiction context.
+
+## 12. Tax Liability Lifecycle
+
+Tax liabilities shall progress through the following lifecycle:
+
+Calculated  
+Approved  
+Accrued  
+Remitted  
+Reported  
+Reconciled  
+Closed
+
+Each lifecycle stage shall remain traceable through lineage records.
+
+Liabilities shall not be overwritten once remitted.
+
+## 13. Deterministic Replay Requirements
+
+Tax calculation shall produce identical outputs when replayed using:
+
+- identical taxable wage inputs
+- identical jurisdiction rule sets
+- identical rule pack versions
+- identical accumulator states
+
+Replay capability shall support:
+
+- audit reconstruction
+- jurisdictional review
+- reconciliation validation

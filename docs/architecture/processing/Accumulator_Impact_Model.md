@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Calculation & Reporting Domain |
 | **Location** | docs/architecture/processing/Accumulator_Impact_Model.md |
@@ -146,6 +146,8 @@ A single Employee Payroll Result may produce multiple impacts across:
 
 Accumulator Impact preserves the exact mutation outcome that results from worker-level payroll processing.
 
+Where worker-level payroll processing produces multiple result lines, accumulator impacts shall preserve traceability to the originating result-line lineage through Source_Object_ID and related payroll result lineage identifiers.
+
 ---
 
 # 5. Relationship to Payroll Run Result Set
@@ -167,6 +169,8 @@ Examples may include:
 - cross-employee control totals
 
 This allows accumulator mutation to exist both at worker-detail level and at broader payroll execution levels where needed.
+
+Run-level accumulator impacts shall remain traceable to the governing payroll run lineage so that aggregate remittance, liability, and reporting impacts can be reconstructed across rerun and correction scenarios.
 
 ---
 
@@ -274,6 +278,10 @@ Examples:
 - derived rollup may be marked as Derived or informational posting
 
 This prevents ambiguity during replay and reconciliation.
+
+Derived postings shall remain governed and auditable.
+
+A posting classified as Derived shall not bypass lineage, validation, or reconstruction requirements.
 
 ---
 
@@ -389,7 +397,25 @@ These validations shall be enforced through payroll processing controls and accu
 
 ---
 
-# 15. Audit and Traceability Requirements
+# 15. Deterministic Replay Requirements
+
+Accumulator Impact reconstruction shall remain deterministic.
+
+Given identical:
+
+- Accumulator_Definition_ID
+- source payroll execution lineage
+- scope context
+- rule/version context
+- applicable calendar and period context
+
+the platform shall reconstruct the same accumulator impacts and resulting balance transitions.
+
+Later rule, configuration, scope, or calendar changes shall not silently reinterpret historical accumulator mutation history.
+
+---
+
+# 16. Audit and Traceability Requirements
 
 The system shall preserve:
 
@@ -413,22 +439,44 @@ This supports:
 
 ---
 
-# 16. Relationship to Other Models
+# 17. Dependencies
 
-This model integrates with:
+This model depends on:
 
 - Employee_Payroll_Result_Model
 - Payroll_Run_Result_Set_Model
+- Payroll_Run_Model
+- Run_Lineage_Model
 - Payroll_Adjustment_and_Correction_Model
 - Accumulator_Definition_Model
 - Accumulator_Model_Detailed.md
 - Rule_Pack_Model
 - Tax_Classification_and_Obligation_Model
-- Regulatory_and_Compliance_Reporting_Model
+- Multi_Context_Calendar_Model
+- Correction_and_Immutability_Model
 
 ---
 
-# 17. Summary
+# 18. Relationship to Other Models
+
+This model integrates with:
+
+- Payroll_Run_Model
+- Run_Lineage_Model
+- Employee_Payroll_Result_Model
+- Payroll_Run_Result_Set_Model
+- Payroll_Adjustment_and_Correction_Model
+- Accumulator_Definition_Model
+- Accumulator_Model_Detailed
+- Rule_Pack_Model
+- Tax_Classification_and_Obligation_Model
+- Regulatory_and_Compliance_Reporting_Model
+- Multi_Context_Calendar_Model
+- Correction_and_Immutability_Model
+
+---
+
+# 19. Summary
 
 This model establishes Accumulator Impact as the governed mutation record connecting payroll results to accumulator values.
 

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Draft (Revision from v0.2) |
 | **Owner** | Compliance Domain |
 | **Location** | docs/architecture/governance/Jurisdiction_and_Compliance_Rules_Model.md |
@@ -149,6 +149,17 @@ Jurisdiction Profiles support:
 - historical recalculation
 - compliance traceability
 
+Jurisdiction_Profile attributes include:
+
+Jurisdiction_Profile_ID  
+Legal_Entity_ID  
+Effective_Start_Date  
+Effective_End_Date  
+Status  
+Associated_Rule_Pack_List
+
+Jurisdiction Profiles shall associate with one or more Rule Packs that define jurisdiction-specific statutory behavior, tax calculations, and reporting requirements.
+
 ---
 
 ## 7. Rule Resolution Enhancements
@@ -207,6 +218,8 @@ Resolution shall remain:
 
 Multiple jurisdiction contexts may execute concurrently.
 
+Employees working across jurisdictional boundaries shall maintain traceable jurisdiction applicability records reflecting work location, residency, and statutory classification factors.
+
 ---
 
 ## 10. Client Company Alignment
@@ -252,3 +265,7 @@ This model integrates with:
 - Regulatory_and_Compliance_Reporting_Model
 - Multi_Context_Calendar_Model
 - Platform_Composition_and_Extensibility_Model
+- Payroll_Run_Model
+- Run_Lineage_Model
+- Payroll_Reconciliation_Model
+- Payroll_Adjustment_and_Correction_Model

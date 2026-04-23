@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/architecture/core/Position_Management_Model.md` |
@@ -22,6 +22,23 @@ Position control is advisory in v1. Exceeding headcount budget generates a warni
 
 ---
 
+### 1.1 Position Identity Stability Principle
+
+Position records represent structural employment capacity and shall remain identity-stable across lifecycle transitions.
+
+Position identity shall:
+
+- persist across vacancy and occupancy cycles
+- remain effective-dated rather than destructively replaced
+- preserve historical assignment relationships
+- remain queryable across organizational restructuring
+
+Position records shall not be deleted when vacated or restructured.
+
+Where structural meaning changes materially, a new effective-dated position definition shall be created rather than modifying historical identity.
+
+---
+
 ## 2. Headcount Tracking Model
 
 Headcount is tracked at two levels simultaneously:
@@ -37,6 +54,26 @@ Headcount is tracked at two levels simultaneously:
 - Department_Headcount_Vacant = Department_Headcount_Budget − Department_Headcount_Filled.
 
 Both levels are computed on demand. Neither requires a separate stored counter subject to concurrency risk.
+
+---
+
+### 2.1 Organizational Lineage Awareness
+
+Position headcount calculations shall respect organizational lineage.
+
+Derived headcount values must resolve against:
+
+- effective organizational hierarchy
+- effective department membership
+- effective legal entity structure
+
+Headcount reporting shall remain reconstructable across:
+
+- organizational restructuring events
+- department realignments
+- legal entity transitions
+
+Organizational lineage integrity ensures point-in-time headcount accuracy.
 
 ---
 
@@ -71,6 +108,12 @@ Vacancy reporting supports:
 - Days vacant (derived from last date a position was fully filled)
 - Headcount vs budget variance by org unit
 
+Vacancy status shall be derived deterministically using effective-dated assignment state.
+
+Vacancy state shall not be stored independently where derivation is possible.
+
+Derived vacancy state must remain reconstructable during replay and audit analysis.
+
 ---
 
 ## 5. Position Lifecycle Integration
@@ -84,6 +127,26 @@ Vacancy reporting supports:
 | Position FROZEN | New hire assignments warned (EXC-HRS-004); existing occupants unaffected |
 | Position CLOSED | Cannot be assigned; existing occupants must be transferred or terminated first |
 
+Frozen status transitions shall require explicit governance approval.
+
+Freeze events shall record:
+
+- Freeze_Reason_Code
+- Freeze_Effective_Date
+- Freeze_Authority
+
+Frozen status shall not retroactively invalidate existing assignments.
+
+Position lifecycle transitions shall reference assignment lineage.
+
+Assignment state changes impacting position capacity must remain traceable through:
+
+- Assignment_ID
+- Assignment_Lineage_ID
+- Effective_Date sequence
+
+Position lifecycle behavior shall remain reconstructable across assignment correction and replay workflows.
+
 ---
 
 ## 6. Department Headcount Budget Attributes
@@ -95,6 +158,17 @@ Added to Org_Unit for DEPARTMENT type units:
 | Headcount_Budget | Integer | No | Approved FTE budget for the department |
 | Headcount_Budget_Effective_Date | Date | No | When this budget came into effect |
 | Headcount_Budget_Approved_By | UUID | No | Approver of the budget |
+
+Department headcount budgets shall follow governed approval lifecycle controls.
+
+Budget changes shall:
+
+- be effective-dated
+- preserve prior approved values
+- record approval authority
+- remain historically auditable
+
+Silent overwriting of approved headcount budgets is not permitted.
 
 ---
 
@@ -110,6 +184,30 @@ Position management supports the following operational reports:
 
 All reports resolve at an effective date for point-in-time accuracy.
 
+All reporting outputs shall remain deterministic when evaluated against effective-dated data.
+
+Historical reporting must resolve using:
+
+- effective-dated position definitions
+- effective-dated assignments
+- effective organizational hierarchy
+
+Later changes shall not reinterpret historical headcount values.
+
+---
+
+### 7.1 Structural Invariants
+
+The following structural invariants shall be preserved:
+
+- Headcount_Filled remains derived, not stored
+- Vacancy state remains derived, not stored
+- Position identity remains stable across lifecycle transitions
+- Department budgets remain historically auditable
+- Assignment-driven occupancy remains authoritative
+
+Violation of these invariants introduces data integrity risk and shall not be permitted.
+
 ---
 
 ## 8. Future Expansion
@@ -122,6 +220,29 @@ Advisory-only position control is the v1 design. Future releases may introduce:
 
 ---
 
-## 9. Relationship to Other Models
+## 9. Dependencies
 
-This model integrates with: Organizational_Structure_Model, Employee_Assignment_Model, Employee_Event_and_Status_Change_Model, Operational_Reporting_and_Analytics_Model, Release_and_Approval_Model.
+This model depends on:
+
+- Organizational_Structure_Model
+- Employee_Assignment_Model
+- Employee_Event_and_Status_Change_Model
+- Employment_and_Person_Identity_Model
+- Jurisdiction_and_Compliance_Rules_Model
+- Configuration_and_Metadata_Management_Model
+- Release_and_Approval_Model
+
+---
+
+## 10. Relationship to Other Models
+
+This model integrates with:
+
+- Organizational_Structure_Model
+- Employee_Assignment_Model
+- Employee_Event_and_Status_Change_Model
+- Employment_and_Person_Identity_Model
+- Operational_Reporting_and_Analytics_Model
+- Workflow_Model
+- Release_and_Approval_Model
+- Configuration_and_Metadata_Management_Model

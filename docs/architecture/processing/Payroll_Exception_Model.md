@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Processing & Operations Domain |
 | **Location** | docs/architecture/processing/Payroll_Exception_Model.md |
@@ -122,6 +122,11 @@ Payroll Exception is the problem record, not the run, not the fix, and not the q
 | Rule_Pack_ID | Related rule pack where applicable |
 | Source_Object_Type | Generic source object type |
 | Source_Object_ID | Generic source object reference |
+| Run_Lineage_ID | (optional) | 
+| Parent_Run_ID | (optional) |
+| Root_Run_ID | (optional) |
+| Replay_Sequence_Number | (optional) |
+| Run_Scope_ID | (optional) |
 
 ---
 
@@ -139,6 +144,10 @@ Examples:
 - missing required legal entity funding configuration
 - failed gross-to-net reconciliation
 - unresolved critical validation error
+
+Hard_Stop exceptions SHALL prevent progression of payroll lifecycle stages that depend on successful completion of the affected processing unit.
+
+Hard_Stop conditions SHALL be evaluated during Release readiness determination.
 
 ### 4.2 Hold
 
@@ -225,6 +234,10 @@ This supports targeted intervention without invalidating the entire run unnecess
 
 Payroll Exception may also attach to downstream operational use records.
 
+Funding, remittance, and disbursement exceptions SHALL remain traceable to their originating payroll run and associated financial execution artifacts.
+
+Where external provider responses are involved, linkage SHALL include Provider_Response identifiers where available.
+
 ### 7.1 Funding Exceptions
 
 Examples:
@@ -265,6 +278,7 @@ Suggested Exception_Status values:
 | Open | Newly detected and not yet worked |
 | Assigned | Routed to an owner or queue |
 | In_Review | Actively under investigation |
+| Awaiting_Approval | Awaiting approval |
 | Resolved | Corrective action completed |
 | Waived | Accepted without corrective action under governance |
 | Closed | Finalized and no longer active |
@@ -377,6 +391,8 @@ Payroll Exception should therefore preserve linkage to:
 
 This allows the platform to trace issue-to-correction lineage.
 
+Where corrective reruns are initiated due to an exception, the originating Payroll_Exception_ID SHALL be preserved as the trigger reference within the resulting child run lineage.
+
 ---
 
 # 13. Effective Dating and Historical Preservation
@@ -456,6 +472,11 @@ This model integrates with:
 - Validation_Framework_Model
 - Exception_and_Work_Queue_Model
 - Release_and_Approval_Model
+- Run_Lineage_Model  
+- Calculation_Run_Lifecycle  
+- Error_Handling_and_Isolation_Model  
+- Payroll_Reconciliation_Model  
+- Configuration_and_Metadata_Management_Model
 
 ---
 

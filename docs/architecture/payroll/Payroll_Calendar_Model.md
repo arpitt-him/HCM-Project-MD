@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/architecture/payroll/Payroll_Calendar_Model.md` |
@@ -32,15 +32,44 @@ Period_Start, Period_End, Pay_Date, Input_Cutoff, Calculation_Date, Validation_W
 
 Calendar_Entry_ID, Payroll_Context_ID, Period_ID, all date control fields above, Calendar_Status.
 
-## 5. Calendar Lifecycle States
+Additional governed attributes may include:
+
+- Parent_Calendar_Entry_ID
+- Root_Calendar_Entry_ID
+- Calendar_Version_Number
+- Approval_Reference_ID
+- Source_Period_ID where applicable
+- Execution_Period_ID where applicable
+
+## 5. Payroll Calendar Lineage
+
+Payroll calendar entries shall preserve lineage across effective-dated calendar change over time.
+
+Calendar lineage shall support:
+
+- Parent_Calendar_Entry_ID
+- Root_Calendar_Entry_ID
+- Calendar_Lineage_Sequence
+- Calendar_Change_Reason_Code
+
+Calendar lineage is required when:
+
+- pay dates are revised before release
+- cutoff dates are adjusted
+- correction windows are changed
+- transmission timing is updated
+
+Later calendar changes shall not reinterpret historical payroll execution, reporting, accumulator, or transmission outcomes.
+
+## 6. Calendar Lifecycle States
 
 Open → In Progress → Calculated → Approved → Released → Closed. State transitions shall be controlled by authorised users or approved system processes.
 
-## 6. Pay_Date Preservation on Rerun
+## 7. Pay_Date Preservation on Rerun
 
 If a run fails and is rerun after the original pay date, the system must continue referencing the original Pay_Date from the calendar entry. This ensures correct date-sensitive calculation behaviour.
 
-## 6.1 Source Period vs Execution Period
+## 7.1 Source Period vs Execution Period
 
 Payroll activity may reference both:
 
@@ -78,11 +107,11 @@ This distinction supports:
 - jurisdictional reporting alignment
 - financial reconciliation integrity
 
-## 7. Calendar Governance
+## 8. Calendar Governance
 
 Calendars must be established before payroll runs can be initiated. Future periods shall be pre-generated. Calendar changes require approval workflow completion. Historical calendar definitions must be preserved for replayability.
 
-## 7.1 Multiple Payroll Runs Per Period
+## 8.1 Multiple Payroll Runs Per Period
 
 A single Payroll Calendar Entry may be associated with multiple Payroll Runs.
 
@@ -104,7 +133,37 @@ This ensures:
 - replay traceability
 - operational lineage clarity
 
-## 8. Relationship to Other Models
+## 9. Deterministic Payroll Calendar Interpretation
+
+Payroll calendar interpretation shall remain deterministic.
+
+Given identical:
+
+- Payroll_Context_ID
+- Period_ID
+- Pay_Date
+- effective calendar state
+- source period and execution period context where applicable
+
+the platform shall resolve the same payroll timing, cutoff, correction-window, finalization, and transmission behavior.
+
+Later calendar changes shall not silently reinterpret historical payroll operations.
+
+## 10. Dependencies
+
+This model depends on:
+
+- Payroll_Context_Model
+- Multi_Context_Calendar_Model
+- Holiday_and_Special_Calendar_Model
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Payroll_Adjustment_and_Correction_Model
+- Accumulator_Definition_Model
+- Accumulator_Impact_Model
+- Correction_and_Immutability_Model
+
+## 11. Relationship to Other Models
 
 This model integrates with:
 
@@ -117,3 +176,5 @@ This model integrates with:
 - Accumulator_Definition_Model
 - Accumulator_Impact_Model
 - Accumulator_Model_Detailed
+- Correction_and_Immutability_Model
+- Regulatory_and_Compliance_Reporting_Model

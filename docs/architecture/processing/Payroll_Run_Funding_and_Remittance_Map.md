@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Domain |
 | **Location** | docs/architecture/processing/Payroll_Run_Funding_and_Remittance_Map.md |
@@ -450,6 +450,8 @@ This supports:
 - provider settlement review
 - audit inquiry response
 
+Reconciliation must remain able to traverse from employee-level obligations through result-set lineage into funding, remittance, settlement, retry, and correction outcomes.
+
 ---
 
 ## 12. Suggested Runtime Mapping Structures
@@ -463,6 +465,11 @@ The implementation may use one or more runtime mapping records such as:
 - Covered_Obligation_Type
 - Funding_Status
 - Override_Flag
+- Payroll_Run_Result_Set_ID
+- Funding_Lineage_ID
+- Parent_Funding_Use_ID
+- Source_Period_ID
+- Execution_Period_ID
 
 ### 12.2 Payroll_Run_Remittance_Use
 - Payroll_Run_ID
@@ -471,6 +478,11 @@ The implementation may use one or more runtime mapping records such as:
 - Obligation_Type
 - Remittance_Status
 - Filing_Linked_Flag
+- Payroll_Run_Result_Set_ID
+- Remittance_Lineage_ID
+- Parent_Remittance_Use_ID
+- Source_Period_ID
+- Execution_Period_ID
 
 ### 12.3 Payroll_Run_Payment_Instruction_Use
 - Payroll_Run_ID
@@ -479,6 +491,11 @@ The implementation may use one or more runtime mapping records such as:
 - Channel_Type
 - Release_Status
 - Transmission_Status
+- Payroll_Run_Result_Set_ID
+- Payment_Lineage_ID
+- Parent_Payment_Instruction_Use_ID
+- Source_Period_ID
+- Execution_Period_ID
 
 These are illustrative structures, not required final implementation names.
 
@@ -509,27 +526,64 @@ The run must preserve enough mapping detail for exceptions to be routed, investi
 
 ---
 
-## 14. Relationship to Other Models
+## 14. Deterministic Replay Requirements
+
+Funding, remittance, and payment-instruction execution mapping shall remain replay-safe.
+
+Given identical:
+
+- Payroll_Run_ID
+- Payroll_Run_Result_Set_ID
+- governing profile references
+- source period and execution period context
+- approval and override state
+
+the platform shall reconstruct the same run-time funding, remittance, and payment-routing interpretation.
+
+Later configuration or profile changes shall not silently reinterpret historical execution evidence.
+
+---
+
+## 15. Dependencies
+
+This model depends on:
+
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
+- Payroll_Context_Model
+- Funding_Profile_Data_Model
+- Remittance_Profile_Data_Model
+- Payment_Instruction_Profile_Data_Model
+- Net_Pay_and_Disbursement_Model
+- Payroll_Funding_and_Cash_Management_Model
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Exception_Model
+- Correction_and_Immutability_Model
+
+---
+
+## 16. Relationship to Other Models
 
 This map integrates with:
 
 - Payroll_Run_Model
 - Payroll_Run_Result_Set_Model
 - Employee_Payroll_Result_Model
-- Payroll_Context_Data_Model
+- Payroll_Context_Model
 - Funding_Profile_Data_Model
 - Remittance_Profile_Data_Model
 - Payment_Instruction_Profile_Data_Model
 - Net_Pay_and_Disbursement_Model
-- Net_Pay_Disbursement_Data_Model
 - Payroll_Exception_Model
 - Payroll_Adjustment_and_Correction_Model
 - Payroll_Funding_and_Cash_Management_Model
 - Payroll_Reconciliation_Model
+- Correction_and_Immutability_Model
 
 ---
 
-## 15. Summary
+## 17. Summary
 
 This document establishes how Payroll Run brings together governed funding and remittance configuration at execution time.
 

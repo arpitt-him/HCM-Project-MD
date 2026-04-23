@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/processing/Processing_Lineage_Validation_Model.md` |
@@ -32,7 +32,7 @@ This model supports:
 
 ---
 
-## Scope
+## 1. Scope
 
 This model applies to:
 
@@ -53,7 +53,7 @@ This model governs:
 
 ---
 
-## Architectural Context
+## 2. Architectural Context
 
 Processing lineage validation operates within the following architecture models:
 
@@ -70,7 +70,7 @@ child run is created, replay is requested, or lineage integrity is questioned.
 
 ---
 
-## Core Validation Objectives
+## 3. Core Validation Objectives
 
 Lineage validation SHALL confirm:
 
@@ -83,9 +83,9 @@ Lineage validation SHALL confirm:
 
 ---
 
-## Validation Domains
+## 4. Validation Domains
 
-### Parent Run Validation
+### 4.1 Parent Run Validation
 
 Confirms that the referenced parent run:
 
@@ -96,7 +96,7 @@ Confirms that the referenced parent run:
 
 ---
 
-### Root Run Validation
+### 4.2 Root Run Validation
 
 Confirms that:
 
@@ -106,7 +106,7 @@ Confirms that:
 
 ---
 
-### Child Run Relationship Validation
+### 4.3 Child Run Relationship Validation
 
 Confirms that:
 
@@ -117,7 +117,7 @@ Confirms that:
 
 ---
 
-### Scope Relationship Validation
+### 4.4 Scope Relationship Validation
 
 Confirms that:
 
@@ -128,7 +128,18 @@ Confirms that:
 
 ---
 
-### Replay Sequence Validation
+### 4.5 Correction Relationship Validation
+
+Confirms that:
+
+- correction-triggered child runs reference the expected originating correction record where applicable
+- correction scope aligns with Run_Type and Relationship_Type
+- additive correction behavior remains consistent with Correction_and_Immutability_Model
+- no correction workflow implies destructive replacement of finalized parent outcomes
+
+---
+
+### 4.6 Replay Sequence Validation
 
 Confirms that:
 
@@ -139,7 +150,19 @@ Confirms that:
 
 ---
 
-## Validation Rules
+### 4.7 Result Set and Result Lineage Validation
+
+Confirms that:
+
+- Payroll_Run_Result_Set_ID values remain traceable to the correct Run_ID
+- Employee_Payroll_Result_ID values remain traceable to the correct Payroll_Run_Result_Set_ID
+- Child-run result artifacts do not silently replace finalized parent result artifacts
+- Correction-generated result sets remain linked to the originating lineage chain
+- Result lineage remains reconstructable across replay and correction workflows
+
+---
+
+## 5. Validation Rules
 
 RULE-PLV-001  
 Every child run SHALL reference one finalized parent run.
@@ -171,9 +194,21 @@ A lineage chain SHALL remain traversable from any child run back to its root run
 RULE-PLV-010  
 Validation outcomes SHALL be recorded as auditable events.
 
+RULE-PLV-011  
+Payroll_Run_Result_Set lineage SHALL remain consistent with the validated run lineage chain.
+
+RULE-PLV-012  
+Employee_Payroll_Result lineage SHALL remain traceable to the correct result set and run within the lineage chain.
+
+RULE-PLV-013  
+Correction-linked child runs SHALL preserve valid linkage to the originating correction context where applicable.
+
+RULE-PLV-014  
+Validation SHALL fail when child-run result artifacts imply silent replacement of finalized parent result artifacts.
+
 ---
 
-## Validation Triggers
+## 6. Validation Triggers
 
 Lineage validation SHALL occur at minimum on the following triggers:
 
@@ -186,11 +221,13 @@ Lineage validation SHALL occur at minimum on the following triggers:
 
 ---
 
-## Validation Checkpoints
+## 7. Validation Checkpoints
 
 Validation SHALL be performed at the following checkpoints:
 
-### Pre-Creation Validation
+---
+
+### 7.1 Pre-Creation Validation
 
 Before creating a child run:
 
@@ -201,7 +238,7 @@ Before creating a child run:
 
 ---
 
-### Pre-Execution Validation
+### 7.2 Pre-Execution Validation
 
 Before child run enters execution:
 
@@ -211,7 +248,7 @@ Before child run enters execution:
 
 ---
 
-### Post-Execution Validation
+### 7.3 Post-Execution Validation
 
 After child run completes or fails:
 
@@ -222,7 +259,7 @@ After child run completes or fails:
 
 ---
 
-## Failure Conditions
+## 8. Failure Conditions
 
 Lineage validation SHALL fail when any of the following occurs:
 
@@ -234,12 +271,16 @@ Lineage validation SHALL fail when any of the following occurs:
 - Non-traversable lineage chain
 - Duplicate or conflicting replay sequence assignment
 - Evidence of destructive mutation to finalized parent results
+- Missing or inconsistent Payroll_Run_Result_Set lineage
+- Missing or inconsistent Employee_Payroll_Result lineage
+- Missing correction linkage where required for governed corrective processing
+- Evidence that child-run result artifacts replace finalized parent result artifacts without governed correction handling
 
 Validation failure SHALL prevent unsafe progression and SHALL route the condition to error handling and exception workflows.
 
 ---
 
-## Validation Outcomes
+## 9. Validation Outcomes
 
 Validation outcomes SHALL include:
 
@@ -253,7 +294,7 @@ PASSED_WITH_WARNINGS MAY allow progression when policy permits and when warnings
 
 ---
 
-## Replay Validation Logic
+## 10. Replay Validation Logic
 
 Replay validation SHALL confirm that:
 
@@ -267,7 +308,7 @@ Replay validation SHALL use persisted lineage records as the primary source of t
 
 ---
 
-## Relationship to Error Handling
+## 11. Relationship to Error Handling
 
 When lineage validation fails, the failure SHALL be classified and contained according to Error_Handling_and_Isolation_Model.
 
@@ -281,7 +322,7 @@ Validation failures SHALL NOT silently correct lineage inconsistencies.
 
 ---
 
-## Audit Requirements
+## 12. Audit Requirements
 
 Every lineage validation operation SHALL record:
 
@@ -292,29 +333,52 @@ Every lineage validation operation SHALL record:
 - Rules evaluated
 - Failures or warnings raised
 - Initiating actor or process
+- Missing or inconsistent Payroll_Run_Result_Set lineage
+- Missing or inconsistent Employee_Payroll_Result lineage
+- Missing correction linkage where required for governed corrective processing
+- Evidence that child-run result artifacts replace finalized parent result artifacts without governed correction handling
 
 These records SHALL remain immutable and support forensic replay review.
 
 ---
 
-## Dependencies
+## 13. Dependencies
 
 This model depends on:
 
 - Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
 - Run_Scope_Model
 - Run_Lineage_Model
-- Entity_Run_Scope
-- STATE-RSC_Run_Scope
-- STATE-RLN_Run_Lineage
+- Calculation_Run_Lifecycle
+- Payroll_Adjustment_and_Correction_Model
+- Correction_and_Immutability_Model
 - Payroll_Reconciliation_Model
 - Error_Handling_and_Isolation_Model
+- Payroll_Exception_Model
 
 ---
 
+## 14. Relationship to Other Models
+
+This model integrates with:
+
+- Payroll_Run_Model
+- Payroll_Run_Result_Set_Model
+- Employee_Payroll_Result_Model
+- Run_Scope_Model
+- Run_Lineage_Model
+- Calculation_Run_Lifecycle
+- Payroll_Adjustment_and_Correction_Model
+- Correction_and_Immutability_Model
+- Payroll_Reconciliation_Model
+- Error_Handling_and_Isolation_Model
+- Payroll_Exception_Model
+
 ---
 
-## Version 1 Lineage Concurrency Constraint
+## 15. Version 1 Lineage Concurrency Constraint
 
 In Version 1, lineage execution SHALL be serialized within a lineage chain.
 
@@ -331,7 +395,7 @@ Concurrent participant-level processing inside an individual run remains permitt
 
 ---
 
-## Deferred Validation Capability: Parallel Lineage Execution
+## 16. Deferred Validation Capability: Parallel Lineage Execution
 
 Future versions MAY introduce validation logic supporting concurrent sibling child runs within a lineage.
 
@@ -346,7 +410,23 @@ Parallel lineage execution SHALL NOT be enabled without formal validation contro
 
 ---
 
-## Future Extensions
+## 17. Deterministic Replay Guarantee
+
+Processing lineage validation exists to preserve deterministic replay.
+
+Where lineage validation passes, replay operations shall be able to reconstruct the governed sequence of:
+
+- root run execution
+- child run execution
+- result set lineage
+- employee result lineage
+- correction-linked additive processing
+
+Later operational or configuration changes shall not reinterpret a historically valid lineage chain.
+
+---
+
+## 18. Future Extensions
 
 Future enhancements may include:
 

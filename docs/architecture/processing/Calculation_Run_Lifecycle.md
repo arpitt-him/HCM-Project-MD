@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/architecture/processing/Calculation_Run_Lifecycle.md` |
@@ -28,7 +28,22 @@ Post-finalization corrections shall be represented through additive runs and adj
 
 ## 2. Run Context Definition
 
-Run_ID, Run_Type, Payroll_Context_ID, Period_ID, Pay_Date, Execution_Timestamp, Initiating_User_or_Process, Run_Status, Included_Batch_Set, Rule_and_Config_Version_Reference, Run_Scope_ID (optional), Parent_Run_ID (optional), Replay_Sequence_Reference (optional).
+Run_ID
+Run_Type
+Payroll_Context_ID
+Period_ID
+Pay_Date
+Execution_Timestamp
+Initiating_User_or_Process
+Run_Status
+Included_Batch_Set
+Rule_and_Config_Version_Reference
+Run_Scope_ID (optional)
+Parent_Run_ID (optional)
+Replay_Sequence_Reference (optional)
+Payroll_Run_Result_Set_ID (optional)
+Source_Period_ID (optional)
+Execution_Period_ID (optional)
 
 Run_Type values: Initial, Rerun, Adjustment, Supplemental, Simulation, Catch_Up, Retro, Recovery.
 
@@ -74,6 +89,8 @@ A calculation run SHALL NOT proceed to Ready when its associated Run Scope remai
 Open → Ready → In Progress → Completed with Exceptions / Completed → Approved → Released → Closed.
 
 Scoped runs follow the same core lifecycle, but entry to Ready requires successful scope validation, and Completed with Exceptions may apply at participant or scope level depending on the error class encountered.
+
+Ready status SHALL imply successful validation of calendar, batch, configuration, and scope prerequisites applicable to the run.
 
 ---
 
@@ -170,6 +187,10 @@ Scoped correction runs may require separate approval from the parent run, depend
 
 Released status SHALL indicate that calculation results are authorized for downstream operational consumption.
 
+Approval and release decisions shall remain traceable to the exact run state and validation state active at the time of approval.
+
+Released status authorizes downstream consumption by result, export, remittance, and reconciliation processes.
+
 ---
 
 ## 14. Relationship to Error Handling
@@ -206,7 +227,23 @@ Audit records shall support deterministic replay validation and correction-chain
 
 ## 16. Relationship to Other Models
 
-This model integrates with: Payroll_Run_Model, Payroll_Calendar_Model, Error_Handling_and_Isolation_Model, Release_and_Approval_Model, Accumulator_and_Balance_Model, Rule_Resolution_Engine, Run_Scope_Model, Run_Lineage_Model, Payroll_Reconciliation_Model, Correction_and_Immutability_Model.
+This model integrates with: 
+
+Payroll_Run_Model
+Payroll_Calendar_Model
+Payroll_Run_Result_Set_Model
+Employee_Payroll_Result_Model
+Accumulator_Impact_Model
+Configuration_and_Metadata_Management_Model
+Exception_and_Work_Queue_Model
+Error_Handling_and_Isolation_Model
+Release_and_Approval_Model
+Accumulator_and_Balance_Model
+Rule_Resolution_Engine
+Run_Scope_Model
+Run_Lineage_Model
+Payroll_Reconciliation_Model
+Correction_and_Immutability_Model
 
 ---
 

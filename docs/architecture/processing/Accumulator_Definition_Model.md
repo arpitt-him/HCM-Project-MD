@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Calculation & Reporting Domain |
 | **Location** | docs/architecture/processing/Accumulator_Definition_Model.md |
@@ -149,6 +149,27 @@ Examples:
 
 ---
 
+## 4.1 Cross-Scope Reconciliation Requirements
+
+Where multiple scope levels exist, accumulator definitions shall support reconciliation across scopes.
+
+Examples:
+
+- Person-level totals reconciled to Employment-level totals
+- Employment totals reconciled to Legal Entity totals
+- Legal Entity totals reconciled to Jurisdiction totals
+
+Accumulator Definitions must support:
+
+- hierarchical roll-up logic
+- governed aggregation eligibility
+- cross-scope audit reconciliation
+- jurisdiction-aware aggregation boundaries
+
+Cross-scope reconciliation shall remain deterministic and reconstructable.
+
+---
+
 # 5. Reset Logic Model
 
 Reset logic defines when an accumulator returns to a new reporting or calculation base.
@@ -172,6 +193,29 @@ Examples:
 Reset logic must align with the governing calendar and statutory rules.
 
 Reset behavior shall not be inferred only from accumulator name.
+
+---
+
+## 5.1 Reset Boundary Governance
+
+Accumulator reset behavior shall align with governed calendar boundaries.
+
+Reset boundaries may reference:
+
+- Payroll Calendar Model
+- Holiday and Special Calendar Model
+- Jurisdiction-specific reporting calendars
+- Statutory reset cycles
+
+Reset execution shall:
+
+- occur deterministically
+- remain replayable
+- remain traceable to calendar governance sources
+
+Reset logic shall not depend on implicit naming conventions or undocumented assumptions.
+
+All reset execution boundaries must be reconstructable during replay.
 
 ---
 
@@ -246,6 +290,30 @@ This distinction is essential for replay and audit.
 
 ---
 
+## 8.1 Relationship to Payroll Result Lineage
+
+Accumulator Definitions participate in governed result lineage chains.
+
+Each accumulator mutation shall remain traceable through:
+
+- Employee_Payroll_Result_ID
+- Payroll_Run_Result_Set_ID
+- Run_ID lineage chain
+
+Accumulator Definition behavior shall not introduce ambiguity into lineage reconstruction.
+
+Accumulator lineage relationships must support:
+
+- correction-linked mutation replay
+- multi-run reconstruction
+- deterministic audit replay
+- jurisdictional reporting traceability
+
+Accumulator Definition meaning shall remain stable enough to allow
+lineage-linked value reconstruction across replay sequences.
+
+---
+
 # 9. Relationship to Payroll Adjustment and Correction
 
 Corrections may affect accumulator values.
@@ -288,7 +356,31 @@ Where jurisdiction matters, the applicable Jurisdiction or Jurisdiction Profile 
 
 ---
 
-# 11. Remittance and Reporting Relevance
+# 11. Relationship to Rule Packs
+
+Accumulator Definitions are referenced by Rule Packs
+through accumulator qualification and mutation logic.
+
+Rule Packs shall:
+
+- determine which payroll results impact accumulators
+- determine mutation eligibility rules
+- enforce jurisdiction-specific behavior
+- enforce tax-base logic
+- enforce threshold logic
+
+Accumulator Definitions do not execute logic directly.
+
+Rule Packs provide executable logic that governs
+how accumulator values change.
+
+Accumulator Definitions therefore represent
+semantic structure, while Rule Packs represent
+operational behavior.
+
+----
+
+# 12. Remittance and Reporting Relevance
 
 Some accumulators feed remittance or reporting directly.
 
@@ -311,7 +403,7 @@ Accumulator Definition should therefore explicitly support remittance and report
 
 ---
 
-# 12. Balance Carry-Forward and Threshold Considerations
+# 13. Balance Carry-Forward and Threshold Considerations
 
 Some accumulators reset cleanly.
 
@@ -335,7 +427,29 @@ The definition should preserve the governing semantics even if the actual calcul
 
 ---
 
-# 13. Status Model
+# 13.1 Threshold Interaction Governance
+
+Threshold-based accumulators shall support governed interaction behavior.
+
+Threshold behavior must define:
+
+- threshold activation condition
+- threshold stop condition
+- post-threshold accumulation behavior
+- reset interaction behavior
+- jurisdiction interaction behavior
+
+Threshold transitions shall be:
+
+- deterministic
+- auditable
+- replay-safe
+
+Threshold state transitions must remain reconstructable across replay and correction sequences.
+
+---
+
+# 14. Status Model
 
 Suggested Accumulator_Status values:
 
@@ -348,13 +462,25 @@ Suggested Accumulator_Status values:
 
 Status transitions shall be governed and auditable.
 
+Activation of Accumulator Definitions shall require
+formal governance approval.
+
+Activation workflow shall support:
+
+- Draft → Review → Approved → Active lifecycle
+- version-aware activation
+- jurisdiction-aware activation where required
+- audit logging of activation authority
+
+Inactive or Retired definitions shall not be used by new accumulator impact logic without reactivation approval.
+
 Retired definitions may not be newly assigned to active result-impact logic without formal reactivation.
 
 Historical values tied to retired definitions must remain queryable.
 
 ---
 
-# 14. Effective Dating and Historical Preservation
+# 15. Effective Dating and Historical Preservation
 
 Accumulator Definitions shall support effective dating.
 
@@ -375,7 +501,67 @@ If a meaning changes materially, a new effective-dated definition should general
 
 ---
 
-# 14. Validation Rules
+# 16. Accumulator Definition Lineage Model
+
+Accumulator Definitions shall support lineage relationships across
+semantic evolution.
+
+When accumulator meaning changes materially, a new effective-dated
+Accumulator Definition shall be created.
+
+Each Accumulator Definition version shall support:
+
+- Parent_Accumulator_Definition_ID
+- Root_Accumulator_Definition_ID
+- Lineage_Sequence_Number
+- Replacement_Reason_Code
+- Semantic_Change_Flag
+
+Material semantic changes include:
+
+- scope changes
+- reset logic changes
+- carry-forward changes
+- threshold behavior changes
+- reporting or remittance meaning changes
+- rounding behavior changes
+
+Silent mutation of existing accumulator definitions is not permitted
+when semantic meaning changes.
+
+Lineage chains shall remain reconstructable for all historical periods.
+
+This supports:
+
+- deterministic replay
+- reporting reconstruction
+- correction traceability
+- audit defensibility
+
+---
+
+# 16.1 Definition Immutability Enforcement
+
+Accumulator Definitions shall remain immutable once activated,
+except through governed effective-dated lineage transitions.
+
+Modifications that alter semantic meaning shall:
+
+- create new effective-dated definitions
+- maintain parent-child lineage linkage
+- preserve historical interpretation integrity
+
+Destructive overwrite of active accumulator definitions is not permitted.
+
+Immutability enforcement aligns with:
+
+Correction_and_Immutability_Model
+Configuration_and_Metadata_Management_Model
+Release_and_Approval_Model
+
+---
+
+# 17. Validation Rules
 
 Examples of validation rules:
 
@@ -388,12 +574,60 @@ Examples of validation rules:
 - Retired definitions may not be newly used in active impact rules
 - Positive_Negative_Allowed_Flag must align with governed balance semantics where policy requires
 - Balance_Carry_Forward_Flag must be compatible with Reset_Frequency where policy requires
+- Reset_Frequency must align with governed calendar references where applicable
+- Scope_Type combinations must remain valid according to governed hierarchy rules
+- Threshold-enabled accumulators must define threshold behavior semantics
+- Lineage-linked definitions must preserve consistent Root_Accumulator_Definition_ID
 
 These validations shall be enforced through payroll configuration governance and accumulator management controls.
 
 ---
 
-# 15. Audit and Traceability Requirements
+# 17.1 Deterministic Reset Guarantee
+
+Accumulator reset behavior shall remain deterministic across replay operations.
+
+Reset operations shall:
+
+- execute at governed calendar boundaries
+- remain traceable to reset authority sources
+- preserve carry-forward semantics
+- preserve threshold interaction semantics
+
+Later calendar or rule changes shall not reinterpret historical reset boundaries.
+
+---
+
+# 18. Deterministic Replay and Recalculation Requirements
+
+Accumulator behavior must remain deterministic across replay
+operations.
+
+Replay shall:
+
+- use the original Accumulator Definition active
+  during the source payroll execution
+- preserve reset semantics
+- preserve scope semantics
+- preserve carry-forward logic
+- preserve rounding semantics
+
+Later changes to accumulator definitions shall not reinterpret
+historical values.
+
+Replay recalculation must produce identical accumulator mutation
+results when executed using identical inputs and lineage context.
+
+Deterministic replay behavior is mandatory for:
+
+- statutory reporting
+- liability reconciliation
+- correction workflows
+- audit reconstruction
+
+---
+
+# 19. Audit and Traceability Requirements
 
 The system shall preserve:
 
@@ -415,7 +649,7 @@ This supports:
 
 ---
 
-## 15.1 Relationship to Accumulator_Impact_Model.md
+## 19.1 Relationship to Accumulator_Impact_Model.md
 
 Accumulator_Impact_Model.md defines the governed mutation layer between payroll results and stored accumulator values.
 
@@ -446,7 +680,7 @@ This separation supports:
 
 ---
 
-# 16. Relationship to Other Models
+# 20. Relationship to Other Models
 
 This model integrates with:
 
@@ -461,7 +695,25 @@ This model integrates with:
 
 ---
 
-# 17. Summary
+# 21. Dependencies
+
+This model depends on:
+
+- Payroll_Calendar_Model
+- Holiday_and_Special_Calendar_Model
+- Accumulator_Impact_Model
+- Accumulator_Model_Detailed
+- Employee_Payroll_Result_Model
+- Payroll_Run_Result_Set_Model
+- Payroll_Adjustment_and_Correction_Model
+- Jurisdiction_and_Compliance_Rules_Model
+- Correction_and_Immutability_Model
+- Configuration_and_Metadata_Management_Model
+- Release_and_Approval_Model
+
+---
+
+# 22. Summary
 
 This model establishes Accumulator Definition as the governed semantic definition of payroll totals, balances, and reporting counters.
 

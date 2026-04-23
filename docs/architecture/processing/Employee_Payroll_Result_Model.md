@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Processing Domain |
 | **Location** | docs/architecture/processing/Employee_Payroll_Result_Model.md |
@@ -105,6 +105,10 @@ Employee Payroll Result is the detailed payroll outcome record, not the employme
 | Payroll_Context_ID | Payroll context reference |
 | Source_Period_ID | Original payroll period to which results logically belong |
 | Execution_Period_ID | Period during which processing execution occurred |
+| Parent_Employee_Payroll_Result_ID | Prior worker-level result in lineage where applicable |
+| Root_Employee_Payroll_Result_ID | Root worker-level result in lineage chain |
+| Result_Lineage_Sequence | Sequence number within worker-level result lineage |
+| Correction_Reference_ID | Governing correction reference where applicable |
 | Result_Status | Calculated, Approved, Released, Finalized, Corrected, Reversed |
 | Pay_Period_Start_Date | Period start date |
 | Pay_Period_End_Date | Period end date |
@@ -158,6 +162,8 @@ Minimum fields:
 
 Each earnings line must remain traceable to the rule and source logic that produced it.
 
+Earnings result lines shall preserve linkage to source payroll result lineage and source rule execution context where applicable.
+
 ---
 
 # 4. Deduction Result Lines
@@ -196,6 +202,8 @@ Minimum fields:
 
 Deduction lines must preserve enough detail to reconstruct priority and ordering behavior.
 
+Deduction result lines shall preserve linkage to source payroll result lineage, withholding priority, and correction lineage where applicable.
+
 ---
 
 # 5. Tax Result Lines
@@ -233,6 +241,8 @@ Minimum fields:
 
 Tax lines must preserve enough detail to reconstruct jurisdiction-specific tax treatment.
 
+Tax result lines shall preserve linkage to tax classification lineage, jurisdiction context, and source payroll result lineage.
+
 ---
 
 # 6. Employer Contribution Result Lines
@@ -266,6 +276,8 @@ Minimum fields:
 
 Employer contribution lines support employer liability tracing and reporting.
 
+Employer contribution lines shall preserve linkage to employer liability lineage and source payroll result lineage where applicable.
+
 ---
 
 # 7. Net Pay Result
@@ -291,6 +303,8 @@ Minimum fields:
 | Review_Required_Flag | Indicates manual review required |
 
 Net Pay Result captures the worker-level gross-to-net summary, while the detailed lines preserve full derivation.
+
+Net Pay Result shall remain distinct from payment execution, while preserving linkage to downstream disbursement and replacement/reissue lineage where applicable.
 
 ---
 
@@ -392,6 +406,8 @@ Pay statements may be generated from the result using:
 
 Employee Payroll Result remains the underlying governed source even if a rendered pay statement is later regenerated.
 
+Rendered pay statements may be regenerated using governed template versions, but Employee Payroll Result remains the authoritative worker-level source artifact for statement content.
+
 ---
 
 # 12. Result Status Model
@@ -463,7 +479,35 @@ These validations shall be enforced before finalization.
 
 ---
 
-# 15. Audit and Traceability Requirements
+# 15. Deterministic Replay Requirements
+
+Employee Payroll Result reconstruction shall remain deterministic.
+
+Given identical:
+
+- Payroll_Run_Result_Set_ID
+- Employment_ID
+- Payroll_Context_ID
+- Source_Period_ID
+- Execution_Period_ID
+- rule and configuration lineage
+- applicable calendar and jurisdiction context
+
+the platform shall reconstruct the same worker-level payroll result, including:
+
+- earnings lines
+- deduction lines
+- tax lines
+- employer contribution lines
+- net pay result
+- accumulator impacts
+- jurisdictional allocations
+
+Later rule, configuration, calendar, or scope changes shall not silently reinterpret historical employee payroll results.
+
+---
+
+# 16. Audit and Traceability Requirements
 
 The system shall preserve:
 
@@ -489,26 +533,45 @@ This supports:
 
 ---
 
-# 16. Relationship to Other Models
+# 17. Dependencies
+
+This model depends on:
+
+- Payroll_Run_Result_Set_Model
+- Payroll_Run_Model
+- Run_Scope_Model
+- Payroll_Context_Model
+- Payroll_Calendar_Model
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Exception_Model
+- Rule_Pack_Model
+- Tax_Classification_and_Obligation_Model
+- Accumulator_Impact_Model
+- Correction_and_Immutability_Model
+
+---
+
+# 18. Relationship to Other Models
 
 This model integrates with:
 
 - Payroll_Run_Result_Set_Model
 - Payroll_Run_Model
 - Run_Scope_Model
-- Employment_Data_Model
+- Payroll_Context_Model
 - Payroll_Adjustment_and_Correction_Model
 - Payroll_Exception_Model
-- Net_Pay_Disbursement_Data_Model
+- Net_Pay_and_Disbursement_Model
 - Rule_Pack_Model
 - Tax_Classification_and_Obligation_Model
 - Accumulator_Impact_Model
-- Accumulator_Model_Detailed.md
-- Pay_Statement_Model.md
+- Accumulator_Model_Detailed
+- Pay_Statement_Model
+- Payroll_Check_Model
 
 ---
 
-# 17. Summary
+# 19. Summary
 
 This model establishes Employee Payroll Result as the detailed worker-level payroll outcome beneath the Payroll Run Result Set.
 

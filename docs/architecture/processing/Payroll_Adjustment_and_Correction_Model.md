@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Processing & Governance Domain |
 | **Location** | docs/architecture/processing/Payroll_Adjustment_and_Correction_Model.md |
@@ -118,6 +118,11 @@ It is the governed correction record, not the original error and not the origina
 | Person_ID | Related person where applicable |
 | Payroll_Context_ID | Payroll context reference |
 | Triggering_Exception_ID | Related payroll exception where applicable |
+| Correction_Run_ID | Generated correction payroll run reference where applicable |
+| Correction_Result_Set_ID | Generated correction result set reference where applicable |
+| Parent_Run_ID | Immediate parent run reference where applicable |
+| Root_Run_ID | Root run lineage reference where applicable |
+| Run_Scope_ID | Scope reference where applicable |
 
 These references preserve correction lineage to the original source outcome.
 
@@ -211,6 +216,8 @@ This preserves:
 - before/after visibility
 - legal defensibility
 
+Where correction runs are created, they shall participate in explicit run-lineage sequencing and remain traceable to the originating correction record.
+
 ---
 
 # 7. Relationship to Employee Payroll Result
@@ -284,6 +291,8 @@ The model shall preserve:
 - linkage to original result
 
 Accumulator corrections must never silently overwrite prior execution history.
+
+Accumulator corrections shall be represented through governed Accumulator Impact records where applicable, rather than by opaque balance replacement alone.
 
 ---
 
@@ -434,6 +443,11 @@ This model integrates with:
 - Accumulator_Model_Detailed.md
 - Correction_and_Immutability_Model.md
 - Release_and_Approval_Model.md
+- Accumulator_Impact_Model
+- Run_Lineage_Model
+- Calculation_Run_Lifecycle
+- Payroll_Reconciliation_Model
+- Payroll_Run_Funding_and_Remittance_Map
 
 ---
 

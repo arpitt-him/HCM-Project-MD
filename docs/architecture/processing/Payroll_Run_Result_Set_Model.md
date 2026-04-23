@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Processing Domain |
 | **Location** | docs/architecture/processing/Payroll_Run_Result_Set_Model.md |
@@ -86,6 +86,10 @@ Corrections must be recorded using adjustment or correction logic rather than ov
 | Run_Scope_ID | Run scope reference identifying the governed processed population segment where applicable |
 | Source_Period_ID | Original payroll period to which the result set logically belongs |
 | Execution_Period_ID | Period during which processing execution occurred |
+| Parent_Payroll_Run_Result_Set_ID | Prior result set in lineage where applicable |
+| Root_Payroll_Run_Result_Set_ID | Root result set in lineage chain |
+| Result_Set_Lineage_Sequence | Sequence number within result-set lineage |
+| Correction_Reference_ID | Governing correction reference where applicable |
 | Result_Set_Status | Pending, Calculated, Approved, Released, Finalized, Archived |
 | Result_Set_Type | Regular_Run, Off_Cycle, Adjustment_Run, Correction_Run |
 | Execution_Start_Timestamp | Start time of result generation |
@@ -99,7 +103,7 @@ Corrections must be recorded using adjustment or correction logic rather than ov
 
 ---
 
-# 3. Employee Payroll Result Set
+# 3. Employee Payroll Results
 
 Each Payroll Run Result Set shall contain one or more **Employee Payroll Results**.
 
@@ -261,6 +265,8 @@ Audit Snapshot may include:
 
 This snapshot allows deterministic replay.
 
+Audit Snapshot shall remain traceable to the specific result-set lineage instance it describes and shall not be reused across distinct correction-linked result sets.
+
 ---
 
 # 8.1 Exception Association
@@ -296,6 +302,10 @@ No Result Set shall be modified after Finalized status.
 
 Corrections must generate separate adjustment runs.
 
+Where correction or adjustment processing occurs, subsequent result sets shall preserve explicit lineage to prior finalized result sets.
+
+Finalized result sets shall remain historically queryable even when superseded by later correction-linked result sets.
+
 ---
 
 # 10. Validation Rules
@@ -319,31 +329,60 @@ Payroll Run Result Set must preserve sufficient state to allow:
 - replay validation
 - forensic analysis
 - payroll recomputation verification
+- correction-chain reconstruction
+- funding and remittance reconstruction
 
-Replay operations must produce identical output when supplied with identical inputs and rule context.
+Replay operations must produce identical output when supplied with identical:
+
+- source inputs
+- run lineage
+- result-set lineage
+- rule and configuration context
+- calendar and period context
+- scope context
 
 ---
 
-# 12. Relationship to Other Models
+# 12. Dependencies
+
+This model depends on:
+
+- Payroll_Run_Model
+- Run_Scope_Model
+- Payroll_Context_Model
+- Payroll_Calendar_Model
+- Employee_Payroll_Result_Model
+- Payroll_Exception_Model
+- Payroll_Adjustment_and_Correction_Model
+- Payroll_Run_Funding_and_Remittance_Map
+- Net_Pay_and_Disbursement_Model
+- Accumulator_Impact_Model
+- Correction_and_Immutability_Model
+
+---
+
+# 13. Relationship to Other Models
 
 This model integrates with:
 
 - Payroll_Run_Model
 - Run_Scope_Model
+- Payroll_Context_Model
+- Payroll_Calendar_Model
 - Employee_Payroll_Result_Model
 - Payroll_Exception_Model
 - Payroll_Adjustment_and_Correction_Model
 - Payroll_Run_Funding_and_Remittance_Map
-- Net_Pay_Disbursement_Data_Model
+- Net_Pay_and_Disbursement_Model
 - Funding_Profile_Data_Model
 - Remittance_Profile_Data_Model
 - Payment_Instruction_Profile_Data_Model
 - Accumulator_Impact_Model
-- Employment_Data_Model
+- Correction_and_Immutability_Model
 
 ---
 
-# 13. Summary
+# 14. Summary
 
 This model establishes Payroll Run Result Set as the structured container for all outputs produced during payroll execution.
 

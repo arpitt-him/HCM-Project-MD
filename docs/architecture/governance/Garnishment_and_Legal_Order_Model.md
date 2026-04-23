@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Reviewed |
 | **Owner** | Compliance Domain |
 | **Location** | `docs/architecture/governance/Garnishment_and_Legal_Order_Model.md` |
@@ -28,6 +28,17 @@ Order_Type values: CHILD_SUPPORT, TAX_LEVY, CREDITOR_GARNISHMENT, BANKRUPTCY, ST
 ## 3. Withholding Priority and Sequencing
 
 Legal orders must follow defined priority rules considering: federal precedence, state-specific precedence, multiple concurrent orders, disposable earnings rules, maximum withholding limits. Priority logic must be explicit, configurable, and auditable.
+
+Priority rules shall be resolved through jurisdiction-specific Rule Packs.
+
+Priority evaluation shall produce:
+
+- Priority_Rank
+- Execution_Order
+- Maximum_Withholding_Limit
+- Protected_Amount_Adjustment
+
+Resolved priority shall remain traceable within payroll result lineage.
 
 ## 4. Disposable Earnings Calculation
 
@@ -56,3 +67,55 @@ Employee notice tracking, authority correspondence logging, compliance deadline 
 ## 10. Relationship to Other Models
 
 This model integrates with: Earnings_and_Deductions_Computation_Model, Net_Pay_and_Disbursement_Model, Payroll_Funding_and_Cash_Management_Model, Tax_Classification_and_Obligation_Model, Multi_Context_Calendar_Model, Correction_and_Immutability_Model.
+
+## 11. Legal Order Lineage and Execution Traceability
+
+All legal orders shall maintain lineage relationships across lifecycle events.
+
+Each order version shall record:
+
+- Parent_Order_ID
+- Original_Order_ID
+- Modification_Event_ID
+- Effective_Date_Change_Reference
+
+All payroll executions applying a legal order shall reference:
+
+- Legal_Order_ID
+- Order_Version_ID
+- Applicable_Run_ID
+- Employee_Result_ID
+
+Lineage shall support full reconstruction of:
+
+- order history
+- modification sequence
+- applied withholding behavior
+- remittance history
+
+## 12. Deterministic Replayability Requirements
+
+Application of legal orders shall produce identical withholding results when replayed using:
+
+- the same legal order version
+- the same jurisdiction rule configuration
+- the same earnings and deduction inputs
+
+Replayability shall support:
+
+- regulatory audit review
+- legal dispute resolution
+- payment verification
+
+## 13. Multi-Jurisdiction Order Conflict Resolution
+
+When legal orders originate from multiple jurisdictions, conflict resolution shall be governed by jurisdiction precedence rules.
+
+Resolution logic shall consider:
+
+- issuing authority hierarchy
+- jurisdictional statutory priority
+- cross-border enforcement agreements
+- protected earnings thresholds
+
+All resolution outcomes shall remain auditable.
