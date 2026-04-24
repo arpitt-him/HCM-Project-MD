@@ -11,6 +11,17 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 ### 2026-04-23 — Accumulator & balance model document updated
 
 **Document update: docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md**
+- Updated section 4 to make Contribution dependency explicit
+
+### 2026-04-23 — Accumulator impact model document updated
+
+**Document update: docs/architecture/processing/Accumulator_Impact_Model.md**
+- Updated section 4 to add Cross-Reference in Balance Model
+- Updated section 7 to make Contribution explicit
+
+### 2026-04-23 — Accumulator & balance model document updated
+
+**Document update: docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md**
 - Updated section 2 to increase number of layers governing Accumulator runtime behavior
 - Updated section 4 to add 4 new Recommended Contribution Fields
 - Updated section 10 to explicitly preserve Contribution lineage

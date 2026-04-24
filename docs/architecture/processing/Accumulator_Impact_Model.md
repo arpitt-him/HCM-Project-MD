@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Calculation & Reporting Domain |
 | **Location** | docs/architecture/processing/Accumulator_Impact_Model.md |
@@ -42,13 +42,13 @@ without embedding accumulator mutation semantics directly inside result lines or
 
 ```text
 Employee Payroll Result / Payroll Adjustment and Correction
-    ↓
+        ↓
 Accumulator Impact
-    ↓
-Accumulator Definition
-    ↓
-Accumulator Value / Balance
-    ↓
+        ↓
+Accumulator Contribution
+        ↓
+Accumulator Balance / Value
+        ↓
 Rollup / Reporting / Remittance / Replay
 ```
 
@@ -203,11 +203,21 @@ No impact may exist without a governed definition.
 
 Accumulator Impact is the mutation input to stored accumulator balances.
 
+Accumulator Contribution represents the persisted historical
+balance-affecting record derived from an Accumulator Impact.
+
+Accumulator Impacts generate Contributions, and Contributions
+mutate the stored Accumulator Balance state. This separation
+preserves mutation lineage while allowing balance state to be
+efficiently maintained.
+
 Typical path:
 
 ```text
 Accumulator Impact
-    ↓
+        ↓
+Accumulator Contribution
+        ↓
 Accumulator Value / Balance
 ```
 

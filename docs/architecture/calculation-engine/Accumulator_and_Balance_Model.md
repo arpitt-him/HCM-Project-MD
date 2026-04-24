@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Approved |
 | **Owner** | Architecture Team |
 | **Location** | `docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md` |
@@ -76,6 +76,8 @@ Balance records do not define accumulator meaning independently; they persist th
 ## 4. Accumulator Contribution History Structure
 
 Contribution History records represent persisted historical balance-affecting entries derived from governed accumulator impacts.
+
+Each Contribution shall be created only from a valid Accumulator Impact record and shall preserve the lineage relationship to that originating Impact.
 
 Recommended Contribution Fields:
 
