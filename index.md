@@ -25,6 +25,8 @@ Product requirements documents define *what* the system must do and *why*. They 
 | [PRD-0700_Workflow_Framework.md](docs/PRD/PRD-0700_Workflow_Framework.md) | Approval workflow applicability, states, and configuration requirements |
 | [PRD-0800_Validation_Framework.md](docs/PRD/PRD-0800_Validation_Framework.md) | Validation phases, exception categories, and configuration readiness checks |
 | [PRD-0900_Integration_Model.md](docs/PRD/PRD-0900_Integration_Model.md) | Integration patterns, inbound/outbound requirements, formats, and security |
+| [PRD-1000_Benefits_Boundary.md](docs/PRD/PRD-1000_Benefits_Boundary.md) | Defines deduction code structure and pre/post-tax classification used by payroll |
+| [PRD-1100_Time_and_Attendance.md](docs/PRD/PRD-1100_Time_and_Attendance.md) | Capture and approval of worked time and correct delivery to payroll |
 
 ### Module PRDs
 

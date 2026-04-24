@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/API_Surface_Map.md` |
@@ -428,4 +428,4 @@ These integration points are defined here to establish the expected contract for
 | INT-BEN-001 | Benefit Deduction Election Import | INBOUND | API / Batch | Benefits | In Scope |
 | INT-GAR-001 | Legal Order Submission | INBOUND | API | Compliance | In Scope |
 | INT-GAR-002 | Garnishment Remittance Export | OUTBOUND | Scheduled | Compliance | In Scope |
-| INT-TIM-001 | Time Entry Import | INBOUND | API / Batch | Time & Attendance | Future |
+| INT-TIM-001 | Time Entry Import | INBOUND | API / Batch | Time & Attendance | In Scope |

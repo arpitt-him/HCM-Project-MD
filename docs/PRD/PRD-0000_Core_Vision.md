@@ -62,19 +62,25 @@ Payroll establishes core object models, jurisdiction handling, and accumulator l
 
 | Module | Status |
 |---|---|
-| Payroll | Active — primary delivery |
 | HRIS | Active — foundational record system |
+| Payroll | Active — primary delivery |
+| Benefits Administration (minimum) | Benefit elections manually-configured or received from external source |
+| Time & Attendance (minimum) | Produces worked time consumed by Payroll |
+| Reporting (minimum) | Provisions reports to satisfy basic needs |
 
 ### Planned (Future)
 
 | Module | Notes |
 |---|---|
-| Benefits Administration | Depends on HRIS eligibility model |
-| Time & Attendance | Produces worked time consumed by Payroll |
+| Benefits Administration (advanced) | Benefits plan administration — plan design, carrier integration, open enrollment workflow, evidence of insurability, COBRA, and ACA reporting |
+| Time & Attendance (advanced) | Advanced scheduling optimization, workforce management analytics, biometric capture, and complex union-rule engines |
 | Recruiting | Produces candidate-to-hire transitions for HRIS |
 | Performance Management | Linked to HRIS employment records |
 | Learning & Development | Linked to HRIS employment records |
 | Workforce Analytics | Consumes data feeds from all modules |
+| Organization Structure | Allow for hierarchical design and viewing of departments, teams and work units |
+| Employee Self-Service (ESS) | Employee can submit/view their employment data |
+| Reporting (advanced) | Provisions user-designed reports and analytical data feeds |
 
 ## 4. Deployment Model
 
@@ -205,11 +211,13 @@ The platform shall support all four data entry channels defined in §5 in v1.
 Multi-country payroll structures are explicitly out of scope for v1. The platform architecture must not preclude future multi-country support, but no multi-country logic shall be implemented in v1.
 
 **REQ-PLT-025**
-Benefits Administration, Time & Attendance, Recruiting, Performance Management, Learning & Development, and Workforce Analytics modules are out of scope for v1.
+Benefits Administration, Recruiting, Performance Management, Learning & Development, and Workforce Analytics modules are out of scope for v1.
 
 **REQ-PLT-026**
 Benefits plan configuration and enrollment processing are out of scope for v1, even though HRIS will publish the eligibility events that a future Benefits module will consume.
 
+**REQ-PLT-027**
+Time & Attendance -> Advanced scheduling optimization, workforce management analytics, biometric capture, and complex union-rule engines are not in scope for v1.
 ---
 
 ## 11. Acceptance Criteria

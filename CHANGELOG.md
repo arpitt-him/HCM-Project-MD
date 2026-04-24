@@ -8,6 +8,25 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-24 — API surface map updated
+
+**Document update: `docs/PRD/PRD-0000_Core_Vision.md`**
+Scope for Version 1 of this platform updated to also include:
+	Benefits Administration (minimum)
+	Time & Attendance (minimum)
+	Reporting
+
+### 2026-04-24 — Time and Attendance
+
+**New document: `docs/PRD/PRD-1100_Time_and_Attendance.md`**
+- Produces worked time consumed by Payroll either manually or from external source
+- Not in scope for v1: Advanced scheduling optimization, workforce management analytics, biometric capture, and complex union-rule engines
+
+### 2026-04-24 — API surface map updated
+
+**Document update: `docs/SPEC/API_Surface_Map.md`**
+- INT-TIM-001 (Time entry import) status updated to `In Scope`
+
 ### 2026-04-23 — Repository file version re-numbering
 
 **ADR re-number: All ADR- files, version re-numbered from v1.x to v0.x**

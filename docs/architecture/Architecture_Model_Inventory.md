@@ -31,8 +31,9 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | PRD | Platform | PRD-0700_Workflow_Framework | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
 | PRD | Platform | PRD-0800_Validation_Framework | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
 | PRD | Platform | PRD-0900_Integration_Model | docs/PRD | Complete | Locked | Core Platform | User stories, scope, AC, NFRs added. |
-| PRD | HRIS | HRIS_Module_PRD | docs/PRD | Complete | Draft | Core Platform | User stories, scope boundaries, 21 AC, 14 NFRs added. |
 | PRD | Platform / Payroll | PRD-1000_Benefits_Boundary | docs/PRD | Complete | Locked | Core Platform | Resolves v1 benefits scope ambiguity; deduction processing in scope, plan admin out of scope |
+| PRD | Platform / Payroll | PRD-1100_Time_and_Attendance | docs/PRD | Complete | Locked | Core Platform | Capture/approval of worked time, delivery to payroll |
+| PRD | HRIS | HRIS_Module_PRD | docs/PRD | Complete | Draft | Core Platform | User stories, scope boundaries, 21 AC, 14 NFRs added. |
 
 ### NFR — Non-Functional Requirements
 
