@@ -2,8 +2,10 @@
 
 This index lists every document in the repository and its purpose. It is the starting point for navigating the HCM platform documentation.
 
+```
 **In-scope modules (v1):** HRIS, Payroll, Benefits Administration (minimum), Time & Attendance (minimum), Reporting (minimum)
 **Platform status:** In Design
+```
 
 ---
 
@@ -33,7 +35,8 @@ Product requirements documents define *what* the system must do and *why*. They 
 | Document | Purpose |
 |---|---|
 | [HRIS_Module_PRD.md](docs/PRD/HRIS_Module_PRD.md) | HRIS module scope, entity model, lifecycle events, self-service, and integration |
-
+| [PRD-1100_Time_and_Attendance.md](docs/PRD/PRD-1100_Time_and_Attendance.md) | T&A module scope, time entry model, approval lifecycle, overtime detection, payroll handoff, and FLSA compliance |
+| [PRD-1200_Reporting_Minimum.md](docs/PRD/PRD-1200_Reporting_Minimum.md) | Minimum viable reporting — 8 payroll operational reports and 8 HR operational reports with access control and delivery model |
 ---
 
 ## NFR — Non-Functional Requirements

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/PRD_to_Architecture_Coverage_Map.md` |
@@ -118,6 +118,29 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 | Pay Statement Delivery | SPEC/Pay_Statement_Delivery | Electronic delivery, mobile access, paper suppression, retention, accessibility | Pay_Statement_Model | Net_Pay_and_Disbursement_Model; Pay_Statement_Template_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 
 | API Surface Map | SPEC/API_Surface_Map | 21 integration points across HRIS, Payroll, Benefits, Compliance | Integration_and_Data_Exchange_Model | Payroll_Interface_and_Export_Model; General_Ledger_and_Accounting_Export_Model; Net_Pay_and_Disbursement_Model | Strong | Low | High | High | In Design | No |
+
+---
+
+### Reporting (Minimum) Capabilities (PRD-1200_Reporting_Minimum)
+
+| PRD Capability | Source Document | Description | Primary Model Owner | Supporting Architecture Models | Coverage Status | Risk Rating | Implementation Priority | Architecture Confidence | Implementation Status | Gap Identified |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Payroll Register | PRD-1200_Reporting_Minimum | Complete per-employee earnings, deductions, taxes, and net pay for a run | Employee_Payroll_Result_Model | Payroll_Run_Model; Payroll_Check_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Gross-to-Net Summary | PRD-1200_Reporting_Minimum | Aggregated run totals for financial reconciliation and funding confirmation | Payroll_Run_Result_Set_Model | Employee_Payroll_Result_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Employer Cost Report | PRD-1200_Reporting_Minimum | Gross pay plus employer tax and benefit contribution totals per employee | Employee_Payroll_Result_Model | Accumulator_Impact_Model; Organizational_Structure_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Payroll Exception Report | PRD-1200_Reporting_Minimum | All exceptions raised during a run with severity, status, and resolution state | Payroll_Exception_Model | Exception_and_Work_Queue_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| YTD Accumulator Balance Report | PRD-1200_Reporting_Minimum | PTD, QTD, and YTD accumulator balances per employee | Accumulator_and_Balance_Model | Accumulator_Impact_Model; Accumulator_Contribution_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Payroll Variance Report | PRD-1200_Reporting_Minimum | Period-over-period gross and net pay variance flagged against configurable threshold | Employee_Payroll_Result_Model | Payroll_Run_Model; Security_and_Access_Control_Model | Strong | Low | Medium | High | In Design | No |
+| Payment Disbursement Report | PRD-1200_Reporting_Minimum | Payment method, amount, and disbursement status per employee for a run | Payroll_Check_Model | Payroll_Funding_and_Cash_Management_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Tax Liability Summary | PRD-1200_Reporting_Minimum | Aggregated employee and employer tax liabilities by jurisdiction | Tax_Classification_and_Obligation_Model | Employee_Payroll_Result_Model; Accumulator_Impact_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Active Headcount Report | PRD-1200_Reporting_Minimum | Current active employee count by department, location, and legal entity | Organizational_Structure_Model | Employment_and_Person_Identity_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| New Hire and Termination Report | PRD-1200_Reporting_Minimum | Employees hired and terminated within a period | Employee_Event_and_Status_Change_Model | Employment_and_Person_Identity_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Turnover Report | PRD-1200_Reporting_Minimum | Turnover rate by department and legal entity with voluntary/involuntary split | Employee_Event_and_Status_Change_Model | Organizational_Structure_Model; Security_and_Access_Control_Model | Strong | Low | Medium | High | In Design | No |
+| Leave Utilisation and Balance Report | PRD-1200_Reporting_Minimum | Leave balances and utilisation per employee across all leave types | Leave_and_Absence_Management_Model | Accrual_and_Entitlement_Model; Accumulator_and_Balance_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Open Position Report | PRD-1200_Reporting_Minimum | Unfilled positions relative to approved headcount | Position_Management_Model | Organizational_Structure_Model; Employee_Assignment_Model; Security_and_Access_Control_Model | Moderate | Low | Medium | Medium | In Design | No |
+| Compensation Summary Report | PRD-1200_Reporting_Minimum | Current compensation rates by employee, department, and legal entity | Compensation_and_Pay_Rate_Model | Employment_and_Person_Identity_Model; Organizational_Structure_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Onboarding Status Report | PRD-1200_Reporting_Minimum | Onboarding task completion status for new hires with blocking task identification | Release_and_Approval_Model | Employee_Event_and_Status_Change_Model; Security_and_Access_Control_Model | Strong | Low | Medium | High | In Design | No |
+| Document Expiration Report | PRD-1200_Reporting_Minimum | HR documents approaching or past expiration date | Data_Retention_and_Archival_Model | Employment_and_Person_Identity_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 
 ---
 

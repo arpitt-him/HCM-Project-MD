@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-24 — Reporting (minimum)
+
+**New document: `docs/PRD/PRD-PRD-1200_Reporting_Minimum.md`**
+- Produces HR and Payroll operational reports
+- Not in scope for v1: User-designed reports, ad-hoc query tools, analytical data feeds, and workforce analytics dashboards
+
 ### 2026-04-24 — API surface map updated
 
 **Document update: `docs/PRD/PRD-0000_Core_Vision.md`**

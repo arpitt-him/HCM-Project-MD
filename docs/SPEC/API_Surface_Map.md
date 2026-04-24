@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/API_Surface_Map.md` |
@@ -382,13 +382,13 @@ Each integration point entry contains:
 
 ---
 
-## 7. Time & Attendance Domain (Future)
+## 7. Time & Attendance Domain
 
 These integration points are defined here to establish the expected contract for the future Time & Attendance module. They are not implemented in v1.
 
 ---
 
-### INT-TIM-001 — Time Entry Import (Future)
+### INT-TIM-001 — Time Entry Import
 
 | Field | Detail |
 |---|---|
