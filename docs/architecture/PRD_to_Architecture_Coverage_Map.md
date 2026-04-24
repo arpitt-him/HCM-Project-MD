@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v2.0 |
+| **Version** | v0.3 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/PRD_to_Architecture_Coverage_Map.md` |

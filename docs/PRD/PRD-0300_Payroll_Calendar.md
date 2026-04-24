@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Payroll Calendar |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/PRD/PRD-0300_Payroll_Calendar.md` |

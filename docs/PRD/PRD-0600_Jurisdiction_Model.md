@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Jurisdiction Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Compliance Domain |
 | **Location** | `docs/PRD/PRD-0600_Jurisdiction_Model.md` |

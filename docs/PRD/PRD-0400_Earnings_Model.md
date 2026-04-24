@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Earnings Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/PRD/PRD-0400_Earnings_Model.md` |

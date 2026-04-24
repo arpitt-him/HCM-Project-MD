@@ -8,6 +8,13 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-23 — Repository file version re-numbering
+
+**ADR re-number: All ADR- files, version re-numbered from v1.x to v0.x**
+**EXC re-number: All EXC- files, version re-numbered from v1.x to v0.x**
+**PRD re-number: All PRD- files, version re-numbered from v1.x to v0.x**
+**STATE re-number: All STATE- files, version re-numbered from v1.x to v0.x**
+
 ### 2026-04-23 — Accumulator & balance model document updated
 
 **Document update: docs/architecture/calculation-engine/Accumulator_and_Balance_Model.md**

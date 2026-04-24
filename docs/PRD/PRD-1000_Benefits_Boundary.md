@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Benefits Boundary Definition |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/PRD/PRD-1000_Benefits_Boundary.md` |

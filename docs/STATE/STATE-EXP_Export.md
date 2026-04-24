@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | State Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Architecture Team |
 | **Location** | `docs/STATE/STATE-EXP_Export.md` |

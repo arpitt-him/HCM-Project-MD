@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | State Model |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/STATE/STATE-RLN_Run_Lineage.md` |

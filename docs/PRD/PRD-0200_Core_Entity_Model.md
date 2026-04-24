@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Core Entity Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/PRD/PRD-0200_Core_Entity_Model.md` |

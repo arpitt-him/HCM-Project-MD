@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-001_Event_Driven_Architecture.md` |

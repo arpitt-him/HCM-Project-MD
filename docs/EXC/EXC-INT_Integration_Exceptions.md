@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Exception Catalogue |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/EXC/EXC-INT_Integration_Exceptions.md` |

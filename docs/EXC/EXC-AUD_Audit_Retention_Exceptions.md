@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Exception Catalogue |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Compliance Domain |
 | **Location** | `docs/EXC/EXC-AUD_Audit_Retention_Exceptions.md` |

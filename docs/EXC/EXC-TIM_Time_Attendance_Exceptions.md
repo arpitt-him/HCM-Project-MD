@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Exception Catalogue |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/EXC/EXC-TIM_Time_Attendance_Exceptions.md` |

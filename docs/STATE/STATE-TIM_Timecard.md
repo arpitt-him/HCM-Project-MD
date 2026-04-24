@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | State Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/STATE/STATE-TIM_Timecard.md` |

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | State Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/STATE/STATE-EMP_Employment_Lifecycle.md` |

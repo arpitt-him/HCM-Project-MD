@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | State Model |
-| **Version** | v1.0 |
+| **Version** | v0.2 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/STATE/STATE-DED_Benefits_Deductions.md` |
