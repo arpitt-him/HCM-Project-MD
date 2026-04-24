@@ -90,11 +90,11 @@ Initial scope is U.S.-based employment structures. Multi-country extensibility i
 ### Out of Scope (v1)
 
 - Payroll calculation and processing (owned by Payroll module)
-- Benefits plan configuration and enrollment processing (owned by Benefits module)
+- Benefits plan configuration and enrollment processing — plan design, carrier integration, open enrollment, COBRA, ACA (out of scope for v1; minimum benefit deduction processing is owned by Benefits minimum module)
+- Time entry advanced features — scheduling optimisation, workforce management analytics, biometric capture, union rule engines (out of scope for v1; minimum time entry and approval is owned by T&A minimum module)
 - Recruiting and applicant tracking
 - Performance management
 - Learning and development
-- Time entry and scheduling (owned by Time & Attendance module)
 - Multi-country payroll structures
 
 ### Boundary with Payroll Module

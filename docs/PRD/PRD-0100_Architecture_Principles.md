@@ -68,15 +68,20 @@ Core modules identified for the platform:
 
 | Module | Category |
 |---|---|
-| HRIS | Core — People & Employment |
-| Payroll | Core — Compensation Processing |
-| Benefits Administration | Future |
-| Time & Attendance | Future |
+| HRIS | v1 — People & Employment |
+| Payroll | v1 — Compensation Processing |
+| Benefits Administration (minimum) | v1 — Deduction elections; manual or externally sourced |
+| Time & Attendance (minimum) | v1 — Worked time capture and payroll handoff |
+| Reporting (minimum) | v1 — Operational reports |
+| Benefits Administration (advanced) | Future — Plan design, carrier integration, open enrollment, COBRA, ACA |
+| Time & Attendance (advanced) | Future — Scheduling optimisation, workforce analytics, biometric capture, union rules |
 | Recruiting & Applicant Tracking | Future |
-| Onboarding | Future |
 | Performance Management | Future |
 | Learning & Development | Future |
 | Workforce Analytics | Future |
+| Organization Structure (advanced) | Future |
+| Employee Self-Service (advanced) | Future |
+| Reporting (advanced) | Future |
 
 ## 3. Compliance with Principles
 

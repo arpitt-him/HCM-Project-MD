@@ -114,9 +114,15 @@ The platform shall support batch file intake for employee data.
 Planned future areas beyond v1 scope:
 
 - Multi-country payroll
-- Benefits engines
-- Reporting engines
-- Workforce analytics
+- Benefits Administration (advanced) — plan design, carrier integration, open enrollment, COBRA, ACA
+- Time & Attendance (advanced) — scheduling optimisation, workforce analytics, biometric capture, union rule engines
+- Recruiting and applicant tracking
+- Performance Management
+- Learning & Development
+- Workforce Analytics
+- Organization Structure (advanced hierarchy design and viewing)
+- Employee Self-Service (ESS — advanced)
+- Reporting (advanced) — user-designed reports and analytical data feeds
 - Compliance rule engines
 
 ---
@@ -127,17 +133,23 @@ The platform is event-driven. Modules do not call each other directly — they p
 
 ```
 HRIS  ──publishes──▶  Employee Events  ──consumed by──▶  Payroll
-                                        ──consumed by──▶  Benefits (future)
-                                        ──consumed by──▶  Time & Attendance (future)
+                                        ──consumed by──▶  Benefits (minimum)
+                                        ──consumed by──▶  Time & Attendance (minimum)
+
+Time & Attendance (minimum)  ──publishes──▶  Worked Time Records  ──consumed by──▶  Payroll
+
+Benefits (minimum)  ──publishes──▶  Deduction Elections  ──consumed by──▶  Payroll
 
 Recruiting (future)  ──publishes──▶  Candidate-to-Hire Events  ──consumed by──▶  HRIS
-
-Time & Attendance (future)  ──publishes──▶  Worked Time Records  ──consumed by──▶  Payroll
 ```
 
 **HRIS** is the upstream source of record for all people, employment, compensation, and lifecycle data. It owns Person and Employment records. It does not calculate pay.
 
-**Payroll** consumes HRIS data but does not own it. It owns calculation results, accumulators, liabilities, and pay statements. It does not write back to HRIS records.
+**Payroll** consumes HRIS, T&A, and Benefits data but does not own it. It owns calculation results, accumulators, liabilities, and pay statements. It does not write back to HRIS records.
+
+**T&A (minimum)** captures and approves worked time and delivers it to Payroll. It does not calculate earnings.
+
+**Benefits (minimum)** receives or accepts deduction elections and supplies them to Payroll. It does not administer plans.
 
 **Future modules** plug into this event fabric without requiring changes to existing module internals. This is the practical meaning of modular architecture as defined in `PRD-0100_Architecture_Principles.md` and `ADR-001_Event_Driven_Architecture.md`.
 
@@ -194,7 +206,7 @@ The full document list with one-line summaries is in `index.md`.
 ### In Scope — v1
 
 **REQ-PLT-020**
-The platform shall deliver Payroll and HRIS as the two v1 modules.
+The platform shall deliver HRIS, Payroll, Benefits Administration (minimum), Time & Attendance (minimum), and Reporting (minimum) as the v1 modules.
 
 **REQ-PLT-021**
 The platform shall support U.S.-based employment structures and U.S. tax jurisdictions in v1.
@@ -211,13 +223,14 @@ The platform shall support all four data entry channels defined in §5 in v1.
 Multi-country payroll structures are explicitly out of scope for v1. The platform architecture must not preclude future multi-country support, but no multi-country logic shall be implemented in v1.
 
 **REQ-PLT-025**
-Benefits Administration, Recruiting, Performance Management, Learning & Development, and Workforce Analytics modules are out of scope for v1.
+Benefits Administration (advanced) — plan design, carrier integration, open enrollment workflow, evidence of insurability, COBRA, and ACA reporting — is out of scope for v1.
 
 **REQ-PLT-026**
-Benefits plan configuration and enrollment processing are out of scope for v1, even though HRIS will publish the eligibility events that a future Benefits module will consume.
+Time & Attendance (advanced) — advanced scheduling optimisation, workforce management analytics, biometric capture, and complex union-rule engines — is out of scope for v1.
 
 **REQ-PLT-027**
-Time & Attendance -> Advanced scheduling optimization, workforce management analytics, biometric capture, and complex union-rule engines are not in scope for v1.
+Recruiting, Performance Management, Learning & Development, Workforce Analytics, Organization Structure (advanced), Employee Self-Service (advanced), and Reporting (advanced) are out of scope for v1.
+
 ---
 
 ## 11. Acceptance Criteria

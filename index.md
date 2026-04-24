@@ -2,7 +2,7 @@
 
 This index lists every document in the repository and its purpose. It is the starting point for navigating the HCM platform documentation.
 
-**In-scope modules (v1):** HRIS, Payroll
+**In-scope modules (v1):** HRIS, Payroll, Benefits Administration (minimum), Time & Attendance (minimum), Reporting (minimum)
 **Platform status:** In Design
 
 ---
