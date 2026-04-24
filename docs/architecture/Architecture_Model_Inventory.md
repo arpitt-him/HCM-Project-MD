@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -101,7 +101,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | State Model | HRIS | STATE-LEV_Leave_Request | docs/STATE | Complete | Locked | Core Platform / HRIS | 7 states |
 | State Model | HRIS | STATE-DOC_Document | docs/STATE | Complete | Locked | Core Platform / HRIS | 4 states |
 | State Model | HRIS | STATE-ONB_Onboarding_Task | docs/STATE | Complete | Locked | Core Platform / HRIS | 5 states |
-| State Model | Payroll | STATE-TIM_Timecard | docs/STATE | Complete | Locked | Payroll Domain | 6 states |
+| State Model | T&A | STATE-TIM_Time_Entry | docs/STATE | Complete | Draft | Core Platform / T&A | 7 states; time entry lifecycle from draft through payroll consumption; governs payroll eligibility gate |
 | State Model | Payroll | STATE-DED_Benefits_Deductions | docs/STATE | Complete | Locked | Core Platform | 5 states |
 | State Model | Compliance | STATE-GAR_Garnishment | docs/STATE | Complete | Locked | Compliance Domain | 6 states |
 | State Model | Compliance | STATE-TAX_Tax_Elections | docs/STATE | Complete | Locked | Compliance Domain | 4 states |
@@ -111,6 +111,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | State Model | Payroll | STATE-EXP_Export | docs/STATE | Complete | Locked | Architecture Team | 8 states |
 | State Model | Compliance | STATE-REC_Reconciliation | docs/STATE | Complete | Locked | Compliance Domain | 8 states |
 | State Model | Payroll | STATE-PRV_Provider_Response | docs/STATE | Complete | Locked | Architecture Team | 7 states |
+| State Model | T&A | STATE-TIM_Time_Entry | docs/STATE | Complete | Draft | Core Platform / T&A | 7 states; time entry lifecycle from draft through payroll consumption |
 
 ### EXC — Exception Catalogues
 
@@ -151,6 +152,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 |---|---|---|---|---|---|---|---|---|
 | Model | Core | Accrual_and_Entitlement_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
 | Model | Core | Benefit_and_Deduction_Configuration_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
+| Model | Core | Benefit_Deduction_Election_Model | docs/architecture/core | Complete | Draft | Core Platform | Yes | High |
 | Model | Core | Compensation_and_Pay_Rate_Model | docs/architecture/core | Complete | Reviewed | Core Platform | Yes | High |
 | Model | Core | Eligibility_and_Enrollment_Lifecycle_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |
 | Model | Core | Employee_Assignment_Model | docs/architecture/core | Complete | Approved | Core Platform | Yes | High |

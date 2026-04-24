@@ -3,12 +3,12 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Reviewed |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/core/Time_Entry_and_Worked_Time_Model.md` |
 | **Domain** | Core |
-| **Related Documents** | Scheduling_and_Shift_Model, Overtime_and_Premium_Pay_Model, Accrual_and_Entitlement_Model, Earnings_and_Deductions_Computation_Model, Correction_and_Immutability_Model |
+| **Related Documents** | PRD-1100_Time_and_Attendance, Scheduling_and_Shift_Model, Overtime_and_Premium_Pay_Model, Accrual_and_Entitlement_Model, Earnings_and_Deductions_Computation_Model, Correction_and_Immutability_Model, STATE-TIM_Time_Entry, EXC-TIM_Time_Attendance_Exceptions |
 
 ## Purpose
 
@@ -52,13 +52,30 @@ REGULAR, OVERTIME, DOUBLE_TIME, HOLIDAY_WORKED, PTO_USED, SICK_USED, UNPAID_LEAV
 
 ## 4. Approval Lifecycle
 
-Draft, Submitted, Approved, Rejected, Corrected, Locked. Payroll processing should only consume approved or otherwise authorised time.
+Time entry approval is governed by `STATE-TIM_Time_Entry`. The full state model, transition rules, guard conditions, and invalid transitions are defined there. The summary relevant to this model is:
 
-Only Approved or Locked time entries may be consumed by payroll execution.
+| State | Code | Payroll Eligible? |
+|---|---|---|
+| Draft | STATE-TIM-001 | No |
+| Submitted | STATE-TIM-002 | No |
+| Approved | STATE-TIM-003 | Yes |
+| Rejected | STATE-TIM-004 | No |
+| Corrected | STATE-TIM-005 | No |
+| Locked | STATE-TIM-006 | Yes — consumed by payroll run; immutable |
+| Voided | STATE-TIM-007 | No — terminal |
 
-Time entries in Draft or Submitted status shall remain excluded from payroll scope resolution.
+Only time entries in STATE-TIM-003 (Approved) or STATE-TIM-006 (Locked) may be consumed by payroll execution.
 
-Locked entries represent payroll-consumed states and must remain immutable except through governed correction workflows.
+Time entries in Draft or Submitted status shall remain excluded from payroll scope resolution. Unapproved entries at payroll cutoff generate EXC-TIM-002.
+
+Locked entries represent payroll-consumed state and must remain immutable except through governed correction workflows. Corrections to Locked entries create new versioned entries linked via Original_Time_Entry_ID; the original entry remains permanently Locked.
+
+All approval state transitions shall be audit-logged with actor identity, timestamp, and reason code where applicable.
+
+Approval authority is role-scoped per the Security_and_Access_Control_Model:
+- Employees may submit their own entries
+- Managers may approve entries for direct reports within their reporting scope
+- HR administrators may approve entries for any employee within their access scope
 
 ## 5. Worked Time Aggregation
 
@@ -135,3 +152,8 @@ This model integrates with:
 - Multi_Context_Calendar_Model
 - Correction_and_Immutability_Model
 - Operational_Reporting_and_Analytics_Model
+- Security_and_Access_Control_Model
+- Data_Retention_and_Archival_Model
+- Exception_and_Work_Queue_Model
+- STATE-TIM_Time_Entry
+- PRD-1100_Time_and_Attendance

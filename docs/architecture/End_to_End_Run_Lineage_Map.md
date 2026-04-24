@@ -2,204 +2,164 @@
 
 | Field | Detail |
 |---|---|
-| **Document Type** | Architecture Model |
-| **Version** | v0.1 |
+| **Document Type** | Architecture Orientation Map |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll Processing Domain |
-| **Location** | docs/architecture/processing/End_to_End_Run_Lineage_Map.md |
+| **Location** | `docs/architecture/End_to_End_Run_Lineage_Map.md` |
 | **Domain** | Payroll Execution / Lineage / Replay / Reconciliation |
+| **Related Documents** | Payroll_Run_Model, Run_Lineage_Model, Payroll_Run_Result_Set_Model, Employee_Payroll_Result_Model, Accumulator_Definition_Model, Accumulator_Impact_Model, Accumulator_and_Balance_Model, Processing_Lineage_Validation_Model, Correction_and_Immutability_Model, Payroll_Reconciliation_Model |
 
 ---
 
 ## Purpose
 
-This document defines the end-to-end lineage chain for payroll execution.
+This document is a cross-model orientation map. It shows how the major payroll execution lineage chains connect from run initiation through to reconciliation and audit, and it directs the reader to the authoritative model governing each segment.
 
-It makes explicit how governed payroll artifacts connect from:
-
-- run initiation  
-- result generation  
-- worker-level payroll output  
-- accumulator mutation  
-- payment execution  
-- remittance execution  
-- reconciliation and audit reconstruction  
-
-This model preserves:
-
-- deterministic replay  
-- correction-safe lineage  
-- funding and remittance traceability  
-- employee-level and run-level financial reconstruction  
-- audit defensibility  
+It does not define entity structures, validation rules, or correction semantics — those are defined in the models referenced throughout. Its value is as a single navigable view of how everything fits together.
 
 ---
 
 ## 1. Core Lineage Principle
 
-Payroll execution shall preserve lineage across all major execution artifacts.
+Every operationally significant payroll artifact must be traceable to:
 
-No artifact may become operationally significant without remaining traceable to:
+- the Payroll Run that generated or governed it
+- the Result Set that contained it where applicable
+- the worker-level result lineage where applicable
+- the correction lineage where applicable
+- the calendar and period context in which it was interpreted
 
-- the Payroll Run that generated or governed it  
-- the Result Set that contained it where applicable  
-- the worker-level result lineage where applicable  
-- the correction lineage where applicable  
-- the calendar and period context in which it was interpreted  
+Corrections, reruns, retries, and reversals always create new lineage-linked artifacts. Historical lineage is never overwritten.
 
-Later corrections, reruns, retries, or reversals shall create new lineage-linked artifacts rather than overwrite historical lineage.
+**Authoritative model:** `Correction_and_Immutability_Model`
 
 ---
 
-## 2. End-to-End Payroll Execution Chain
+## 2. Complete Execution Chain
 
 ```text
 Payroll Context
-    ↓
+        ↓
 Payroll Calendar / Period Context
-    ↓
+        ↓
 Payroll Run
-    ↓
+        ↓
 Payroll Run Result Set
-    ↓
+        ↓
 Employee Payroll Result
-    ↓
-Result Lines / Net Pay Result / Accumulator Impacts
-    ↓
-Accumulator Balance / Value
-    ↓
-Net Pay Disbursement / Funding / Remittance
-    ↓
+        ↓
+Result Lines  ──────────────────────────────────────────────┐
+        ↓                                                   │
+Accumulator Impact                                          │
+        ↓                                                   │
+Accumulator Contribution                                    │
+        ↓                                                   ↓
+Accumulator Balance / Value              Net Pay Result
+                                                ↓
+                                         Net Pay Disbursement
+                                                ↓
+                                         Payment Instruction
+        ↓                                       ↓
+Funding / Remittance              Release / Delivery / Return / Reissue
+        ↓
 Reconciliation / Reporting / Audit
 ```
 
 ---
 
-## 3. Payroll Run Lineage
+## 3. Run and Result Set Lineage
 
-Payroll Run is the central execution anchor.
-
-A Payroll Run shall preserve:
-
-- Payroll_Run_ID  
-- Parent_Run_ID  
-- Root_Run_ID  
-- Run_Lineage_Sequence  
-- Payroll_Context_ID  
-- Source_Period_ID  
-- Execution_Period_ID  
-
-Typical lineage:
+The Payroll Run is the central execution anchor. Every downstream artifact traces back to a Run ID.
 
 ```text
 Root Payroll Run
-    ↓
-Correction Run
-    ↓
-Supplemental Run
+        ↓
+Payroll Run Result Set
+        ↓
+[Correction Run → Corrected Result Set]
+        ↓
+[Supplemental Run → Supplemental Result Set]
 ```
 
----
+Each Payroll Run preserves: `Payroll_Run_ID`, `Parent_Run_ID`, `Root_Run_ID`, `Run_Lineage_Sequence`, `Payroll_Context_ID`, `Source_Period_ID`, `Execution_Period_ID`.
 
-## 4. Payroll Run Result Set Lineage
+Each Result Set preserves: `Payroll_Run_Result_Set_ID`, `Payroll_Run_ID`, `Parent_Payroll_Run_Result_Set_ID`, `Root_Payroll_Run_Result_Set_ID`.
 
-Each Payroll Run produces one governed Payroll Run Result Set.
-
-Required identifiers:
-
-- Payroll_Run_Result_Set_ID  
-- Payroll_Run_ID  
-- Parent_Payroll_Run_Result_Set_ID  
-- Root_Payroll_Run_Result_Set_ID  
-- Result_Set_Lineage_Sequence  
-
-The Result Set contains:
-
-- employee payroll results  
-- funding outputs  
-- remittance outputs  
-- disbursement outputs  
-- accumulator summaries  
-- audit snapshot  
-- exception references  
+**Authoritative models:** `Payroll_Run_Model`, `Run_Lineage_Model`, `Payroll_Run_Result_Set_Model`
 
 ---
 
-## 5. Employee Payroll Result Lineage
+## 4. Employee Payroll Result Lineage
 
-Employee Payroll Result represents worker-level payroll truth.
-
-Required identifiers:
-
-- Employee_Payroll_Result_ID  
-- Payroll_Run_Result_Set_ID  
-- Payroll_Run_ID  
-- Parent_Employee_Payroll_Result_ID  
-- Root_Employee_Payroll_Result_ID  
-- Result_Lineage_Sequence  
-
-Typical structure:
+The Employee Payroll Result is the worker-level truth record. All earnings, deductions, taxes, and accumulator impacts are anchored to it.
 
 ```text
 Payroll Run Result Set
-    └── Employee Payroll Result
-            ├── Earnings
-            ├── Deductions
-            ├── Taxes
-            ├── Employer Contributions
-            ├── Net Pay
-            └── Accumulator Impacts
+        └── Employee Payroll Result
+                ├── Earnings result lines
+                ├── Deduction result lines
+                ├── Tax result lines
+                ├── Employer contribution result lines
+                ├── Net Pay Result
+                └── Accumulator Impacts (0..n)
 ```
+
+Each Employee Payroll Result preserves: `Employee_Payroll_Result_ID`, `Payroll_Run_Result_Set_ID`, `Payroll_Run_ID`, `Parent_Employee_Payroll_Result_ID`, `Root_Employee_Payroll_Result_ID`.
+
+**Authoritative model:** `Employee_Payroll_Result_Model`
 
 ---
 
-## 6. Accumulator Lineage
+## 5. Accumulator Lineage
 
-Accumulator lineage consists of:
+Accumulator mutation flows through four distinct layers. Each layer has a defined role and is governed by a separate model.
 
 ```text
-Accumulator Definition
-    ↓
-Accumulator Impact
-    ↓
-Accumulator Balance / Value
+Accumulator Definition          ← what the accumulator means, its scope and reset rules
+        ↓
+Accumulator Impact              ← the mutation event: which result changed which accumulator
+        ↓
+Accumulator Contribution        ← the persisted historical balance-affecting record
+        ↓
+Accumulator Balance / Value     ← the current authoritative persisted state
 ```
 
-This separation supports:
+This four-layer separation supports deterministic replay, correction safety, and regulatory reconstruction. No layer may be bypassed.
 
-- deterministic replay  
-- correction safety  
-- regulatory reconstruction  
+**Authoritative models:** `Accumulator_Definition_Model`, `Accumulator_Impact_Model`, `Accumulator_and_Balance_Model`
 
 ---
 
-## 7. Net Pay and Disbursement Lineage
+## 6. Net Pay and Disbursement Lineage
 
 ```text
 Employee Payroll Result
-    ↓
+        ↓
 Net Pay Result
-    ↓
+        ↓
 Net Pay Disbursement
-    ↓
+        ↓
 Payment Instruction
-    ↓
+        ↓
 Release / Delivery / Return / Reissue
 ```
 
+**Authoritative models:** `Employee_Payroll_Result_Model`, `Payroll_Funding_and_Cash_Management_Model`, `Net_Pay_Disbursement_Data_Model`
+
 ---
 
-## 8. Funding and Remittance Lineage
+## 7. Funding and Remittance Lineage
 
 Funding:
 
 ```text
 Payroll Run Result Set
-    ↓
+        ↓
 Funding Use
-    ↓
+        ↓
 Funding Batch
-    ↓
+        ↓
 Settlement
 ```
 
@@ -207,126 +167,122 @@ Remittance:
 
 ```text
 Payroll Run Result Set
-    ↓
+        ↓
 Remittance Use
-    ↓
+        ↓
 Remittance Output
-    ↓
+        ↓
 Transmission / Acceptance / Retry
 ```
 
+**Authoritative models:** `Payroll_Run_Funding_and_Remittance_Map`, `Payroll_Interface_and_Export_Model`, `Payroll_Provider_Response_Model`
+
 ---
 
-## 9. Correction Lineage
+## 8. Correction Lineage
 
-Corrections never overwrite.
-
-They create lineage-linked artifacts.
+Corrections never overwrite. They produce new lineage-linked artifacts that carry delta impact forward.
 
 ```text
 Original Run
-    ↓
+        ↓
 Original Result Set
-    ↓
-Correction Run
-    ↓
+        ↓
+Original Employee Payroll Result
+        ↓
+Correction Run (child)
+        ↓
 Corrected Result Set
+        ↓
+Corrected Employee Payroll Result
 ```
 
----
+Corrections at the accumulator level follow the same four-layer chain defined in §5, with Accumulator Impact `Impact_Type` set to CORRECTION or REVERSAL and `Prior_Accumulator_Impact_ID` preserving the link to the original.
 
-## 10. Calendar and Period Propagation
-
-Required preserved identifiers:
-
-- Payroll_Context_ID  
-- Source_Period_ID  
-- Execution_Period_ID  
-- Pay_Date  
-
-Historical replay must use the original calendar context.
+**Authoritative models:** `Correction_and_Immutability_Model`, `Run_Lineage_Model`, `Payroll_Adjustment_and_Correction_Model`
 
 ---
 
-## 11. Exception Lineage
+## 9. Exception Lineage
 
 ```text
 Execution Artifact
-    ↓
+        ↓
 Payroll Exception
-    ↓
-Work Queue
-    ↓
-Resolution / Retry
+        ↓
+Work Queue Item
+        ↓
+Resolution / Retry / Escalation
 ```
+
+Exceptions are traceable to the artifact that generated them. Resolution actions are audit-logged.
+
+**Authoritative models:** `Payroll_Exception_Model`, `Exception_and_Work_Queue_Model`
 
 ---
 
-## 12. Reconciliation Traversal
+## 10. Calendar and Period Context Propagation
 
-Examples:
+All execution artifacts preserve the calendar context in which they were interpreted. Historical replay must use the original calendar context — not the current one.
 
-```text
-Payroll Run
-    ↓
-Result Set
-    ↓
-Employee Results
-```
+Required identifiers preserved across the chain: `Payroll_Context_ID`, `Source_Period_ID`, `Execution_Period_ID`, `Pay_Date`.
 
-```text
-Employee Result
-    ↓
-Accumulator Impact
-    ↓
-Accumulator Balance
-```
-
-```text
-Employee Result
-    ↓
-Net Pay
-    ↓
-Disbursement
-```
+**Authoritative models:** `Payroll_Calendar_Model`, `Multi_Context_Calendar_Model`
 
 ---
 
-## 13. Deterministic Replay Boundary
+## 11. Reconciliation Traversal
 
-Replay must reconstruct:
+The lineage chain supports three primary reconciliation traversal paths:
 
-- runs  
-- result sets  
-- employee results  
-- accumulator changes  
-- payments  
-- remittances  
-- corrections  
+**Run-level:**
+```text
+Payroll Run → Result Set → Employee Results → totals
+```
 
-Given identical:
+**Accumulator-level:**
+```text
+Employee Result → Accumulator Impact → Accumulator Contribution → Accumulator Balance
+```
 
-- configuration  
-- rules  
-- source inputs  
-- calendar context  
+**Payment-level:**
+```text
+Employee Result → Net Pay → Disbursement → Settlement
+```
 
-The platform shall reproduce identical governed outcomes.
+All three paths must be reconstructable from archived artifacts for any historical period.
+
+**Authoritative model:** `Payroll_Reconciliation_Model`, `Processing_Lineage_Validation_Model`
 
 ---
 
-## 14. Summary
+## 12. Deterministic Replay Guarantee
 
-This model defines the complete lineage path across payroll execution.
+Given identical configuration, rules, source inputs, and calendar context, the platform must reproduce identical governed outcomes across all layers of this chain.
 
-Key anchors:
+This guarantee applies to: runs, result sets, employee results, accumulator mutations, payments, remittances, and corrections.
 
-- Payroll Run  
-- Payroll Run Result Set  
-- Employee Payroll Result  
-- Accumulator Impacts  
-- Disbursement  
-- Funding  
-- Remittance  
+Lineage chain integrity is the prerequisite for replay validity. The `Processing_Lineage_Validation_Model` governs the validation logic that confirms chain integrity before replay is permitted.
 
-All correction-safe, replay-safe, and audit-safe payroll systems depend on this lineage chain.
+**Authoritative models:** `ADR-002_Deterministic_Replayability`, `Processing_Lineage_Validation_Model`, `Run_Lineage_Model`
+
+---
+
+## 13. Where to Go for Detail
+
+| Topic | Authoritative Document |
+|---|---|
+| Run structure, states, parent-child relationships | `Payroll_Run_Model`, `Run_Lineage_Model` |
+| Result set structure and lifecycle | `Payroll_Run_Result_Set_Model` |
+| Worker-level result structure | `Employee_Payroll_Result_Model` |
+| Accumulator meaning and scope | `Accumulator_Definition_Model` |
+| Accumulator mutation events | `Accumulator_Impact_Model` |
+| Accumulator balance and contribution history | `Accumulator_and_Balance_Model` |
+| Net pay and disbursement | `Payroll_Funding_and_Cash_Management_Model` |
+| Funding and remittance | `Payroll_Run_Funding_and_Remittance_Map` |
+| Correction and immutability rules | `Correction_and_Immutability_Model` |
+| Exception routing and resolution | `Exception_and_Work_Queue_Model` |
+| Calendar and period context | `Multi_Context_Calendar_Model` |
+| Reconciliation logic | `Payroll_Reconciliation_Model` |
+| Lineage chain validation | `Processing_Lineage_Validation_Model` |
+| Replay guarantee and ADR | `ADR-002_Deterministic_Replayability` |

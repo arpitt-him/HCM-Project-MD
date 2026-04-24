@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.4 |
+| **Version** | v0.5 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/PRD_to_Architecture_Coverage_Map.md` |
@@ -129,7 +129,7 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 | Gross-to-Net Summary | PRD-1200_Reporting_Minimum | Aggregated run totals for financial reconciliation and funding confirmation | Payroll_Run_Result_Set_Model | Employee_Payroll_Result_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 | Employer Cost Report | PRD-1200_Reporting_Minimum | Gross pay plus employer tax and benefit contribution totals per employee | Employee_Payroll_Result_Model | Accumulator_Impact_Model; Organizational_Structure_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 | Payroll Exception Report | PRD-1200_Reporting_Minimum | All exceptions raised during a run with severity, status, and resolution state | Payroll_Exception_Model | Exception_and_Work_Queue_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
-| YTD Accumulator Balance Report | PRD-1200_Reporting_Minimum | PTD, QTD, and YTD accumulator balances per employee | Accumulator_and_Balance_Model | Accumulator_Impact_Model; Accumulator_Contribution_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| YTD Accumulator Balance Report | PRD-1200_Reporting_Minimum | PTD, QTD, and YTD accumulator balances per employee | Accumulator_and_Balance_Model | Accumulator_Impact_Model; Accumulator_and_Balance_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 | Payroll Variance Report | PRD-1200_Reporting_Minimum | Period-over-period gross and net pay variance flagged against configurable threshold | Employee_Payroll_Result_Model | Payroll_Run_Model; Security_and_Access_Control_Model | Strong | Low | Medium | High | In Design | No |
 | Payment Disbursement Report | PRD-1200_Reporting_Minimum | Payment method, amount, and disbursement status per employee for a run | Payroll_Check_Model | Payroll_Funding_and_Cash_Management_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 | Tax Liability Summary | PRD-1200_Reporting_Minimum | Aggregated employee and employer tax liabilities by jurisdiction | Tax_Classification_and_Obligation_Model | Employee_Payroll_Result_Model; Accumulator_Impact_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |

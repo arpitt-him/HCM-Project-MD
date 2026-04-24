@@ -291,6 +291,7 @@ State model documents define the named states, valid transitions, guard conditio
 | [STATE-EXP_Export.md](docs/STATE/STATE-EXP_Export.md) | Outbound payroll export units |
 | [STATE-REC_Reconciliation.md](docs/STATE/STATE-REC_Reconciliation.md) | Payroll reconciliation lifecycle |
 | [STATE-PRV_Provider_Response.md](docs/STATE/STATE-PRV_Provider_Response.md) | Inbound provider response processing |
+| [STATE-TIM_Time_Entry.md](docs/STATE/STATE-TIM_Time_Entry.md) | Time entry lifecycle from draft through payroll consumption |
 
 ---
 

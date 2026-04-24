@@ -8,9 +8,33 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-24 — Operational reporting & analytics model update
+**Document update: `docs/architecture/Operational_Reporting_and_Analytics_Model.md`**
+- Updated file information block with expanded list of related documents
+- Updated Purpose section
+- Updated section 1: Reporting Scope
+- Updated section 3: Report Categories
+- Updated section 4: Data Aggregation Sources
+- Updated section 10: Relationship to Other Models
+
+### 2026-04-24 — Time entry & worked time model update
+**Document update: `docs/architecture/Time_Entry_and_Worked_Time_Model.md`**
+- Updated file information block with expanded list of related documents
+- Updated section 4: Approval Lifecycle
+- Updated section 11: Relationship to Other Models
+
+### 2026-04-24 — STATE-TIM Time Entry state values
+
+**New document: `docs/STATE/STATE-TIM_Time_Entry.md`**
+
+### 2026-04-24 — End to End Run Lineage map updated
+
+**Document update: `docs/architecture/End_to_End_Run_Lineage_Map.md`**
+- Rewritten for posterity to include recent PRD changes
+
 ### 2026-04-24 — Reporting (minimum)
 
-**New document: `docs/PRD/PRD-PRD-1200_Reporting_Minimum.md`**
+**New document: `docs/PRD/PRD-1200_Reporting_Minimum.md`**
 - Produces HR and Payroll operational reports
 - Not in scope for v1: User-designed reports, ad-hoc query tools, analytical data feeds, and workforce analytics dashboards
 
