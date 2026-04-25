@@ -256,8 +256,8 @@ Table person {
   veteran_status              varchar(50)     [null]
   disability_status           varchar(50)     [null]
   person_status               person_status   [not null]
-  creation_timestamp          timestamp       [not null]
-  last_update_timestamp       timestamp       [not null]
+  creation_timestamp          timestamptz [not null]
+  last_update_timestamp       timestamptz [not null]
   last_updated_by             varchar(200)    [not null]
 
   indexes {
@@ -287,7 +287,7 @@ Table person_address {
   effective_start_date    date          [not null]
   effective_end_date      date          [null]
   created_by              uuid          [not null]
-  creation_timestamp      timestamp     [not null]
+  creation_timestamp      timestamptz [not null]
 
   indexes {
     person_id
@@ -308,7 +308,7 @@ Table person_emergency_contact {
   email                   varchar(200)  [null]
   primary_flag            boolean       [not null, default: false]
   created_by              uuid          [not null]
-  creation_timestamp      timestamp     [not null]
+  creation_timestamp      timestamptz [not null]
 
   indexes {
     person_id
@@ -342,9 +342,9 @@ Table org_unit {
   locality_code           varchar(50)     [null, note: "Local tax jurisdiction code"]
   work_location_type      work_location_type [null]
   created_by              uuid            [not null]
-  creation_timestamp      timestamp       [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid            [not null]
-  last_update_timestamp   timestamp       [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     org_unit_type
@@ -370,9 +370,9 @@ Table job {
   effective_start_date    date                [not null]
   effective_end_date      date                [null]
   created_by              uuid                [not null]
-  creation_timestamp      timestamp           [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid                [not null]
-  last_update_timestamp   timestamp           [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     job_code
@@ -395,9 +395,9 @@ Table position {
   effective_start_date    date              [not null]
   effective_end_date      date              [null]
   created_by              uuid              [not null]
-  creation_timestamp      timestamp         [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid              [not null]
-  last_update_timestamp   timestamp         [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     job_id
@@ -435,8 +435,8 @@ Table employment {
   payroll_eligibility_flag      boolean                   [not null, default: true]
   benefits_eligibility_flag     boolean                   [not null, default: true]
   time_tracking_required_flag   boolean                   [not null, default: false]
-  creation_timestamp            timestamp                 [not null]
-  last_update_timestamp         timestamp                 [not null]
+  creation_timestamp            timestamptz [not null]
+  last_update_timestamp         timestamptz [not null]
   last_updated_by               varchar(200)              [not null]
 
   indexes {
@@ -471,9 +471,9 @@ Table assignment {
   assignment_start_date   date                [not null]
   assignment_end_date     date                [null]
   created_by              uuid                [not null]
-  creation_timestamp      timestamp           [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid                [not null]
-  last_update_timestamp   timestamp           [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     employment_id
@@ -505,12 +505,12 @@ Table compensation_record {
   change_reason_code      varchar(50)               [not null]
   approval_status         approval_status           [not null]
   approved_by             uuid                      [null]
-  approval_timestamp      timestamp                 [null]
+  approval_timestamp      timestamptz [null]
   primary_rate_flag       boolean                   [not null, default: false]
   created_by              uuid                      [not null]
-  creation_timestamp      timestamp                 [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid                      [not null]
-  last_update_timestamp   timestamp                 [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     employment_id
@@ -538,13 +538,13 @@ Table leave_request {
   payroll_impact_type     payroll_impact_type   [not null]
   leave_balance_impact    decimal(10,4)         [null, note: "Hours or days deducted from balance"]
   approved_by             uuid                  [null]
-  approval_timestamp      timestamp             [null]
+  approval_timestamp      timestamptz [null]
   hr_contact_id           uuid                  [null]
   fmla_eligible_flag      boolean               [null, default: false]
   created_by              uuid                  [not null]
-  creation_timestamp      timestamp             [not null]
+  creation_timestamp      timestamptz [not null]
   last_updated_by         uuid                  [not null]
-  last_update_timestamp   timestamp             [not null]
+  last_update_timestamp   timestamptz [not null]
 
   indexes {
     employment_id
@@ -571,13 +571,13 @@ Table document {
   expiration_date             date              [null]
   storage_reference           varchar(500)      [not null, note: "Secure reference to stored file"]
   file_format                 varchar(20)       [not null]
-  upload_date                 timestamp         [not null]
+  upload_date                 timestamptz [not null]
   uploaded_by                 uuid              [not null]
   verified_by                 uuid              [null]
-  verification_date           timestamp         [null]
+  verification_date           timestamptz [null]
   superseded_by_document_id   uuid              [null]
   created_by                  uuid              [not null]
-  creation_timestamp          timestamp         [not null]
+  creation_timestamp          timestamptz [not null]
 
   indexes {
     person_id
@@ -602,9 +602,9 @@ Table onboarding_plan {
   completion_date           date                      [null]
   assigned_hr_contact_id    uuid                      [null]
   created_by                uuid                      [not null]
-  creation_timestamp        timestamp                 [not null]
+  creation_timestamp        timestamptz [not null]
   last_updated_by           uuid                      [not null]
-  last_update_timestamp     timestamp                 [not null]
+  last_update_timestamp     timestamptz [not null]
 
   indexes {
     employment_id
@@ -630,7 +630,7 @@ Table onboarding_task {
   waiver_reason         varchar(500)              [null]
   waived_by             uuid                      [null]
   created_by            uuid                      [not null]
-  creation_timestamp    timestamp                 [not null]
+  creation_timestamp    timestamptz [not null]
 
   indexes {
     onboarding_plan_id

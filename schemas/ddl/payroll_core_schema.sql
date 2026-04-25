@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-04-25T14:14:44.560Z
+-- Generated at: 2026-04-25T15:58:26.716Z
 
 CREATE TYPE "run_type" AS ENUM (
   'REGULAR',
@@ -219,12 +219,12 @@ CREATE TABLE "payroll_run" (
   "temporal_override_active_flag" boolean DEFAULT false,
   "temporal_override_date" date,
   "initiated_by" uuid NOT NULL,
-  "run_start_timestamp" timestamp,
-  "run_end_timestamp" timestamp,
+  "run_start_timestamp" timestamptz,
+  "run_end_timestamp" timestamptz,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "run_scope" (
@@ -238,15 +238,15 @@ CREATE TABLE "run_scope" (
   "population_definition" text NOT NULL,
   "population_count" int NOT NULL,
   "population_resolved_flag" boolean NOT NULL DEFAULT false,
-  "resolution_timestamp" timestamp,
+  "resolution_timestamp" timestamptz,
   "exception_derived_flag" boolean DEFAULT false,
   "priority_level" varchar(50) NOT NULL,
   "adjustment_flag" boolean NOT NULL DEFAULT false,
-  "execution_start_timestamp" timestamp,
-  "execution_end_timestamp" timestamp,
+  "execution_start_timestamp" timestamptz,
+  "execution_end_timestamp" timestamptz,
   "execution_result" varchar(50),
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "payroll_run_result_set" (
@@ -261,14 +261,14 @@ CREATE TABLE "payroll_run_result_set" (
   "correction_reference_id" uuid,
   "result_set_status" result_set_status NOT NULL,
   "result_set_type" result_set_type NOT NULL,
-  "execution_start_timestamp" timestamp,
-  "execution_end_timestamp" timestamp,
+  "execution_start_timestamp" timestamptz,
+  "execution_end_timestamp" timestamptz,
   "approval_required_flag" boolean NOT NULL DEFAULT false,
   "approved_by_user_id" uuid,
-  "approval_timestamp" timestamp,
-  "finalization_timestamp" timestamp,
-  "created_timestamp" timestamp NOT NULL,
-  "updated_timestamp" timestamp NOT NULL
+  "approval_timestamp" timestamptz,
+  "finalization_timestamp" timestamptz,
+  "created_timestamp" timestamptz NOT NULL,
+  "updated_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "employee_payroll_result" (
@@ -294,8 +294,8 @@ CREATE TABLE "employee_payroll_result" (
   "total_employee_tax_amount" decimal(18,4) NOT NULL,
   "total_employer_contribution_amount" decimal(18,4) NOT NULL,
   "net_pay_amount" decimal(18,4) NOT NULL,
-  "created_timestamp" timestamp NOT NULL,
-  "updated_timestamp" timestamp NOT NULL
+  "created_timestamp" timestamptz NOT NULL,
+  "updated_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "earnings_result_line" (
@@ -313,7 +313,7 @@ CREATE TABLE "earnings_result_line" (
   "source_rule_version_id" uuid,
   "correction_flag" boolean NOT NULL DEFAULT false,
   "corrects_line_id" uuid,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "deduction_result_line" (
@@ -329,7 +329,7 @@ CREATE TABLE "deduction_result_line" (
   "source_rule_version_id" uuid,
   "correction_flag" boolean NOT NULL DEFAULT false,
   "corrects_line_id" uuid,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "tax_result_line" (
@@ -346,7 +346,7 @@ CREATE TABLE "tax_result_line" (
   "source_rule_version_id" uuid,
   "correction_flag" boolean NOT NULL DEFAULT false,
   "corrects_line_id" uuid,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "employer_contribution_result_line" (
@@ -360,7 +360,7 @@ CREATE TABLE "employer_contribution_result_line" (
   "source_rule_version_id" uuid,
   "correction_flag" boolean NOT NULL DEFAULT false,
   "corrects_line_id" uuid,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "payroll_check" (
@@ -384,7 +384,7 @@ CREATE TABLE "payroll_check" (
   "void_reason" varchar(500),
   "corrects_check_id" uuid,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "payroll_item" (
@@ -407,7 +407,7 @@ CREATE TABLE "payroll_item" (
   "item_status" item_status NOT NULL,
   "correction_flag" boolean NOT NULL DEFAULT false,
   "corrects_item_id" uuid,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "accumulator_definition" (
@@ -424,9 +424,9 @@ CREATE TABLE "accumulator_definition" (
   "effective_start_date" date NOT NULL,
   "effective_end_date" date,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "accumulator_impact" (
@@ -454,9 +454,9 @@ CREATE TABLE "accumulator_impact" (
   "correction_flag" boolean NOT NULL DEFAULT false,
   "prior_accumulator_impact_id" uuid,
   "notes" varchar(500),
-  "impact_timestamp" timestamp NOT NULL,
-  "created_timestamp" timestamp NOT NULL,
-  "updated_timestamp" timestamp NOT NULL
+  "impact_timestamp" timestamptz NOT NULL,
+  "created_timestamp" timestamptz NOT NULL,
+  "updated_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "accumulator_contribution" (
@@ -481,7 +481,7 @@ CREATE TABLE "accumulator_contribution" (
   "before_value" decimal(18,4),
   "after_value" decimal(18,4),
   "reason_code" varchar(50),
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "accumulator_balance" (
@@ -499,7 +499,7 @@ CREATE TABLE "accumulator_balance" (
   "balance_status" accumulator_balance_status NOT NULL,
   "last_updated_run_id" uuid NOT NULL,
   "last_updated_result_set_id" uuid,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "funding_result_set" (
@@ -508,8 +508,8 @@ CREATE TABLE "funding_result_set" (
   "funding_profile_id" uuid NOT NULL,
   "funding_status" funding_status NOT NULL,
   "funding_amount" decimal(18,4) NOT NULL,
-  "funding_timestamp" timestamp,
-  "created_timestamp" timestamp NOT NULL
+  "funding_timestamp" timestamptz,
+  "created_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "remittance_result_set" (
@@ -518,8 +518,8 @@ CREATE TABLE "remittance_result_set" (
   "remittance_profile_id" uuid NOT NULL,
   "total_remittance_amount" decimal(18,4) NOT NULL,
   "remittance_status" remittance_status NOT NULL,
-  "transmission_timestamp" timestamp,
-  "created_timestamp" timestamp NOT NULL
+  "transmission_timestamp" timestamptz,
+  "created_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "disbursement_result_set" (
@@ -528,7 +528,7 @@ CREATE TABLE "disbursement_result_set" (
   "net_pay_disbursement_id" uuid NOT NULL,
   "disbursement_status" disbursement_status NOT NULL,
   "disbursement_amount" decimal(18,4) NOT NULL,
-  "created_timestamp" timestamp NOT NULL
+  "created_timestamp" timestamptz NOT NULL
 );
 
 CREATE INDEX ON "payroll_run" ("payroll_context_id");

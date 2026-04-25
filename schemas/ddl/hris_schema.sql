@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-04-25T14:13:43.135Z
+-- Generated at: 2026-04-25T15:58:11.097Z
 
 CREATE TYPE "person_status" AS ENUM (
   'ACTIVE',
@@ -239,8 +239,8 @@ CREATE TABLE "person" (
   "veteran_status" varchar(50),
   "disability_status" varchar(50),
   "person_status" person_status NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
+  "last_update_timestamp" timestamptz NOT NULL,
   "last_updated_by" varchar(200) NOT NULL
 );
 
@@ -260,7 +260,7 @@ CREATE TABLE "person_address" (
   "effective_start_date" date NOT NULL,
   "effective_end_date" date,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "person_emergency_contact" (
@@ -272,7 +272,7 @@ CREATE TABLE "person_emergency_contact" (
   "email" varchar(200),
   "primary_flag" boolean NOT NULL DEFAULT false,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "org_unit" (
@@ -296,9 +296,9 @@ CREATE TABLE "org_unit" (
   "locality_code" varchar(50),
   "work_location_type" work_location_type,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "job" (
@@ -313,9 +313,9 @@ CREATE TABLE "job" (
   "effective_start_date" date NOT NULL,
   "effective_end_date" date,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "position" (
@@ -328,9 +328,9 @@ CREATE TABLE "position" (
   "effective_start_date" date NOT NULL,
   "effective_end_date" date,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "employment" (
@@ -358,8 +358,8 @@ CREATE TABLE "employment" (
   "payroll_eligibility_flag" boolean NOT NULL DEFAULT true,
   "benefits_eligibility_flag" boolean NOT NULL DEFAULT true,
   "time_tracking_required_flag" boolean NOT NULL DEFAULT false,
-  "creation_timestamp" timestamp NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
+  "last_update_timestamp" timestamptz NOT NULL,
   "last_updated_by" varchar(200) NOT NULL
 );
 
@@ -378,9 +378,9 @@ CREATE TABLE "assignment" (
   "assignment_start_date" date NOT NULL,
   "assignment_end_date" date,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "compensation_record" (
@@ -397,12 +397,12 @@ CREATE TABLE "compensation_record" (
   "change_reason_code" varchar(50) NOT NULL,
   "approval_status" approval_status NOT NULL,
   "approved_by" uuid,
-  "approval_timestamp" timestamp,
+  "approval_timestamp" timestamptz,
   "primary_rate_flag" boolean NOT NULL DEFAULT false,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "leave_request" (
@@ -418,13 +418,13 @@ CREATE TABLE "leave_request" (
   "payroll_impact_type" payroll_impact_type NOT NULL,
   "leave_balance_impact" decimal(10,4),
   "approved_by" uuid,
-  "approval_timestamp" timestamp,
+  "approval_timestamp" timestamptz,
   "hr_contact_id" uuid,
   "fmla_eligible_flag" boolean DEFAULT false,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "document" (
@@ -439,13 +439,13 @@ CREATE TABLE "document" (
   "expiration_date" date,
   "storage_reference" varchar(500) NOT NULL,
   "file_format" varchar(20) NOT NULL,
-  "upload_date" timestamp NOT NULL,
+  "upload_date" timestamptz NOT NULL,
   "uploaded_by" uuid NOT NULL,
   "verified_by" uuid,
-  "verification_date" timestamp,
+  "verification_date" timestamptz,
   "superseded_by_document_id" uuid,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "onboarding_plan" (
@@ -457,9 +457,9 @@ CREATE TABLE "onboarding_plan" (
   "completion_date" date,
   "assigned_hr_contact_id" uuid,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL,
+  "creation_timestamp" timestamptz NOT NULL,
   "last_updated_by" uuid NOT NULL,
-  "last_update_timestamp" timestamp NOT NULL
+  "last_update_timestamp" timestamptz NOT NULL
 );
 
 CREATE TABLE "onboarding_task" (
@@ -476,7 +476,7 @@ CREATE TABLE "onboarding_task" (
   "waiver_reason" varchar(500),
   "waived_by" uuid,
   "created_by" uuid NOT NULL,
-  "creation_timestamp" timestamp NOT NULL
+  "creation_timestamp" timestamptz NOT NULL
 );
 
 CREATE INDEX ON "person" ("person_number");
