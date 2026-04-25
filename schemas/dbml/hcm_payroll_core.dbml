@@ -1,0 +1,766 @@
+// ============================================================
+// HCM Platform — Payroll Core Domain Schema
+// Version: v0.1
+// Status: Draft
+// Covers: Payroll Run, Run Result Set, 
+//         Employee Payroll Result, Result Lines, 
+//         Accumulator chain (4 layers),
+//         Payroll Check, Payroll Item, Run Scope
+// Note: References are defined as standalone — no FK constraints
+//       applied. Column names are consistent across tables to
+//       support FK addition without renaming.
+// ============================================================
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum run_type {
+  REGULAR
+  ADJUSTMENT
+  CORRECTION
+  REPROCESSING
+  SUPPLEMENTAL
+  SIMULATION
+}
+
+enum run_status {
+  DRAFT
+  OPEN
+  CALCULATING
+  CALCULATED
+  UNDER_REVIEW
+  APPROVED
+  RELEASING
+  RELEASED
+  CLOSED
+  FAILED
+  CANCELLED
+}
+
+enum result_set_status {
+  PENDING
+  CALCULATED
+  APPROVED
+  RELEASED
+  FINALIZED
+  ARCHIVED
+}
+
+enum result_set_type {
+  REGULAR_RUN
+  OFF_CYCLE
+  ADJUSTMENT_RUN
+  CORRECTION_RUN
+}
+
+enum employee_result_status {
+  CALCULATED
+  APPROVED
+  RELEASED
+  FINALIZED
+  CORRECTED
+  REVERSED
+}
+
+enum result_class {
+  EARNING
+  DEDUCTION
+  TAX
+  EMPLOYER_CONTRIBUTION
+}
+
+enum item_status {
+  DRAFT
+  POSTED
+  VOIDED
+  CORRECTED
+}
+
+enum check_status {
+  DRAFT
+  GENERATED
+  RELEASED
+  VOIDED
+  REPLACED
+  RETURNED
+}
+
+enum payment_method {
+  DIRECT_DEPOSIT
+  PRINTED_CHECK
+  PAYCARD
+  CASH
+  MANUAL_CHECK
+  OTHER
+}
+
+enum payment_context {
+  REGULAR
+  SUPPLEMENTAL
+  CORRECTION
+  FINAL_PAY
+  OFF_CYCLE
+}
+
+enum impact_status {
+  CALCULATED
+  POSTED
+  REVERSED
+  CORRECTED
+  SUPERSEDED
+}
+
+enum impact_source_type {
+  EARNINGS_LINE
+  DEDUCTION_LINE
+  TAX_LINE
+  EMPLOYER_CONTRIBUTION_LINE
+  CORRECTION_LINE
+  MANUAL_ADJUSTMENT
+  OTHER
+}
+
+enum posting_direction {
+  INCREASE
+  DECREASE
+  NEUTRAL
+  DERIVED
+}
+
+enum contribution_type {
+  STANDARD
+  REVERSAL
+  CORRECTION
+  RESET
+}
+
+enum accumulator_balance_status {
+  ACTIVE
+  RESET
+  ARCHIVED
+}
+
+enum accumulator_family {
+  GROSS_WAGES
+  PRE_TAX_DEDUCTIONS
+  POST_TAX_DEDUCTIONS
+  FEDERAL_TAX_WITHHELD
+  STATE_TAX_WITHHELD
+  LOCAL_TAX_WITHHELD
+  SOCIAL_SECURITY
+  MEDICARE
+  EMPLOYER_FICA
+  FUTA
+  SUI
+  EMPLOYER_BENEFIT
+  RETIREMENT
+  GARNISHMENT_TOTALS
+}
+
+enum accumulator_scope_type {
+  EMPLOYEE
+  EMPLOYER
+  EMPLOYEE_JURISDICTION
+  EMPLOYER_JURISDICTION
+  CLIENT_JURISDICTION
+}
+
+enum period_context {
+  PTD
+  QTD
+  YTD
+  PLAN_YEAR
+  LTD
+}
+
+enum scope_type {
+  FULL
+  CATCH_UP
+  RETRO
+  RECOVERY
+}
+
+enum scope_status {
+  DRAFT
+  VALIDATED
+  READY
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum population_method {
+  EXPLICIT
+  QUERY
+  EXCEPTION
+}
+
+enum funding_status {
+  FUNDED
+  PARTIALLY_FUNDED
+  FAILED
+}
+
+enum remittance_status {
+  PREPARED
+  RELEASED
+  TRANSMITTED
+  ACCEPTED
+  REJECTED
+}
+
+enum disbursement_status {
+  PREPARED
+  RELEASED
+  SETTLED
+  RETURNED
+}
+
+// ============================================================
+// PAYROLL RUN
+// ============================================================
+
+Table payroll_run {
+  run_id                          uuid          [pk, not null, note: "System-generated. Immutable."]
+  payroll_context_id              uuid          [not null, note: "The payroll group this run belongs to"]
+  period_id                       uuid          [not null, note: "The payroll calendar period"]
+  pay_date                        date          [not null, note: "Inherited from calendar entry; immutable"]
+  run_type                        run_type      [not null]
+  run_status                      run_status    [not null]
+  run_description                 varchar(500)  [null]
+  parent_run_id                   uuid          [null, note: "Links correction or rerun to original run"]
+  related_run_group_id            uuid          [null, note: "Groups related supplemental or adjustment runs"]
+  rule_and_config_version_ref     varchar(200)  [null, note: "Snapshot of configuration version used"]
+  temporal_override_active_flag   boolean       [null, default: false]
+  temporal_override_date          date          [null, note: "Override_Date at initiation time; null if no override"]
+  initiated_by                    uuid          [not null]
+  run_start_timestamp             timestamp     [null]
+  run_end_timestamp               timestamp     [null]
+  created_by                      uuid          [not null]
+  creation_timestamp              timestamp     [not null]
+  last_updated_by                 uuid          [not null]
+  last_update_timestamp           timestamp     [not null]
+
+  indexes {
+    payroll_context_id
+    period_id
+    run_status
+    parent_run_id
+    (payroll_context_id, period_id, run_type)
+  }
+}
+
+// ============================================================
+// RUN SCOPE
+// ============================================================
+
+Table run_scope {
+  run_scope_id                uuid              [pk, not null, note: "System-generated. Immutable."]
+  parent_run_id               uuid              [not null, note: "References the finalized parent payroll_run"]
+  payroll_context_id          uuid              [not null]
+  scope_type                  scope_type        [not null]
+  scope_status                scope_status      [not null]
+  trigger_reason              varchar(500)      [not null]
+  population_method           population_method [not null]
+  population_definition       text              [not null, note: "Serialized query or explicit list reference"]
+  population_count            int               [not null]
+  population_resolved_flag    boolean           [not null, default: false]
+  resolution_timestamp        timestamp         [null]
+  exception_derived_flag      boolean           [null, default: false]
+  priority_level              varchar(50)       [not null, note: "STANDARD, CATCH_UP, RECOVERY, EMERGENCY"]
+  adjustment_flag             boolean           [not null, default: false]
+  execution_start_timestamp   timestamp         [null]
+  execution_end_timestamp     timestamp         [null]
+  execution_result            varchar(50)       [null, note: "SUCCESS, FAILED"]
+  created_by                  uuid              [not null]
+  creation_timestamp          timestamp         [not null]
+
+  indexes {
+    parent_run_id
+    scope_status
+    scope_type
+    payroll_context_id
+  }
+}
+
+// ============================================================
+// PAYROLL RUN RESULT SET
+// ============================================================
+
+Table payroll_run_result_set {
+  payroll_run_result_set_id             uuid                [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_id                        uuid                [not null]
+  run_scope_id                          uuid                [null, note: "Present when result set is from a scoped execution"]
+  source_period_id                      uuid                [not null, note: "Original payroll period"]
+  execution_period_id                   uuid                [not null, note: "Period during which execution occurred"]
+  parent_payroll_run_result_set_id      uuid                [null, note: "Prior result set in lineage"]
+  root_payroll_run_result_set_id        uuid                [null, note: "Root result set in lineage chain"]
+  result_set_lineage_sequence           int                 [null]
+  correction_reference_id               uuid                [null]
+  result_set_status                     result_set_status   [not null]
+  result_set_type                       result_set_type     [not null]
+  execution_start_timestamp             timestamp           [null]
+  execution_end_timestamp               timestamp           [null]
+  approval_required_flag                boolean             [not null, default: false]
+  approved_by_user_id                   uuid                [null]
+  approval_timestamp                    timestamp           [null]
+  finalization_timestamp                timestamp           [null]
+  created_timestamp                     timestamp           [not null]
+  updated_timestamp                     timestamp           [not null]
+
+  indexes {
+    payroll_run_id
+    run_scope_id
+    result_set_status
+    source_period_id
+    parent_payroll_run_result_set_id
+    root_payroll_run_result_set_id
+  }
+}
+
+// ============================================================
+// EMPLOYEE PAYROLL RESULT
+// ============================================================
+
+Table employee_payroll_result {
+  employee_payroll_result_id            uuid                      [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_result_set_id             uuid                      [not null]
+  payroll_run_id                        uuid                      [not null]
+  run_scope_id                          uuid                      [null]
+  employment_id                         uuid                      [not null, note: "Payroll anchor — never person_id"]
+  person_id                             uuid                      [not null]
+  payroll_context_id                    uuid                      [not null]
+  source_period_id                      uuid                      [not null]
+  execution_period_id                   uuid                      [not null]
+  parent_employee_payroll_result_id     uuid                      [null, note: "Prior worker-level result in lineage"]
+  root_employee_payroll_result_id       uuid                      [null, note: "Root worker-level result in lineage chain"]
+  result_lineage_sequence               int                       [null]
+  correction_reference_id               uuid                      [null]
+  result_status                         employee_result_status    [not null]
+  pay_period_start_date                 date                      [not null]
+  pay_period_end_date                   date                      [not null]
+  pay_date                              date                      [not null]
+  gross_pay_amount                      decimal(18,4)             [not null]
+  total_deductions_amount               decimal(18,4)             [not null]
+  total_employee_tax_amount             decimal(18,4)             [not null]
+  total_employer_contribution_amount    decimal(18,4)             [not null]
+  net_pay_amount                        decimal(18,4)             [not null]
+  created_timestamp                     timestamp                 [not null]
+  updated_timestamp                     timestamp                 [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    payroll_run_id
+    employment_id
+    person_id
+    result_status
+    source_period_id
+    parent_employee_payroll_result_id
+    root_employee_payroll_result_id
+  }
+}
+
+// ============================================================
+// EARNINGS RESULT LINE
+// ============================================================
+
+Table earnings_result_line {
+  earnings_result_line_id       uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  earnings_code                 varchar(50)   [not null]
+  earnings_description          varchar(200)  [not null]
+  quantity                      decimal(18,4) [null, note: "Hours, units, or quantity"]
+  rate                          decimal(18,4) [null]
+  calculated_amount             decimal(18,4) [not null]
+  jurisdiction_split_flag       boolean       [not null, default: false]
+  taxable_flag                  boolean       [not null]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamp     [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    earnings_code
+  }
+}
+
+// ============================================================
+// DEDUCTION RESULT LINE
+// ============================================================
+
+Table deduction_result_line {
+  deduction_result_line_id      uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  deduction_code                varchar(50)   [not null]
+  deduction_description         varchar(200)  [not null]
+  calculated_amount             decimal(18,4) [not null]
+  pre_tax_flag                  boolean       [not null]
+  cash_impact_flag              boolean       [not null]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamp     [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    deduction_code
+  }
+}
+
+// ============================================================
+// TAX RESULT LINE
+// ============================================================
+
+Table tax_result_line {
+  tax_result_line_id            uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  jurisdiction_id               uuid          [not null]
+  tax_code                      varchar(50)   [not null]
+  tax_description               varchar(200)  [not null]
+  taxable_wages_amount          decimal(18,4) [not null]
+  calculated_amount             decimal(18,4) [not null]
+  employer_flag                 boolean       [not null, default: false, note: "True for employer-side tax lines"]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamp     [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    jurisdiction_id
+    tax_code
+  }
+}
+
+// ============================================================
+// EMPLOYER CONTRIBUTION RESULT LINE
+// ============================================================
+
+Table employer_contribution_result_line {
+  employer_contribution_result_line_id  uuid          [pk, not null]
+  employee_payroll_result_id            uuid          [not null]
+  employment_id                         uuid          [not null]
+  contribution_code                     varchar(50)   [not null]
+  contribution_description              varchar(200)  [not null]
+  calculated_amount                     decimal(18,4) [not null]
+  accumulator_impact_flag               boolean       [not null, default: false]
+  source_rule_version_id                uuid          [null]
+  correction_flag                       boolean       [not null, default: false]
+  corrects_line_id                      uuid          [null]
+  creation_timestamp                    timestamp     [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    contribution_code
+  }
+}
+
+// ============================================================
+// PAYROLL CHECK
+// ============================================================
+
+Table payroll_check {
+  check_id                  uuid            [pk, not null, note: "System-generated. Immutable."]
+  check_number              varchar(50)     [not null, note: "Human-readable; unique within context"]
+  payroll_run_id            uuid            [not null]
+  employment_id             uuid            [not null]
+  pay_period_start_date     date            [not null]
+  pay_period_end_date       date            [not null]
+  check_date                date            [not null]
+  payment_date              date            [not null]
+  calendar_context_id       uuid            [not null]
+  payment_method            payment_method  [not null]
+  payment_context           payment_context [not null]
+  check_status              check_status    [not null]
+  gross_earnings            decimal(18,4)   [not null]
+  total_deductions          decimal(18,4)   [not null]
+  total_taxes               decimal(18,4)   [not null]
+  net_pay                   decimal(18,4)   [not null]
+  employer_total_cost       decimal(18,4)   [null]
+  void_reason               varchar(500)    [null]
+  corrects_check_id         uuid            [null, note: "Reference to original if this is a correction check"]
+  created_by                uuid            [not null]
+  creation_timestamp        timestamp       [not null]
+
+  indexes {
+    payroll_run_id
+    employment_id
+    check_status
+    check_number
+    corrects_check_id
+  }
+}
+
+// ============================================================
+// PAYROLL ITEM  (result lines in the legacy/flat model)
+// ============================================================
+
+Table payroll_item {
+  payroll_item_id           uuid          [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_id            uuid          [not null]
+  payroll_check_id          uuid          [not null]
+  employment_id             uuid          [not null]
+  period_id                 uuid          [not null]
+  result_class              result_class  [not null]
+  code_type                 varchar(50)   [not null]
+  code                      varchar(50)   [not null]
+  description               varchar(200)  [not null]
+  hours                     decimal(18,4) [null]
+  rate                      decimal(18,4) [null]
+  amount                    decimal(18,4) [not null]
+  taxable_flag              boolean       [not null]
+  cash_impact_flag          boolean       [not null]
+  accumulator_target        varchar(100)  [null]
+  source_rule_version_id    uuid          [null]
+  item_status               item_status   [not null]
+  correction_flag           boolean       [not null, default: false]
+  corrects_item_id          uuid          [null]
+  creation_timestamp        timestamp     [not null]
+
+  indexes {
+    payroll_run_id
+    payroll_check_id
+    employment_id
+    period_id
+    result_class
+    code
+    corrects_item_id
+  }
+}
+
+// ============================================================
+// ACCUMULATOR LAYER 1 — DEFINITION
+// ============================================================
+
+Table accumulator_definition {
+  accumulator_definition_id   uuid                    [pk, not null, note: "System-generated. Immutable."]
+  accumulator_family          accumulator_family      [not null]
+  accumulator_code            varchar(50)             [not null, unique]
+  accumulator_name            varchar(200)            [not null]
+  scope_type                  accumulator_scope_type  [not null]
+  period_context              period_context          [not null]
+  reset_type                  varchar(50)             [not null, note: "CALENDAR_YEAR, PLAN_YEAR, QUARTER, NONE, CONDITIONAL"]
+  carry_forward_flag          boolean                 [not null, default: false]
+  reporting_flag              boolean                 [not null, default: true]
+  remittance_flag             boolean                 [not null, default: false]
+  effective_start_date        date                    [not null]
+  effective_end_date          date                    [null]
+  created_by                  uuid                    [not null]
+  creation_timestamp          timestamp               [not null]
+  last_updated_by             uuid                    [not null]
+  last_update_timestamp       timestamp               [not null]
+
+  indexes {
+    accumulator_code
+    accumulator_family
+    scope_type
+  }
+}
+
+// ============================================================
+// ACCUMULATOR LAYER 2 — IMPACT
+// ============================================================
+
+Table accumulator_impact {
+  accumulator_impact_id         uuid                    [pk, not null, note: "System-generated. Immutable."]
+  accumulator_definition_id     uuid                    [not null]
+  payroll_run_result_set_id     uuid                    [null, note: "Present for run-level impacts"]
+  employee_payroll_result_id    uuid                    [null, note: "Present for employee-level impacts"]
+  payroll_run_id                uuid                    [not null]
+  employment_id                 uuid                    [null]
+  person_id                     uuid                    [null]
+  impact_status                 impact_status           [not null]
+  impact_source_type            impact_source_type      [not null]
+  source_object_id              uuid                    [null, note: "Source result line reference"]
+  prior_value                   decimal(18,4)           [not null]
+  delta_value                   decimal(18,4)           [not null]
+  new_value                     decimal(18,4)           [not null]
+  posting_direction             posting_direction       [not null]
+  scope_type                    accumulator_scope_type  [not null]
+  scope_object_id               uuid                    [null]
+  jurisdiction_id               uuid                    [null]
+  rule_pack_id                  uuid                    [null]
+  rule_version_id               uuid                    [null]
+  retroactive_flag              boolean                 [not null, default: false]
+  reversal_flag                 boolean                 [not null, default: false]
+  correction_flag               boolean                 [not null, default: false]
+  prior_accumulator_impact_id   uuid                    [null, note: "Links correction/reversal to original impact"]
+  notes                         varchar(500)            [null]
+  impact_timestamp              timestamp               [not null]
+  created_timestamp             timestamp               [not null]
+  updated_timestamp             timestamp               [not null]
+
+  indexes {
+    accumulator_definition_id
+    payroll_run_id
+    payroll_run_result_set_id
+    employee_payroll_result_id
+    employment_id
+    impact_status
+    prior_accumulator_impact_id
+  }
+}
+
+// ============================================================
+// ACCUMULATOR LAYER 3 — CONTRIBUTION
+// ============================================================
+
+Table accumulator_contribution {
+  contribution_id                   uuid                [pk, not null, note: "System-generated. Immutable."]
+  accumulator_id                    uuid                [not null, note: "Links to accumulator_balance"]
+  accumulator_impact_id             uuid                [not null, note: "Source impact that generated this contribution"]
+  accumulator_definition_id         uuid                [not null]
+  parent_contribution_id            uuid                [null, note: "Prior contribution in correction chain"]
+  root_contribution_id              uuid                [null, note: "Root contribution in lineage chain"]
+  contribution_lineage_sequence     int                 [null]
+  correction_reference_id           uuid                [null]
+  source_run_id                     uuid                [not null]
+  source_result_set_id              uuid                [null]
+  source_employee_result_id         uuid                [null]
+  source_period_id                  uuid                [not null]
+  execution_period_id               uuid                [not null]
+  employment_id                     uuid                [null]
+  scope_type                        accumulator_scope_type [not null]
+  scope_object_id                   uuid                [null]
+  contribution_amount               decimal(18,4)       [not null]
+  contribution_type                 contribution_type   [not null]
+  before_value                      decimal(18,4)       [null]
+  after_value                       decimal(18,4)       [null]
+  reason_code                       varchar(50)         [null]
+  creation_timestamp                timestamp           [not null]
+
+  indexes {
+    accumulator_id
+    accumulator_impact_id
+    accumulator_definition_id
+    source_run_id
+    source_period_id
+    employment_id
+    parent_contribution_id
+    root_contribution_id
+  }
+}
+
+// ============================================================
+// ACCUMULATOR LAYER 4 — BALANCE
+// ============================================================
+
+Table accumulator_balance {
+  accumulator_id              uuid                    [pk, not null, note: "System-generated. Immutable."]
+  accumulator_definition_id   uuid                    [not null]
+  accumulator_family          accumulator_family      [not null]
+  scope_type                  accumulator_scope_type  [not null]
+  participant_id              uuid                    [null, note: "Required if scope includes employee"]
+  employer_id                 uuid                    [null, note: "Required if scope includes employer"]
+  jurisdiction_id             uuid                    [null]
+  plan_id                     uuid                    [null]
+  period_context              period_context          [not null]
+  calendar_context_id         uuid                    [not null]
+  current_value               decimal(18,4)           [not null]
+  balance_status              accumulator_balance_status [not null]
+  last_updated_run_id         uuid                    [not null]
+  last_updated_result_set_id  uuid                    [null]
+  last_update_timestamp       timestamp               [not null]
+
+  indexes {
+    accumulator_definition_id
+    (scope_type, participant_id, period_context, calendar_context_id)
+    (accumulator_family, scope_type, participant_id)
+    last_updated_run_id
+    balance_status
+  }
+}
+
+// ============================================================
+// RESULT SET CHILD TABLES
+// ============================================================
+
+Table funding_result_set {
+  funding_result_set_id         uuid            [pk, not null]
+  payroll_run_result_set_id     uuid            [not null]
+  funding_profile_id            uuid            [not null]
+  funding_status                funding_status  [not null]
+  funding_amount                decimal(18,4)   [not null]
+  funding_timestamp             timestamp       [null]
+  created_timestamp             timestamp       [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    funding_status
+  }
+}
+
+Table remittance_result_set {
+  remittance_result_set_id      uuid                [pk, not null]
+  payroll_run_result_set_id     uuid                [not null]
+  remittance_profile_id         uuid                [not null]
+  total_remittance_amount       decimal(18,4)       [not null]
+  remittance_status             remittance_status   [not null]
+  transmission_timestamp        timestamp           [null]
+  created_timestamp             timestamp           [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    remittance_status
+  }
+}
+
+Table disbursement_result_set {
+  disbursement_result_set_id    uuid                  [pk, not null]
+  payroll_run_result_set_id     uuid                  [not null]
+  net_pay_disbursement_id       uuid                  [not null]
+  disbursement_status           disbursement_status   [not null]
+  disbursement_amount           decimal(18,4)         [not null]
+  created_timestamp             timestamp             [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    disbursement_status
+  }
+}
+
+// ============================================================
+// TABLE GROUPS
+// ============================================================
+
+TableGroup payroll_execution {
+  payroll_run
+  run_scope
+  payroll_run_result_set
+  employee_payroll_result
+}
+
+TableGroup result_lines {
+  earnings_result_line
+  deduction_result_line
+  tax_result_line
+  employer_contribution_result_line
+  payroll_check
+  payroll_item
+}
+
+TableGroup accumulator_chain {
+  accumulator_definition
+  accumulator_impact
+  accumulator_contribution
+  accumulator_balance
+}
+
+TableGroup result_set_outputs {
+  funding_result_set
+  remittance_result_set
+  disbursement_result_set
+}
