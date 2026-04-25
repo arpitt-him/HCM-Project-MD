@@ -8,6 +8,26 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-24 — Run visibility & dashboard model update
+
+**Document update: `docs/architecture/operations/Run_Visibility_and_Dashboard_Model.md`**
+- Updated section 3 to add 2 new Alert Categories
+- Updated section 10: Relationship to Other Models
+
+### 2026-04-24 — Architecture principles model update
+
+**Document update: `docs/PRD/PRD-0100 — Architecture Principles.md`**
+- Updated file information block with expanded list of related documents
+- Updated section 1: add sub-section on Asynchronous Job Execution
+- Updated section 4: Scope Boundaries reference count
+- Updated section 5: Acceptance Criteria table
+
+### 2026-04-24 — Async job execution model document
+
+**New document: `docs/architecture/processing/Async_Job_Execution_Model.md`**
+- Defines the architecture for asynchronous job execution
+- Heavy operations should execute on a dedicated processing tier
+
 ### 2026-04-24 — Entity payroll run model update
 
 **Document update: `docs/architecture/Entity_Payroll_Run.md`**
@@ -24,7 +44,7 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ### 2026-04-24 — Operational reporting & analytics model update
 
-**Document update: `docs/architecture/Operational_Reporting_and_Analytics_Model.md`**
+**Document update: `docs/architecture/operations/Operational_Reporting_and_Analytics_Model.md`**
 - Updated file information block with expanded list of related documents
 - Updated Purpose section
 - Updated section 1: Reporting Scope

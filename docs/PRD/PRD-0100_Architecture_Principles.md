@@ -3,12 +3,12 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Architecture Principles |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/PRD/PRD-0100_Architecture_Principles.md` |
 | **Replaces** | `docs/PRD/HCM_Platform_PRD.md` §2, §3 |
-| **Related Documents** | PRD-0000_Core_Vision, ADR-001_Event_Driven_Architecture, ADR-002_Deterministic_Replayability, SPEC/Temporal_Override |
+| **Related Documents** | PRD-0000_Core_Vision, ADR-001_Event_Driven_Architecture, ADR-002_Deterministic_Replayability, SPEC/Temporal_Override, docs/architecture/processing/Async_Job_Execution_Model |
 
 ## Purpose
 
@@ -19,22 +19,27 @@ Defines the non-negotiable architectural principles that govern all platform des
 ## 1. Core Architectural Principles
 
 ### Modular Architecture
+
 **REQ-PLT-020**
 All functional capabilities shall be modular. Customers may purchase any subset of modules. No module shall create a hard runtime dependency on another module's internal implementation.
 
 ### Plug-and-Play Composition
+
 **REQ-PLT-021**
 Modules shall be independently deployable and loosely coupled. A module that is not deployed shall not prevent other modules from operating.
 
 ### Event-Driven Processing
+
 **REQ-PLT-022**
 All meaningful state changes shall be represented as events. Events are the integration contract between modules. Modules publish events; downstream modules subscribe and act. No module shall orchestrate another module's internal behaviour.
 
 ### Deterministic Replayability
+
 **REQ-PLT-023**
 Historical payroll results shall be reproducible using historical inputs and rules. The system must be able to answer: *given this exact context at that historical moment, what was the result and why?* See ADR-002_Deterministic_Replayability.
 
 ### Effective-Dated Data
+
 **REQ-PLT-024**
 All payroll-relevant and HR-relevant data must support effective start and end dates. Point-in-time resolution shall be deterministic.
 
@@ -42,6 +47,7 @@ All payroll-relevant and HR-relevant data must support effective start and end d
 Silent overwrites of historical records are not permitted under any circumstance.
 
 ### Approval Workflow Governance
+
 **REQ-PLT-026**
 Changes to configuration, employment records, and payroll must follow configurable approval workflows before becoming effective.
 
@@ -49,6 +55,7 @@ Changes to configuration, employment records, and payroll must follow configurab
 Self-service actions shall initiate workflow events rather than writing directly to canonical records.
 
 ### Post-Calculation Validation
+
 **REQ-PLT-028**
 All payroll results shall pass through a validation phase that is explicitly separate from the calculation phase.
 
@@ -56,13 +63,15 @@ All payroll results shall pass through a validation phase that is explicitly sep
 Posting shall not occur without completed validation. Validation authorises results for durable mutation.
 
 ### Audit and Historical Preservation
+
 **REQ-PLT-030**
 All record changes shall be preserved historically. Corrections shall generate compensating records rather than overwriting history.
 
 **REQ-PLT-031**
 Audit trails must identify source, timestamp, and responsible actor for every mutation.
 
-### Governed Operative Date
+### Governed Operative Date 
+
 **REQ-PLT-044**
 All platform processes that require knowledge of the current date shall consume a governed operative date from a single authoritative resolution function rather than reading the system clock directly. Direct system clock consumption (`Date.now()`, `System.currentDate()`, or equivalent) is not permitted in any module's business logic.
 
@@ -71,6 +80,19 @@ In normal operation the governed operative date shall resolve to the real curren
 
 **REQ-PLT-046**
 Temporal Override — the displacement of the governed operative date — shall not be available in Production environments under any circumstances.
+
+### Asynchronous Job Execution
+
+**REQ-PLT-047**
+All long-running, resource-intensive, or computationally heavy operations shall execute on a dedicated background processing tier, isolated from the UI request/response cycle. Operations governed by this principle include payroll run calculation, batch imports, bulk corrections, large exports, and large report generation.
+
+**REQ-PLT-048**
+A UI or API action that submits a long-running operation shall return an immediate acknowledgement containing a Job_ID and current job status. The caller shall not be required to wait for the operation to complete. Job status shall be queryable at any time via the Job_ID.
+
+**REQ-PLT-049**
+Job status events shall be published to the operational dashboard so that operators have live progress visibility without polling. A failed or delayed background job shall generate an alert in the monitoring layer.
+
+The full definition of this principle, job types, lifecycle, and scheduling model is in `docs/architecture/processing/Async_Job_Execution_Model.md`.
 
 ## 2. Module Catalogue
 
@@ -108,7 +130,7 @@ An ADR must be filed whenever a principle is constrained, adapted, or deliberate
 ### In Scope — v1
 
 **REQ-PLT-034**
-All eight architectural principles defined in §1 are non-negotiable and apply to all v1 modules without exception.
+All architectural principles defined in §1 are non-negotiable and apply to all v1 modules without exception.
 
 **REQ-PLT-035**
 All architecture models produced for v1 shall reference the principles they implement and shall be reviewed against this document before approval.
@@ -144,6 +166,9 @@ Real-time streaming event architectures (e.g. Apache Kafka, event sourcing at in
 | REQ-PLT-044 | A static analysis of the codebase finds no direct system clock calls in any module's business logic. All date resolution passes through the governed operative date function. |
 | REQ-PLT-045 | A payroll run initiated in a non-production tenant with an active Temporal Override correctly uses the override date for period resolution, effective-date enforcement, and accumulator reset evaluation. |
 | REQ-PLT-046 | Attempting to activate a Temporal Override on a Production-classified tenant or deployment is rejected at the infrastructure layer and cannot be bypassed by any application-level action. |
+| REQ-PLT-047 | A payroll run initiated from the UI returns an HTTP 202 response with a Job_ID within 2 seconds. The UI does not block on calculation completion. |
+| REQ-PLT-048 | The job status endpoint returns the current Job_Status, Progress_Percent, and Processed_Records for any active job within the caller's scope. |
+| REQ-PLT-049 | A job that transitions to FAILED_PERMANENT generates an alert in the Monitoring_and_Alerting_Model and routes to the operator work queue within 60 seconds of failure. |
 
 ---
 

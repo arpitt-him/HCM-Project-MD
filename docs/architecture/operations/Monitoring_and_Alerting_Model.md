@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/architecture/operations/Monitoring_and_Alerting_Model.md` |
@@ -28,7 +28,7 @@ Monitoring must remain:
 
 ## 1. Core Design Principles
 
-Monitoring shall prioritise payroll continuity and deadline protection. Alerts shall be actionable, not merely informational. Alert severity shall reflect business impact and time sensitivity. Monitoring shall be payroll-context-aware. Escalation shall be structured and auditable.
+Monitoring shall prioritize payroll continuity and deadline protection. Alerts shall be actionable, not merely informational. Alert severity shall reflect business impact and time sensitivity. Monitoring shall be payroll-context-aware. Escalation shall be structured and auditable.
 
 ## 2. Monitoring Scope
 
@@ -44,7 +44,7 @@ Additional monitoring scope may include:
 
 ## 3. Alert Categories
 
-Run Failure Alert, Queue Aging Alert, Retry Failure Alert, Approval Delay Alert, Release Delay Alert, Export Failure Alert, Reconciliation Variance Alert, External Dependency Outage Alert, Deadline Risk Alert.
+Run Failure Alert, Queue Aging Alert, Retry Failure Alert, Approval Delay Alert, Release Delay Alert, Export Failure Alert, Reconciliation Variance Alert, External Dependency Outage Alert, Deadline Risk Alert, Job Failure Alert, Job Queue Delay Alert.
 
 Additional alert categories may include:
 
@@ -126,3 +126,4 @@ This model integrates with:
 - Payroll_Provider_Response_Model
 - Payroll_Adjustment_and_Correction_Model
 - Run_Lineage_Model
+- Async_Job_Execution_Model

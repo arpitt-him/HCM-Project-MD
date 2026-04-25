@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Model |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/architecture/operations/Run_Visibility_and_Dashboard_Model.md` |
@@ -85,3 +85,4 @@ This model integrates with:
 - Payroll_Reconciliation_Model
 - Payroll_Provider_Response_Model
 - Operational_Reporting_and_Analytics_Model
+- Async_Job_Execution_Model

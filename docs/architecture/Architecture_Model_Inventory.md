@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.5 |
+| **Version** | v0.6 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -243,6 +243,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 |---|---|---|---|---|---|---|---|---|
 | Model | Processing | Accumulator_Definition_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Accumulator_Impact_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Async_Job_Execution_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Calculation_Run_Lifecycle | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Employee_Payroll_Result_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Error_Handling_and_Isolation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
@@ -255,6 +256,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Model | Processing | Processing_Lineage_Validation_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Run_Linkage_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
 | Model | Processing | Run_Scope_Model | docs/architecture/processing | Complete | Draft | Payroll Domain | Yes | High |
+| Model | Processing | Async_Job_Execution_Model | docs/architecture/processing | Complete | Draft | Core Platform | Governs background job execution tier; job entity, job types, status lifecycle, progress reporting, retry, priority, dashboard integration |
 
 ### Architecture Models — Rules
 

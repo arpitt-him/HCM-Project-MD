@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.6 |
+| **Version** | v0.7 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/PRD_to_Architecture_Coverage_Map.md` |
@@ -29,6 +29,7 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 | Event-Driven Architecture | PRD-0100 | All meaningful state changes represented as events | Employee_Event_and_Status_Change_Model | Integration_and_Data_Exchange_Model; ADR-001_Event_Driven_Architecture | Strong | Low | High | High | In Design | No |
 | Audit and Historical Preservation | PRD-0100 | All record changes preserved historically | Correction_and_Immutability_Model | Data_Retention_and_Archival_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 | Governed Operative Date | PRD-0100 | Single authoritative current-date source for all platform processes; supports tenant-scoped temporal override in non-production | SPEC/Temporal_Override | Configuration_and_Metadata_Management_Model; Tenant_Data_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Asynchronous Job Execution | PRD-0100 | Background processing tier isolating heavy operations from UI; job submission, status polling, progress reporting, retry | Async_Job_Execution_Model | Run_Visibility_and_Dashboard_Model; Monitoring_and_Alerting_Model; Exception_and_Work_Queue_Model; Error_Handling_and_Isolation_Model | Strong | Low | High | High | In Design | No |
 
 ### Core Entity Model (PRD-0200)
 

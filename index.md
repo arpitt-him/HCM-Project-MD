@@ -225,6 +225,7 @@ Architecture models define *how* the system implements the requirements. They ar
 |---|---|
 | [Accumulator_Definition_Model.md](docs/architecture/processing/Accumulator_Definition_Model.md) | Defines the core data structure for **Accumulator Definition** as the specification of payroll totals, balances, and reporting counters used across calculation, remittance, reporting, and audit processes |
 | [Accumulator_Impact_Model.md](docs/architecture/processing/Accumulator_Impact_Model.md) | Defines the core data structure for **Accumulator Impact** as the mutation record that connects payroll results to accumulator value changes |
+| [Async_Job_Execution_Model.md](docs/architecture/processing/Async_Job_Execution_Model.md) | Defines the architecture for asynchronous job execution |
 | [Calculation_Run_Lifecycle.md](docs/architecture/processing/Calculation_Run_Lifecycle.md) | Payroll run states, transitions, and lifecycle management |
 | [Employee_Payroll_Result_Model.md](docs/architecture/processing/Employee_Payroll_Result_Model.md) | Defines the core data structure for **Employee Payroll Result** as the detailed payroll outcome for an individual Employment within a Payroll Run Result Set |
 | [Error_Handling_and_Isolation_Model.md](docs/architecture/processing/Error_Handling_and_Isolation_Model.md) | Error isolation, failure containment, and recovery patterns |
