@@ -117,6 +117,7 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [Pay_Statement_Delivery.md](docs/SPEC/Pay_Statement_Delivery.md) | Pay statement content, format, delivery channels, retention, accessibility, and security |
 | [API_Surface_Map.md](docs/SPEC/API_Surface_Map.md) | Domain-by-domain catalogue of all 21 integration points with direction, trigger, inputs, outputs, and SLAs |
 | [Temporal_Override.md](docs/SPEC/Temporal_Override.md) | Tenant-scoped operative date shift for non-production testing; governed operative date principle |
+| [Host_Application_Shell.md](docs/SPEC/Host_Application_Shell.md) | Solution structure, Program.cs startup sequence, module composition contracts, shell layout, NavMenu, CSS design tokens, authentication scaffold, environment configuration |
 
 ---
 

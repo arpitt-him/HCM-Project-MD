@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Host Application Shell specification added
+
+- Added `docs/SPEC/Host_Application_Shell.md` — build-ready spec covering solution structure, Program.cs startup sequence, MEF module discovery, Autofac composition, IPlatformModule and MenuContribution contracts, IConnectionFactory and IUnitOfWork patterns, MainLayout and NavMenu components, CSS design tokens (Caribbean pastel palette), authentication scaffold, environment variable configuration, and 18 test cases
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — Architecture Decision Records ADR-006, ADR-007 and ADR-008 added
 
 - Added `docs/ADR/ADR-006_UI_Component_Library.md` — Platform UI requires a comprehensive set of data-entry and data-display components suitable for a complex HCM application

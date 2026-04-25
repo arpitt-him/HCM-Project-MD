@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.9 |
+| **Version** | v1.0 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -88,6 +88,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Spec | Platform | API_Contract_Standards | docs/SPEC | Complete | Draft | Core Platform | Authentication, versioning, request/response format, error handling, idempotency, rate limiting |
 | Spec | Payroll | Pay_Statement_Delivery | docs/SPEC | Complete | Draft | Core Platform / Payroll | Content, format, delivery channels, retention, accessibility, security |
 | Functional Specification | Platform | Temporal_Override | docs/SPEC | Complete | Draft | Core Platform | Tenant-scoped operative date displacement for non-production testing; environment-gated; governed operative date principle |
+| Functional Specification | Platform | Host_Application_Shell | docs/SPEC | Complete | Draft | Core Platform | Solution structure, startup sequence, IPlatformModule contract, MenuContribution, IConnectionFactory, IUnitOfWork, shell layout, NavMenu, CSS design tokens, auth scaffold, 18 test cases |
 | Spec | Platform | API_Surface_Map | docs/SPEC | Complete | Draft | Core Platform | 21 integration points across HRIS, Payroll, Benefits, Compliance, T&A (future) |
 
 ### Conventions
