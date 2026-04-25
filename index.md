@@ -118,6 +118,7 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [API_Surface_Map.md](docs/SPEC/API_Surface_Map.md) | Domain-by-domain catalogue of all 21 integration points with direction, trigger, inputs, outputs, and SLAs |
 | [Temporal_Override.md](docs/SPEC/Temporal_Override.md) | Tenant-scoped operative date shift for non-production testing; governed operative date principle |
 | [Host_Application_Shell.md](docs/SPEC/Host_Application_Shell.md) | Solution structure, Program.cs startup sequence, module composition contracts, shell layout, NavMenu, CSS design tokens, authentication scaffold, environment configuration |
+| [HRIS_Core_Module.md](docs/SPEC/HRIS_Core_Module.md) | HRIS module assembly structure, repository and service interfaces, domain commands, lifecycle event publication pattern, Employee List and Detail page component specs, DateRangeFilter reusable component |
 
 ---
 

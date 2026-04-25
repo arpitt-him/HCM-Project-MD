@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — HRIS Core Module specification added
+
+- Added `docs/SPEC/HRIS_Core_Module.md` — build-ready spec covering module assembly structure, HrisModule IPlatformModule registration, domain commands (Hire, Terminate, ChangeCompensation), repository and service interfaces, lifecycle event publication pattern (publish after commit), point-in-time query pattern (Temporal Override aware), Blazor component specs for Employee List / Employee Detail / Organisation pages, DateRangeFilter reusable component (platform-wide standard per ADR-006), effective date and retroactive handling, role definitions, and 23 test cases
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — Host Application Shell specification added
 
 - Added `docs/SPEC/Host_Application_Shell.md` — build-ready spec covering solution structure, Program.cs startup sequence, MEF module discovery, Autofac composition, IPlatformModule and MenuContribution contracts, IConnectionFactory and IUnitOfWork patterns, MainLayout and NavMenu components, CSS design tokens (Caribbean pastel palette), authentication scaffold, environment variable configuration, and 18 test cases
