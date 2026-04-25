@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Architecture Decision Record ADR-005 added
+
+- Added `docs/ADR/ADR-005_Background_Job_Execution.md` — .NET Core IHostedService as background job execution mechanism; platform_job table as authoritative progress source; Blazor Server SignalR for real-time operator dashboard updates; Hangfire and Quartz.NET evaluated and rejected on operator visibility grounds
+- Updated Architecture_Model_Inventory.md — new ADR row
+- Updated index.md — new ADR table entry
+
 ### 2026-04-25 — Architecture Decision Records ADR-003 and ADR-004 added
 
 - Added `docs/ADR/ADR-003_UI_Technology_Stack.md` — Blazor Server on .NET Core; C# end-to-end stack; SignalR scale profile; MEF + Autofac compatibility; alternatives considered
