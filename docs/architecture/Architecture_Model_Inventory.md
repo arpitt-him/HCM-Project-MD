@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.5 |
+| **Version** | v1.6 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -76,6 +76,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Data Entity | Payroll | Entity_Accumulator | docs/DATA | Complete | Draft | Payroll Domain | Includes Contribution history |
 | Data Entity | Compliance | Entity_Legal_Order | docs/DATA | Complete | Draft | Compliance Domain | Garnishments and levies |
 | Data Entity | Compliance | Entity_Jurisdiction | docs/DATA | Complete | Draft | Compliance Domain | |
+| Functional Specification | Reporting | Reporting_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | 16 pre-built reports (8 payroll, 8 HR), CSV/XLSX/PDF export (ClosedXML + QuestPDF), async threshold, scheduled delivery, role-scoped access, ReportRunner shared component, 18 test cases |
 
 ### SPEC — Functional Specifications
 
@@ -95,6 +96,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Functional Specification | HRIS | HRIS_Document_Management | docs/SPEC | Complete | Draft | Core Platform / HRIS | Document upload, versioning, supersession, I-9 and W-4 specific handling, expiration tracking, compliance alerts, access control, storage abstraction, retention rules, 20 test cases |
 | Functional Specification | Payroll | Payroll_Core_Module | docs/SPEC | Complete | Draft | Core Platform / Payroll | Module assembly, HRIS event subscriptions, run initiation async pattern, ordered computation flow, accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components, 23 test cases |
 | Functional Specification | Benefits | Benefits_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, deduction code management, election lifecycle, versioning pattern, HRIS event integration, batch import async pattern, payroll boundary, Blazor component specs, 20 test cases |
+| Functional Specification | T&A | Time_Attendance_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, time entry lifecycle, overtime detection and FLSA reclassification, payroll handoff, correction of locked entries, batch import, HRIS event integration, Blazor component specs, 20 test cases |
 
 ### Conventions
 

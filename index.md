@@ -121,6 +121,8 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [HRIS_Document_Management.md](docs/SPEC/HRIS_Document_Management.md) | Document upload, versioning, supersession pattern, I-9 and W-4 specific handling, expiration tracking and compliance alerts, access control, storage abstraction, retention rules |
 | [Payroll_Core_Module.md](docs/SPEC/Payroll_Core_Module.md) | Payroll module assembly, HRIS event subscriptions, async run initiation, ordered computation flow (9 steps), accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components |
 | [Benefits_Minimum_Module.md](docs/SPEC/Benefits_Minimum_Module.md) | Deduction code management, benefit election lifecycle and versioning, HRIS event integration, batch import async pattern, payroll consumption boundary, UI component specs |
+| [Time_Attendance_Minimum_Module.md](docs/SPEC/Time_Attendance_Minimum_Module.md) | Time entry lifecycle, manager approval, FLSA overtime detection and reclassification, payroll handoff, locked entry correction, batch import, HRIS event integration, My Timecard and Timecards UI |
+| [Reporting_Minimum_Module.md](docs/SPEC/Reporting_Minimum_Module.md) | 16 pre-built operational reports (8 payroll, 8 HR), CSV/XLSX/PDF export using ClosedXML and QuestPDF, async threshold pattern, scheduled delivery, role-scoped access enforcement, shared ReportRunner component |
 
 ---
 

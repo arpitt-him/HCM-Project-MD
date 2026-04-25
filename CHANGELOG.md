@@ -8,6 +8,19 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Reporting Minimum Module specification added
+
+- Added `docs/SPEC/Reporting_Minimum_Module.md` — build-ready spec covering module assembly, 16 pre-built reports (PAY-RPT-001 through 008, HR-RPT-001 through 008), common ReportParameters model, report execution pattern (authorisation → scope enforcement → operative date → Dapper query → audit log → async if >10k rows), CSV export (no library), XLSX export (ClosedXML MIT — freeze panes, number formatting, auto-sized columns, totals row), PDF export (QuestPDF Community — landscape/portrait, header block, page numbers), async threshold with SignalR progress, scheduled report delivery, role-scoped access table, shared ReportRunner Blazor component, 18 test cases
+- Export library decisions: ClosedXML (MIT, NuGet) for XLSX; QuestPDF (Community license, free under $1M revenue) for PDF; no library for CSV
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
+### 2026-04-25 — Time & Attendance Minimum Module specification added
+
+- Added `docs/SPEC/Time_Attendance_Minimum_Module.md` — build-ready spec covering module assembly, time entry submission/approval/rejection/void lifecycle, FLSA overtime detection (40hr threshold, reclassification from most-recent entries first), locked entry correction with retroactive flag, payroll handoff service (lock entries, record PayrollRunId), batch import (INT-TIM-001), HRIS event integration (Termination/Leave/ReturnToWork), Blazor component specs for My Timecard / Timecards / Timecard Detail / Payroll Handoff pages, role definitions, and 20 test cases
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — Benefits Minimum Module specification added
 
 - Added `docs/SPEC/Benefits_Minimum_Module.md` — build-ready spec covering module assembly, deduction code management, election creation/update/terminate lifecycle, versioning pattern (never overwrite — new record per update), HRIS event integration (Termination/Leave/ReturnToWork), batch import async job pattern with dry-run validation, clean payroll boundary (Benefits writes table, Payroll reads — no service calls cross module), Blazor component specs for deduction codes page / elections page / employee benefits tab / import page, role definitions, and 20 test cases
