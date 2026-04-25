@@ -8,6 +8,13 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Requirement ID Convention updated
+
+**Document update: `docs/conventions/Requirement_ID_Convention.md`**
+- Added REQ-TMP prefix — Temporal Override (SPEC/Temporal_Override.md)
+- Added REQ-AJE prefix — Async Job Execution (docs/architecture/processing/Async_Job_Execution_Model.md)
+- Version bumped to v0.3
+
 ### 2026-04-25 — Benefit deduction election model document
 
 **New document: `docs/architecture/core/Benefit_Deduction_Election_Model.md`**

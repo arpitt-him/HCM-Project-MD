@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Convention Reference |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/conventions/Requirement_ID_Convention.md` |
@@ -58,6 +58,8 @@ Used in PRD documents and architecture models to express discrete, testable func
 | REQ-COR | Corrections / Retroactive Adjustments |
 | REQ-ONB | Onboarding |
 | REQ-ESS | Employee Self-Service |
+| REQ-TMP | Temporal Override — operative date displacement for non-production testing |
+| REQ-AJE | Async Job Execution — background processing tier, job lifecycle, and status model |
 
 ### REQ Format Example
 
