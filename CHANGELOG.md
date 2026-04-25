@@ -8,6 +8,15 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Architecture Decision Records ADR-006, ADR-007 and ADR-008 added
+
+- Added `docs/ADR/ADR-006_UI_Component_Library.md` — Platform UI requires a comprehensive set of data-entry and data-display components suitable for a complex HCM application
+- Added `docs/ADR/ADR-007_Module_Composition_DI_Lifetime.md` — MEF for assembly discovery only; Autofac owns all service lifetimes and object resolution; IPlatformModule contract with Register and GetMenuContributions; menu contribution model; UI components compiled into host assembly
+- Added `docs/ADR/ADR-008_API_Surface_Architecture.md` — Minimal API for all HTTP endpoints; MVC explicitly excluded; clean Blazor Server + Minimal API coexistence pattern with no routing conflicts; amends ADR-003
+- Updated ADR-003_UI_Technology_Stack.md — v0.2; added amendment note referencing ADR-008; MVC exclusion made explicit
+- Updated Architecture_Model_Inventory.md — three new ADR rows
+- Updated index.md — three new ADR table entries
+
 ### 2026-04-25 — Architecture Decision Record ADR-005 added
 
 - Added `docs/ADR/ADR-005_Background_Job_Execution.md` — .NET Core IHostedService as background job execution mechanism; platform_job table as authoritative progress source; Blazor Server SignalR for real-time operator dashboard updates; Hangfire and Quartz.NET evaluated and rejected on operator visibility grounds
@@ -23,10 +32,14 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ### 2026-04-25 — DDL schema files added
 
+**New document files: `schema/ddl/*.sql`**
+
 - Added `schemas/ddl/hris_schema.sql` — DDL definition of schema for HRIS core platform
 - Added `schemas/ddl/payroll_core_schema.sql` — DDL definition of schema for Payroll plug-in
 
 ### 2026-04-25 — DBML schema files added
+
+**New document files: `schema/dbml/*.dbml`**
 
 - Added `schemas/dbml/hcm_hris.dbml` — DBML definition of schema for HRIS core platform
 - Added `schemas/dbml/hcm_payroll_core.dbml` — DBML definition of schema for Payroll plug-in

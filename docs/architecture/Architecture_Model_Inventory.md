@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.8 |
+| **Version** | v0.9 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -51,6 +51,9 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | ADR | Platform | ADR-003_UI_Technology_Stack | docs/ADR | Complete | Accepted | Core Platform | Blazor Server on .NET Core; C# end-to-end; SignalR scale profile match for target deployment size |
 | ADR | Platform | ADR-004_Data_Access_Strategy | docs/ADR | Complete | Accepted | Core Platform | Dapper micro-ORM; manual SQL; no stored procedures; DBMS portability via ADO.NET provider abstraction |
 | ADR | Platform | ADR-005_Background_Job_Execution | docs/ADR | Complete | Accepted | Core Platform | IHostedService + platform_job table + Blazor SignalR; Hangfire and Quartz.NET rejected on operator visibility grounds |
+| ADR | Platform | ADR-006_UI_Component_Library | docs/ADR | Complete | Accepted | Core Platform | Platform UI requires a comprehensive set of data-entry and data-display components - Syncfusion UI license exists |
+| ADR | Platform | ADR-007_Module_Composition_DI_Lifetime | docs/ADR | Complete | Accepted | Core Platform | MEF for assembly discovery only; Autofac owns all lifetimes; IPlatformModule contract; menu contribution model; UI components in host assembly only |
+| ADR | Platform | ADR-008_API_Surface_Architecture | docs/ADR | Complete | Accepted | Core Platform | Minimal API for HTTP endpoints; MVC explicitly excluded; Blazor Server + Minimal API coexistence pattern; no routing conflicts |
 
 ### DATA — Entity Specifications
 

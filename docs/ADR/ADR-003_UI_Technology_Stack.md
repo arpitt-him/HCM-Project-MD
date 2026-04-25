@@ -3,12 +3,12 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-003_UI_Technology_Stack.md` |
 | **Date** | April 2026 |
-| **Related Documents** | PRD-0100_Architecture_Principles, ADR-004_Data_Access_Strategy, docs/architecture/processing/Async_Job_Execution_Model.md |
+| **Related Documents** | PRD-0100_Architecture_Principles, ADR-004_Data_Access_Strategy, ADR-007_Module_Composition_DI_Lifetime, ADR-008_API_Surface_Architecture, docs/architecture/processing/Async_Job_Execution_Model.md |
 
 ---
 
@@ -80,3 +80,7 @@ Server-rendered, no persistent connection. Rejected because: lacks real-time upd
 
 **Blazor United / .NET 8 Auto render mode**
 Per-component choice of server or WebAssembly rendering. Rejected for v1 because: adds complexity without material benefit at the current scale; the component boundary decisions required add design overhead; can be evaluated in a future version if the hybrid approach becomes warranted.
+
+## Amendment — ADR-008
+
+ASP.NET Core MVC is explicitly not used in this platform. ADR-008 documents this decision and the adoption of Minimal API for the HTTP endpoint surface. The coexistence risks between MVC and Blazor Server identified in the stack review are eliminated by this decision.

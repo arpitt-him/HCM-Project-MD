@@ -58,7 +58,9 @@ ADRs document significant architectural decisions — the context, the decision 
 | [ADR-003_UI_Technology_Stack.md](docs/ADR/ADR-003_UI_Technology_Stack.md) | Blazor Server on .NET Core as the platform UI framework; C# end-to-end; rationale and alternatives considered |
 | [ADR-004_Data_Access_Strategy.md](docs/ADR/ADR-004_Data_Access_Strategy.md) | Dapper micro-ORM with manual SQL as the data access strategy; no stored procedures; DBMS portability via provider abstraction |
 | [ADR-005_Background_Job_Execution.md](docs/ADR/ADR-005_Background_Job_Execution.md) | .NET IHostedService as background execution mechanism; platform_job table as progress source of truth; Blazor SignalR for real-time operator visibility; Hangfire and Quartz.NET rejected |
-
+| [ADR-006_UI_Component_Library.md](docs/ADR/ADR-006_UI_Component_Library.md) | Complete | Accepted | Core Platform | Platform UI requires a comprehensive set of data-entry and data-display components - Syncfusion UI license exists |
+| [ADR-007_Module_Composition_DI_Lifetime.md](docs/ADR/ADR-007_Module_Composition_DI_Lifetime.md) | MEF for module discovery only; Autofac owns all service lifetimes; IPlatformModule contract; menu contribution model |
+| [ADR-008_API_Surface_Architecture.md](docs/ADR/ADR-008_API_Surface_Architecture.md) | Minimal API for all HTTP endpoints; MVC explicitly excluded; clean Blazor Server + Minimal API coexistence |
 ---
 
 ## DATA — Entity Specifications
