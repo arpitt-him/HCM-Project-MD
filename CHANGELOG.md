@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Payroll Core Module specification added
+
+- Added `docs/SPEC/Payroll_Core_Module.md` — build-ready spec covering module assembly structure, PayrollModule IPlatformModule registration, HRIS event subscription pattern (Hire/Termination/CompensationChange/LeaveApproved/ReturnToWork), run initiation async job pattern (immediate JobId return, SignalR progress), PayrollRunJob IHostedService with employee-level failure isolation, ordered 9-step computation flow, accumulator 4-layer mutation chain (Impact → Contribution → Balance atomic write), repository and service interfaces, Blazor component specs for run list / run progress panel / run detail / pay register / new run form, run state transitions, role definitions, and 23 test cases
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — HRIS Document Management specification added
 
 - Added `docs/SPEC/HRIS_Document_Management.md` — build-ready spec covering document upload and versioning, automatic supersession pattern, IDocumentStorageService abstraction, I-9 employment eligibility verification handling and re-verification rules for rehires, W-4 federal tax withholding handling, expiration tracking background job, compliance alert thresholds, role-scoped access control with download audit logging, document retention rules by type, Blazor component specs for document list / upload panel / expiration report, legal_hold_flag DBML addition, and 20 test cases
