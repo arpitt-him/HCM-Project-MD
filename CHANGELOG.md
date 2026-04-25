@@ -8,6 +8,18 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — HRIS Leave and Absence specification added
+
+- Added `docs/SPEC/HRIS_Leave_and_Absence.md` — build-ready spec covering leave request submission and validation, manager approval workflow, balance deduction and restoration, payroll impact signal publication (PAID_SUBSTITUTION, UNPAID_SUPPRESSION, DISABILITY_PAY), return from leave handling, working days calculation, Blazor component specs for leave submission / approval / balance display, leave_balance schema addition, role definitions, and 20 test cases
+- Note: leave_balance table must be added to hcm_hris.dbml and hris_schema.sql per spec §12
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
+### 2026-04-25 — Two Module specification files renamed
+
+- Renamed file `SPEC_HRIS_Core_Module.md` to `HRIS_Core_Module.md`
+- Renamed file `SPEC_Host_Application_Shell.md` to `Host_Application_Shell.md`
+
 ### 2026-04-25 — HRIS Core Module specification added
 
 - Added `docs/SPEC/HRIS_Core_Module.md` — build-ready spec covering module assembly structure, HrisModule IPlatformModule registration, domain commands (Hire, Terminate, ChangeCompensation), repository and service interfaces, lifecycle event publication pattern (publish after commit), point-in-time query pattern (Temporal Override aware), Blazor component specs for Employee List / Employee Detail / Organisation pages, DateRangeFilter reusable component (platform-wide standard per ADR-006), effective date and retroactive handling, role definitions, and 23 test cases

@@ -641,6 +641,31 @@ Table onboarding_task {
 }
 
 // ============================================================
+// LEAVE BALANCE
+// ============================================================
+
+Table leave_balance {
+    leave_balance_id    uuid            [pk, not null, note: "System-generated. Immutable."]
+    employment_id       uuid            [not null]
+    leave_type          leave_type      [not null]
+    available_balance   decimal(10,4)   [not null, default: 0]
+    pending_balance     decimal(10,4)   [not null, default: 0]
+    used_balance        decimal(10,4)   [not null, default: 0]
+    entitlement_total   decimal(10,4)   [not null, default: 0]
+    plan_year_start     date            [not null]
+    plan_year_end       date            [not null]
+    last_accrual_date   date            [null]
+    last_updated_run_id uuid            [null]
+    created_timestamp   timestamptz     [not null]
+    last_update_timestamp timestamptz   [not null]
+
+	indexes {
+    employment_id
+    (employment_id, leave_type, plan_year_start)
+  }
+}
+
+// ============================================================
 // TABLE GROUPS
 // ============================================================
 
@@ -667,4 +692,5 @@ TableGroup workforce_management {
   document
   onboarding_plan
   onboarding_task
+  leave_balance
 }

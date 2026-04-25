@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-04-25T15:58:11.097Z
+-- Generated at: 2026-04-25T21:29:13.867Z
 
 CREATE TYPE "person_status" AS ENUM (
   'ACTIVE',
@@ -479,6 +479,22 @@ CREATE TABLE "onboarding_task" (
   "creation_timestamp" timestamptz NOT NULL
 );
 
+CREATE TABLE "leave_balance" (
+  "leave_balance_id" uuid PRIMARY KEY NOT NULL,
+  "employment_id" uuid NOT NULL,
+  "leave_type" leave_type NOT NULL,
+  "available_balance" decimal(10,4) NOT NULL DEFAULT 0,
+  "pending_balance" decimal(10,4) NOT NULL DEFAULT 0,
+  "used_balance" decimal(10,4) NOT NULL DEFAULT 0,
+  "entitlement_total" decimal(10,4) NOT NULL DEFAULT 0,
+  "plan_year_start" date NOT NULL,
+  "plan_year_end" date NOT NULL,
+  "last_accrual_date" date,
+  "last_updated_run_id" uuid,
+  "created_timestamp" timestamptz NOT NULL,
+  "last_update_timestamp" timestamptz NOT NULL
+);
+
 CREATE INDEX ON "person" ("person_number");
 
 CREATE INDEX ON "person" ("person_status");
@@ -589,6 +605,10 @@ CREATE INDEX ON "onboarding_task" ("blocking_flag");
 
 CREATE INDEX ON "onboarding_task" ("onboarding_plan_id", "blocking_flag", "task_status");
 
+CREATE INDEX ON "leave_balance" ("employment_id");
+
+CREATE INDEX ON "leave_balance" ("employment_id", "leave_type", "plan_year_start");
+
 COMMENT ON COLUMN "person"."person_id" IS 'System-generated. Immutable. Enduring human identity key.';
 
 COMMENT ON COLUMN "person"."person_number" IS 'Optional human-facing or integration-facing identifier';
@@ -676,3 +696,5 @@ COMMENT ON COLUMN "document"."storage_reference" IS 'Secure reference to stored 
 COMMENT ON COLUMN "onboarding_plan"."onboarding_plan_id" IS 'System-generated. Immutable.';
 
 COMMENT ON COLUMN "onboarding_task"."task_id" IS 'System-generated. Immutable.';
+
+COMMENT ON COLUMN "leave_balance"."leave_balance_id" IS 'System-generated. Immutable.';

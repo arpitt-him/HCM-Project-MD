@@ -101,8 +101,6 @@ Entity specification documents define the canonical attributes, status values, r
 
 ---
 
-
-
 ## SPEC — Functional Specifications
 
 SPEC documents define detailed behaviour for specific features or integration patterns, below the level of the PRD and above the level of architecture models.
@@ -119,6 +117,7 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [Temporal_Override.md](docs/SPEC/Temporal_Override.md) | Tenant-scoped operative date shift for non-production testing; governed operative date principle |
 | [Host_Application_Shell.md](docs/SPEC/Host_Application_Shell.md) | Solution structure, Program.cs startup sequence, module composition contracts, shell layout, NavMenu, CSS design tokens, authentication scaffold, environment configuration |
 | [HRIS_Core_Module.md](docs/SPEC/HRIS_Core_Module.md) | HRIS module assembly structure, repository and service interfaces, domain commands, lifecycle event publication pattern, Employee List and Detail page component specs, DateRangeFilter reusable component |
+| [HRIS_Leave_and_Absence.md](docs/SPEC/HRIS_Leave_and_Absence.md) | Leave request submission, manager approval workflow, balance tracking, payroll impact signal publication, return from leave handling, leave balance schema |
 
 ---
 
