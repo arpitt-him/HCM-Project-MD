@@ -1,4 +1,4 @@
-# Architecture_Model_Inventory
+# Architecture_Model_Invenstory
 
 | Field | Detail |
 |---|---|
