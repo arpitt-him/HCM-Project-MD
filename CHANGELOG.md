@@ -8,6 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Benefits Minimum Module specification added
+
+- Added `docs/SPEC/Benefits_Minimum_Module.md` — build-ready spec covering module assembly, deduction code management, election creation/update/terminate lifecycle, versioning pattern (never overwrite — new record per update), HRIS event integration (Termination/Leave/ReturnToWork), batch import async job pattern with dry-run validation, clean payroll boundary (Benefits writes table, Payroll reads — no service calls cross module), Blazor component specs for deduction codes page / elections page / employee benefits tab / import page, role definitions, and 20 test cases
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — Payroll Core Module specification added
 
 - Added `docs/SPEC/Payroll_Core_Module.md` — build-ready spec covering module assembly structure, PayrollModule IPlatformModule registration, HRIS event subscription pattern (Hire/Termination/CompensationChange/LeaveApproved/ReturnToWork), run initiation async job pattern (immediate JobId return, SignalR progress), PayrollRunJob IHostedService with employee-level failure isolation, ordered 9-step computation flow, accumulator 4-layer mutation chain (Impact → Contribution → Balance atomic write), repository and service interfaces, Blazor component specs for run list / run progress panel / run detail / pay register / new run form, run state transitions, role definitions, and 23 test cases
