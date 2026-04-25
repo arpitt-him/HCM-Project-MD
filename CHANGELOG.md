@@ -8,6 +8,23 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Architecture Decision Records ADR-003 and ADR-004 added
+
+- Added `docs/ADR/ADR-003_UI_Technology_Stack.md` — Blazor Server on .NET Core; C# end-to-end stack; SignalR scale profile; MEF + Autofac compatibility; alternatives considered
+- Added `docs/ADR/ADR-004_Data_Access_Strategy.md` — Dapper micro-ORM with manual SQL; no stored procedures; DBMS portability via ADO.NET provider abstraction; unit of work pattern for transactional writes
+- Updated Architecture_Model_Inventory.md — two new ADR rows
+- Updated index.md — two new ADR table entries
+
+### 2026-04-25 — DDL schema files added
+
+- Added `schemas/ddl/hris_schema.sql` — DDL definition of schema for HRIS core platform
+- Added `schemas/ddl/payroll_core_schema.sql` — DDL definition of schema for Payroll plug-in
+
+### 2026-04-25 — DBML schema files added
+
+- Added `schemas/dbml/hcm_hris.dbml` — DBML definition of schema for HRIS core platform
+- Added `schemas/dbml/hcm_payroll_core.dbml` — DBML definition of schema for Payroll plug-in
+
 ### 2026-04-25 — Requirement ID Convention updated
 
 **Document update: `docs/conventions/Requirement_ID_Convention.md`**

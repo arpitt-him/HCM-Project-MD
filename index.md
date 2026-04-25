@@ -55,6 +55,8 @@ ADRs document significant architectural decisions — the context, the decision 
 |---|---|
 | [ADR-001_Event_Driven_Architecture.md](docs/ADR/ADR-001_Event_Driven_Architecture.md) | All inter-module integration uses an event-driven model; direct module-to-module calls are prohibited |
 | [ADR-002_Deterministic_Replayability.md](docs/ADR/ADR-002_Deterministic_Replayability.md) | Historical payroll results must be exactly reproducible from historical inputs and rules |
+| [ADR-003_UI_Technology_Stack.md](docs/ADR/ADR-003_UI_Technology_Stack.md) | Blazor Server on .NET Core as the platform UI framework; C# end-to-end; rationale and alternatives considered |
+| [ADR-004_Data_Access_Strategy.md](docs/ADR/ADR-004_Data_Access_Strategy.md) | Dapper micro-ORM with manual SQL as the data access strategy; no stored procedures; DBMS portability via provider abstraction |
 
 ---
 
