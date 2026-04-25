@@ -1,14 +1,14 @@
-# PRD-100 — Architecture Principles
+# PRD-0100 — Architecture Principles
 
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Architecture Principles |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/PRD/PRD-0100_Architecture_Principles.md` |
 | **Replaces** | `docs/PRD/HCM_Platform_PRD.md` §2, §3 |
-| **Related Documents** | PRD-0000_Core_Vision, ADR-001_Event_Driven_Architecture, ADR-002_Deterministic_Replayability |
+| **Related Documents** | PRD-0000_Core_Vision, ADR-001_Event_Driven_Architecture, ADR-002_Deterministic_Replayability, SPEC/Temporal_Override |
 
 ## Purpose
 
@@ -61,6 +61,16 @@ All record changes shall be preserved historically. Corrections shall generate c
 
 **REQ-PLT-031**
 Audit trails must identify source, timestamp, and responsible actor for every mutation.
+
+### Governed Operative Date
+**REQ-PLT-044**
+All platform processes that require knowledge of the current date shall consume a governed operative date from a single authoritative resolution function rather than reading the system clock directly. Direct system clock consumption (`Date.now()`, `System.currentDate()`, or equivalent) is not permitted in any module's business logic.
+
+**REQ-PLT-045**
+In normal operation the governed operative date shall resolve to the real current date. In non-production environments it shall support displacement to a future date at the tenant level for testing purposes, as defined in `SPEC/Temporal_Override.md`.
+
+**REQ-PLT-046**
+Temporal Override — the displacement of the governed operative date — shall not be available in Production environments under any circumstances.
 
 ## 2. Module Catalogue
 
@@ -131,6 +141,9 @@ Real-time streaming event architectures (e.g. Apache Kafka, event sourcing at in
 | REQ-PLT-031 | Every mutation to a financial or HR record has a corresponding audit log entry containing: actor, timestamp, before value, after value, and source action. |
 | REQ-PLT-032 | Every architecture model document contains a section referencing which principles from this document it implements. |
 | REQ-PLT-033 | Every deviation from a principle in this document has a corresponding ADR in `docs/ADR/`. |
+| REQ-PLT-044 | A static analysis of the codebase finds no direct system clock calls in any module's business logic. All date resolution passes through the governed operative date function. |
+| REQ-PLT-045 | A payroll run initiated in a non-production tenant with an active Temporal Override correctly uses the override date for period resolution, effective-date enforcement, and accumulator reset evaluation. |
+| REQ-PLT-046 | Attempting to activate a Temporal Override on a Production-classified tenant or deployment is rejected at the infrastructure layer and cannot be bypassed by any application-level action. |
 
 ---
 

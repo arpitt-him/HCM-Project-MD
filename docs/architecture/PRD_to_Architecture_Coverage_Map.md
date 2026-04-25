@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.5 |
+| **Version** | v0.6 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/PRD_to_Architecture_Coverage_Map.md` |
@@ -28,6 +28,7 @@ Traceability map from PRD capabilities to the primary and supporting architectur
 | Multi-Tenant Support | PRD-0000 | Support multiple clients and companies | Payroll_Context_Model | Security_and_Access_Control_Model; Organizational_Structure_Model | Strong | Medium | High | Medium | In Design | No |
 | Event-Driven Architecture | PRD-0100 | All meaningful state changes represented as events | Employee_Event_and_Status_Change_Model | Integration_and_Data_Exchange_Model; ADR-001_Event_Driven_Architecture | Strong | Low | High | High | In Design | No |
 | Audit and Historical Preservation | PRD-0100 | All record changes preserved historically | Correction_and_Immutability_Model | Data_Retention_and_Archival_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
+| Governed Operative Date | PRD-0100 | Single authoritative current-date source for all platform processes; supports tenant-scoped temporal override in non-production | SPEC/Temporal_Override | Configuration_and_Metadata_Management_Model; Tenant_Data_Model; Security_and_Access_Control_Model | Strong | Low | High | High | In Design | No |
 
 ### Core Entity Model (PRD-0200)
 

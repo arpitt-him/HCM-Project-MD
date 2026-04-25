@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v0.4 |
+| **Version** | v0.5 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -81,6 +81,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Spec | HRIS | Onboarding_Workflow | docs/SPEC | Complete | Draft | Core Platform / HRIS | Plan creation, rehire treatment, integration touch points, EXC-ONB |
 | Spec | Platform | API_Contract_Standards | docs/SPEC | Complete | Draft | Core Platform | Authentication, versioning, request/response format, error handling, idempotency, rate limiting |
 | Spec | Payroll | Pay_Statement_Delivery | docs/SPEC | Complete | Draft | Core Platform / Payroll | Content, format, delivery channels, retention, accessibility, security |
+| Functional Specification | Platform | Temporal_Override | docs/SPEC | Complete | Draft | Core Platform | Tenant-scoped operative date displacement for non-production testing; environment-gated; governed operative date principle |
 | Spec | Platform | API_Surface_Map | docs/SPEC | Complete | Draft | Core Platform | 21 integration points across HRIS, Payroll, Benefits, Compliance, T&A (future) |
 
 ### Conventions
@@ -111,7 +112,6 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | State Model | Payroll | STATE-EXP_Export | docs/STATE | Complete | Locked | Architecture Team | 8 states |
 | State Model | Compliance | STATE-REC_Reconciliation | docs/STATE | Complete | Locked | Compliance Domain | 8 states |
 | State Model | Payroll | STATE-PRV_Provider_Response | docs/STATE | Complete | Locked | Architecture Team | 7 states |
-| State Model | T&A | STATE-TIM_Time_Entry | docs/STATE | Complete | Draft | Core Platform / T&A | 7 states; time entry lifecycle from draft through payroll consumption |
 
 ### EXC — Exception Catalogues
 

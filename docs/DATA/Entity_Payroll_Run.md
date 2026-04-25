@@ -3,11 +3,11 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Entity Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Payroll Domain |
 | **Location** | `docs/DATA/Entity_Payroll_Run.md` |
-| **Related Documents** | DATA/Entity_Payroll_Check.md, docs/STATE/STATE-RUN_Payroll_Run.md, docs/architecture/processing/Payroll_Run_Model.md, docs/architecture/processing/Calculation_Run_Lifecycle.md |
+| **Related Documents** | DATA/Entity_Payroll_Check.md, docs/STATE/STATE-RUN_Payroll_Run.md, docs/architecture/processing/Payroll_Run_Model.md, docs/architecture/processing/Calculation_Run_Lifecycle.md, docs/SPEC/Temporal_Override.md |
 
 ## Purpose
 
@@ -39,6 +39,8 @@ Defines the Payroll Run entity — a discrete execution event within a Payroll C
 | Parent_Run_ID | UUID | No | Links correction or rerun to original |
 | Related_Run_Group_ID | UUID | No | Groups related supplemental or adjustment runs |
 | Rule_and_Config_Version_Reference | String | No | Snapshot of configuration version used |
+| Temporal_Override_Active_Flag | Boolean | No | True if a Temporal Override was active at run initiation time |
+| Temporal_Override_Date | Date | No | The Override_Date in effect at run initiation time. Null if no override was active |
 | Initiated_By | UUID | Yes | User or system that created the run |
 | Run_Start_Timestamp | Datetime | No | When calculation began |
 | Run_End_Timestamp | Datetime | No | When calculation completed |
@@ -105,6 +107,8 @@ Defines the Payroll Run entity — a discrete execution event within a Payroll C
 - Run_Status may only advance through valid STATE-RUN transitions.
 - Closed and Reversed runs are immutable; corrections require new run records.
 - All run lifecycle transitions are audit-logged with timestamp and actor.
+
+Where a run is initiated while a Temporal Override is active, Temporal_Override_Active_Flag shall be set to True and Temporal_Override_Date shall record the override date in effect at initiation time. These fields are immutable once set.
 
 ---
 

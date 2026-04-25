@@ -8,7 +8,22 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-24 — Entity payroll run model update
+
+**Document update: `docs/architecture/Entity_Payroll_Run.md`**
+- Updated file information block with expanded list of related documents
+- Updated section 2: Core attributes
+- Updated section 6: Governance
+
+### 2026-04-24 — Operational temporal date override document
+
+**New document: `docs/SPEC/Temporal_Override.md`**
+- Describes the ability to shift the operative current date forward in time within a single tenant
+- Affects every date-sensitive process in the platform
+- Unavailable in production environments
+
 ### 2026-04-24 — Operational reporting & analytics model update
+
 **Document update: `docs/architecture/Operational_Reporting_and_Analytics_Model.md`**
 - Updated file information block with expanded list of related documents
 - Updated Purpose section
@@ -18,6 +33,7 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 - Updated section 10: Relationship to Other Models
 
 ### 2026-04-24 — Time entry & worked time model update
+
 **Document update: `docs/architecture/Time_Entry_and_Worked_Time_Model.md`**
 - Updated file information block with expanded list of related documents
 - Updated section 4: Approval Lifecycle
