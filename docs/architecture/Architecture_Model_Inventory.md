@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.2 |
+| **Version** | v1.3 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -92,6 +92,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Spec | Platform | API_Surface_Map | docs/SPEC | Complete | Draft | Core Platform | 21 integration points across HRIS, Payroll, Benefits, Compliance, T&A (future) |
 | Functional Specification | HRIS | HRIS_Core_Module | docs/SPEC | Complete | Draft | Core Platform / HRIS | Module assembly structure, repository and service interfaces, domain commands, lifecycle event pattern, event publisher, Blazor component specs for Employee List/Detail/Org pages, DateRangeFilter component, 23 test cases |
 | Functional Specification | HRIS | HRIS_Leave_and_Absence | docs/SPEC | Complete | Draft | Core Platform / HRIS | Leave request lifecycle, manager approval, balance tracking, payroll impact signals, return from leave, leave_balance schema addition, 20 test cases |
+| Functional Specification | HRIS | HRIS_Document_Management | docs/SPEC | Complete | Draft | Core Platform / HRIS | Document upload, versioning, supersession, I-9 and W-4 specific handling, expiration tracking, compliance alerts, access control, storage abstraction, retention rules, 20 test cases |
 
 ### Conventions
 

@@ -118,6 +118,7 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [Host_Application_Shell.md](docs/SPEC/Host_Application_Shell.md) | Solution structure, Program.cs startup sequence, module composition contracts, shell layout, NavMenu, CSS design tokens, authentication scaffold, environment configuration |
 | [HRIS_Core_Module.md](docs/SPEC/HRIS_Core_Module.md) | HRIS module assembly structure, repository and service interfaces, domain commands, lifecycle event publication pattern, Employee List and Detail page component specs, DateRangeFilter reusable component |
 | [HRIS_Leave_and_Absence.md](docs/SPEC/HRIS_Leave_and_Absence.md) | Leave request submission, manager approval workflow, balance tracking, payroll impact signal publication, return from leave handling, leave balance schema |
+| [HRIS_Document_Management.md](docs/SPEC/HRIS_Document_Management.md) | Document upload, versioning, supersession pattern, I-9 and W-4 specific handling, expiration tracking and compliance alerts, access control, storage abstraction, retention rules |
 
 ---
 

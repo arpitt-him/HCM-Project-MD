@@ -571,13 +571,14 @@ Table document {
   expiration_date             date              [null]
   storage_reference           varchar(500)      [not null, note: "Secure reference to stored file"]
   file_format                 varchar(20)       [not null]
-  upload_date                 timestamptz [not null]
+  upload_date                 timestamptz       [not null]
   uploaded_by                 uuid              [not null]
   verified_by                 uuid              [null]
-  verification_date           timestamptz [null]
+  verification_date           timestamptz       [null]
   superseded_by_document_id   uuid              [null]
+  legal_hold_flag             boolean           [not null, default: false, note: "True if document is under legal hold; prevents archival and disposal"]
   created_by                  uuid              [not null]
-  creation_timestamp          timestamptz [not null]
+  creation_timestamp          timestamptz       [not null]
 
   indexes {
     person_id

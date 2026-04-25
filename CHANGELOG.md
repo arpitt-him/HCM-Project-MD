@@ -8,6 +8,13 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — HRIS Document Management specification added
+
+- Added `docs/SPEC/HRIS_Document_Management.md` — build-ready spec covering document upload and versioning, automatic supersession pattern, IDocumentStorageService abstraction, I-9 employment eligibility verification handling and re-verification rules for rehires, W-4 federal tax withholding handling, expiration tracking background job, compliance alert thresholds, role-scoped access control with download audit logging, document retention rules by type, Blazor component specs for document list / upload panel / expiration report, legal_hold_flag DBML addition, and 20 test cases
+- Note: legal_hold_flag column must be added to document table in hcm_hris.dbml; regenerate DDL after update
+- Updated Architecture_Model_Inventory.md — new SPEC row
+- Updated index.md — new SPEC table entry
+
 ### 2026-04-25 — HRIS Leave and Absence specification added
 
 - Added `docs/SPEC/HRIS_Leave_and_Absence.md` — build-ready spec covering leave request submission and validation, manager approval workflow, balance deduction and restoration, payroll impact signal publication (PAID_SUBSTITUTION, UNPAID_SUPPRESSION, DISABILITY_PAY), return from leave handling, working days calculation, Blazor component specs for leave submission / approval / balance display, leave_balance schema addition, role definitions, and 20 test cases
