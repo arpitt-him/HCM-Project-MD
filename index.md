@@ -136,6 +136,7 @@ Architecture models define *how* the system implements the requirements. They ar
 |---|---|
 | [Accrual_and_Entitlement_Model.md](docs/architecture/core/Accrual_and_Entitlement_Model.md) | Leave accrual rules, entitlement calculation, and balance management |
 | [Benefit_and_Deduction_Configuration_Model.md](docs/architecture/core/Benefit_and_Deduction_Configuration_Model.md) | Benefit plan configuration and deduction setup |
+| [Benefit_Deduction_Election_Model](docs/architecture/core/Benefit_Deduction_Election_Model.md) | Defines the structure, lifecycle, intake, validation, and correction behaviour of the Benefit Deduction Election record |
 | [Compensation_and_Pay_Rate_Model.md](docs/architecture/core/Compensation_and_Pay_Rate_Model.md) | Compensation record structure, rate history, and change handling |
 | [Eligibility_and_Enrollment_Lifecycle_Model.md](docs/architecture/core/Eligibility_and_Enrollment_Lifecycle_Model.md) | Benefit eligibility determination and enrollment state management |
 | [Employee_Assignment_Model.md](docs/architecture/core/Employee_Assignment_Model.md) | Job, position, department, and location assignment linkages |

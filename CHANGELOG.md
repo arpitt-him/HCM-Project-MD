@@ -8,6 +8,11 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — Benefit deduction election model document
+
+**New document: `docs/architecture/core/Benefit_Deduction_Election_Model.md`**
+- Defines the behaviour of the Benefit Deduction Election record
+
 ### 2026-04-24 — Run visibility & dashboard model update
 
 **Document update: `docs/architecture/operations/Run_Visibility_and_Dashboard_Model.md`**
