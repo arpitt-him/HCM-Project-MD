@@ -8,11 +8,34 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-26 — 'AllWorkHRIS' branding replaces 'BlazorHR' branding
+
+- Renamed all BlazorHR references to AllWorkHRIS / AllWorkHRIS.Web / AllWorkHRIS.Core throughout
+- Files affected:	SPEC/Host_Application_Shell.md (updated to v0.3)
+					ADR/ADR-009_Authentication_Identity_Strategy.md  (updated to v0.2)
+					ADR/ADR-011_Module_Independence_Principle.md  (updated to v0.2)
+					architecture/Architecture_Model_Inventory.md  (updated to v1.9)
+					build/Build_Sequence_Plan (updated to v0.2)
+					SPEC/Benefits_Minimum_Module.md (updated to v0.2)
+					SPEC/HRIS_Core_Module.md (updated to v0.3)
+					SPEC/HRIS_Document_Management.md (updated to v0.2)
+					SPEC/HRIS_Leave_and_Absence.md (updated to v0.2)
+					SPEC/Payroll_Core_Module.md (updated to v0.2)
+					SPEC/Reporting_Minimum_Module (updated to v0.3)
+					SPEC/Time_Attendance_Minimum_Module.md (updated to v0.2)
+
+### 2026-04-26 — Host_Application_Shell.md updated to v0.3 — module icons
+
+- §1 Solution Structure updated — AllWorkHRIS.sln, AllWorkHRIS.Web, AllWorkHRIS.Core, AllWorkHRIS.Web.Tests; added Components/Icons/ folder with seven icon component files
+- §11 CSS Design Tokens replaced with AllWorkHRIS brand palette (--aw-brown, --aw-blue, --aw-green, --aw-coral, --aw-purple, --aw-teal, --aw-gold, --aw-navy); module accent tokens (--module-hris through --module-performance); semantic colours aligned to brand palette; --sidebar-bg now uses var(--aw-navy)
+- §12 Module Accent Colors table updated with new token names, Tabler icon assignments, and future module entries (Recruiting, Performance)
+- Added §12a Module Icon Components — seven decorated Tabler SVG Razor components (HrisIcon, PayrollIcon, TimeAttendanceIcon, BenefitsIcon, ReportingIcon, RecruitingIcon, PerformanceIcon); Size parameter; CSS custom property colour; icon resolution pattern for NavMenu
+- TC-HST-016 updated — default app name changed from BlazorHR to AllWorkHRIS
+
 ### 2026-04-25 — ADR-011 and module independence patches applied
 
 - Added `docs/ADR/ADR-011_Module_Independence_Principle.md` — six rules governing module independence: no cross-module project references; event payloads in BlazorHR.Core/Events/; InProcessEventBus with zero-subscriber no-op; nullable module-optional command fields; per-module schema application; subscribers register own handlers. Formally closes coupling points identified between HRIS and Payroll modules.
 - Patched `docs/SPEC/HRIS_Core_Module.md` to v0.2 — PayrollContextId on HireEmployeeCommand changed from required Guid to Guid?; event payload definitions moved to BlazorHR.Core/Events/; IEventPublisher §7 updated to InProcessEventBus pattern; added TC-HRS-024, TC-HRS-025, TC-HRS-026 (26 test cases total)
-- Patched `docs/build/Build_Sequence_Plan.md` to v0.2 — Phase Overview table updated with schema state column; Phase 0 applies HRIS schema only; Phase 2 gate includes 8-step HRIS Standalone Test; Phase 4 adds 4.0 Apply Payroll Schema step
 - Updated Architecture_Model_Inventory.md — new ADR-011 row; updated HRIS_Core_Module and Build_Sequence_Plan row notes
 - Updated index.md — new ADR-011 table entry
 - Note: BlazorHR.Core/Events/ folder and InProcessEventBus registration in Program.cs are Phase 1 build deliverables — not yet implemented

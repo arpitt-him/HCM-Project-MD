@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Reporting_Minimum_Module.md` |
@@ -32,7 +32,7 @@ The Reporting module is read-only. It consumes data from Payroll and HRIS but ne
 ## 1. Module Assembly Structure
 
 ```
-BlazorHR.Module.Reporting/
+AllWorkHRIS.Module.Reporting/
 │
 ├── ReportingModule.cs
 │
@@ -938,7 +938,7 @@ Shared component used by all 16 reports:
 
         var fileName = $"{ReportId}_{DateTime.UtcNow:yyyyMMdd}.{format}";
         await _jsRuntime.InvokeVoidAsync(
-            "blazorDownload", fileName, mimeType,
+            "allworkhrisDownload", fileName, mimeType,
             Convert.ToBase64String(((MemoryStream)stream).ToArray()));
     }
 }

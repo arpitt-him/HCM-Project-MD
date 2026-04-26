@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Time_Attendance_Minimum_Module.md` |
@@ -24,7 +24,7 @@ The scope is deliberately minimal — manual entry, batch import, approval workf
 ## 1. Module Assembly Structure
 
 ```
-BlazorHR.Module.TimeAttendance/
+AllWorkHRIS.Module.TimeAttendance/
 │
 ├── TimeAttendanceModule.cs               # IPlatformModule implementation
 │

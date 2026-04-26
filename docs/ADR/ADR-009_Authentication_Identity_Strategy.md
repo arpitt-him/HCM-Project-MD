@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-009_Authentication_Identity_Strategy.md` |
@@ -46,7 +46,7 @@ The identity provider is configured entirely through environment variables estab
 
 | Variable | Purpose |
 |---|---|
-| `AUTH_AUTHORITY` | The OIDC authority URL (e.g. `https://login.example.com/realm/blazorhr`) |
+| `AUTH_AUTHORITY` | The OIDC authority URL (e.g. `https://login.example.com/realm/allworkhris`) |
 | `AUTH_CLIENT_ID` | The client ID registered with the identity provider |
 | `AUTH_CLIENT_SECRET` | The client secret for confidential client authentication |
 

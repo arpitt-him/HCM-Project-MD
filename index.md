@@ -63,7 +63,7 @@ ADRs document significant architectural decisions — the context, the decision 
 | [ADR-008_API_Surface_Architecture.md](docs/ADR/ADR-008_API_Surface_Architecture.md) | Minimal API for all HTTP endpoints; MVC explicitly excluded; clean Blazor Server + Minimal API coexistence |
 | [ADR-009_Authentication_Identity_Strategy.md](docs/ADR/ADR-009_Authentication_Identity_Strategy.md) | OIDC provider-agnostic authentication; Keycloak as on-premises default; role claim mapping; tenant_id claim bridge to ADR-010 |
 | [ADR-010_Tenant_Isolation_Strategy.md](docs/ADR/ADR-010_Tenant_Isolation_Strategy.md) | Three isolation models as client deployment options; Autofac per-request IConnectionFactory resolution; TenantRegistry pattern; repositories completely isolation-model agnostic |
-| [ADR-011_Module_Independence_Principle.md](docs/ADR/ADR-011_Module_Independence_Principle.md) | Six rules governing module independence; InProcessEventBus zero-subscriber no-op; event payloads in BlazorHR.Core; nullable module-optional fields; per-module schema application |
+| [ADR-011_Module_Independence_Principle.md](docs/ADR/ADR-011_Module_Independence_Principle.md) | Six rules governing module independence; InProcessEventBus zero-subscriber no-op; event payloads in AllWorkHRIS.Core; nullable module-optional fields; per-module schema application |
 
 ---
 

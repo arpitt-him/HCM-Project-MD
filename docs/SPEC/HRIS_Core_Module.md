@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/SPEC/HRIS_Core_Module.md` |
@@ -24,7 +24,7 @@ The HRIS module does not calculate pay, manage accumulators, or own deduction el
 ## 1. Module Assembly Structure
 
 ```
-BlazorHR.Module.Hris/
+AllWorkHRIS.Module.Hris/
 │
 ├── HrisModule.cs                         # IPlatformModule implementation
 │
@@ -147,7 +147,7 @@ public sealed class HrisModule : IPlatformModule
                .As<IOrgStructureService>()
                .InstancePerLifetimeScope();
 
-        // The InProcessEventBus is registered as a singleton in BlazorHR.Host Program.cs.
+        // The InProcessEventBus is registered as a singleton in AllWorkHRIS.Host Program.cs.
         // The HRIS module does not register the bus — it resolves it to register its own
         // outbound event handler registrations if needed.
         // Per ADR-011: HRIS publishes events; other modules register handlers.
@@ -155,7 +155,7 @@ public sealed class HrisModule : IPlatformModule
 	}
 	
 	Note — IEventPublisher registration: The InProcessEventBus singleton is registered in
-	BlazorHR.Host Program.cs, not in any module.  Modules resolve IEventPublisher from the
+	AllWorkHRIS.Host Program.cs, not in any module.  Modules resolve IEventPublisher from the
 	container to publish events. Subscribing modules (Payroll, T&A, Benefits) register their
 	own handlers on the bus in their own Register methods. HRIS never references subscriber
 	interfaces from other modules.
@@ -454,16 +454,16 @@ public async Task<HireResult> HireEmployeeAsync(HireEmployeeCommand command)
 ## 7. Event Publisher
 
 The HRIS module publishes lifecycle events to the platform-wide `IEventPublisher` 
-(implemented as `InProcessEventBus` in `BlazorHR.Core`). The publisher has no knowledge 
+(implemented as `InProcessEventBus` in `AllWorkHRIS.Core`). The publisher has no knowledge 
 of who is listening. If no modules are deployed that subscribe to a given event type, 
 publication is a silent no-op — not an exception. This is the correct and expected 
 behaviour in HRIS-only deployments.
 
-Per ADR-011, all event payload types are defined in `BlazorHR.Core/Events/` — not in 
+Per ADR-011, all event payload types are defined in `AllWorkHRIS.Core/Events/` — not in 
 the HRIS module. Both the publishing module (HRIS) and any subscribing modules (Payroll, 
-T&A) reference the shared payload types from `BlazorHR.Core`.
+T&A) reference the shared payload types from `AllWorkHRIS.Core`.
 
-### Event payload types (defined in BlazorHR.Core/Events/)
+### Event payload types (defined in AllWorkHRIS.Core/Events/)
 
 | Payload Type | Published When | Key Fields |
 |---|---|---|
@@ -473,13 +473,13 @@ T&A) reference the shared payload types from `BlazorHR.Core`.
 | `CompensationChangeEventPayload` | After `ChangeCompensationAsync` commits | EmploymentId, EventId, EffectiveDate, RateType, NewBaseRate, PayFrequency, IsRetroactive |
 
 Leave-related payloads (`LeaveApprovedPayload`, `ReturnToWorkPayload`) are defined in 
-`BlazorHR.Core/Events/` and published by the HRIS Leave service — see 
+`AllWorkHRIS.Core/Events/` and published by the HRIS Leave service — see 
 `SPEC/HRIS_Leave_and_Absence`.
 
-### IEventPublisher interface (defined in BlazorHR.Core)
+### IEventPublisher interface (defined in AllWorkHRIS.Core)
 
 ```csharp
-// BlazorHR.Core/Events/IEventPublisher.cs
+// AllWorkHRIS.Core/Events/IEventPublisher.cs
 public interface IEventPublisher
 {
     /// <summary>

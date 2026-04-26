@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.8 |
+| **Version** | v1.9 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -56,7 +56,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | ADR | Platform | ADR-008_API_Surface_Architecture | docs/ADR | Complete | Accepted | Core Platform | Minimal API for HTTP endpoints; MVC explicitly excluded; Blazor Server + Minimal API coexistence pattern; no routing conflicts |
 | ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
 | ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
-| ADR | Platform | ADR-011_Module_Independence_Principle | docs/ADR | Complete | Accepted | Core Platform | Six rules governing module independence; event payloads in BlazorHR.Core; InProcessEventBus zero-subscriber no-op; PayrollContextId nullable; schemas applied per module; subscribers register own handlers |
+| ADR | Platform | ADR-011_Module_Independence_Principle | docs/ADR | Complete | Accepted | Core Platform | Six rules governing module independence; event payloads in AllWorkHRIS.Core; InProcessEventBus zero-subscriber no-op; PayrollContextId nullable; schemas applied per module; subscribers register own handlers |
 
 ### DATA — Entity Specifications
 

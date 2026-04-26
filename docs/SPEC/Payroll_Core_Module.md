@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / Payroll |
 | **Location** | `docs/SPEC/Payroll_Core_Module.md` |
@@ -24,7 +24,7 @@ The Payroll module consumes HRIS events and data but does not own them. It owns 
 ## 1. Module Assembly Structure
 
 ```
-BlazorHR.Module.Payroll/
+AllWorkHRIS.Module.Payroll/
 │
 ├── PayrollModule.cs                      # IPlatformModule implementation
 │

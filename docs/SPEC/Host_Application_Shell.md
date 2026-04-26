@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Host_Application_Shell.md` |
@@ -13,7 +13,7 @@
 
 ## Purpose
 
-Defines the implementation-ready specification for the BlazorHR host application shell — the foundation on which all platform modules are composed. This document covers solution structure, startup sequence, module composition contracts, shell layout, navigation, authentication scaffold, CSS design tokens, environment configuration, and test cases.
+Defines the implementation-ready specification for the AllWorkHRIS host application shell — the foundation on which all platform modules are composed. This document covers solution structure, startup sequence, module composition contracts, shell layout, navigation, authentication scaffold, CSS design tokens, environment configuration, and test cases.
 
 The host application shell contains no business logic. It is the runtime container that discovers modules, composes the DI container, renders the shell UI, and routes to module-owned pages.
 
@@ -22,10 +22,10 @@ The host application shell contains no business logic. It is the runtime contain
 ## 1. Solution Structure
 
 ```
-BlazorHR.sln
+AllWorkHRIS.sln
 │
 ├── src/
-│   ├── BlazorHR.Host/                    # Blazor Server host application
+│   ├── AllWorkHRIS.Web/                  # Blazor Server host application
 │   │   ├── Program.cs
 │   │   ├── App.razor
 │   │   ├── _Host.cshtml
@@ -38,12 +38,21 @@ BlazorHR.sln
 │   │   │   └── Error.razor               # Error boundary page
 │   │   ├── Auth/
 │   │   │   └── AuthenticationStateHelper.cs
+│   │   ├── Components/
+│   │   │   └── Icons/                    # Module icon Razor components
+│   │   │       ├── HrisIcon.razor
+│   │   │       ├── PayrollIcon.razor
+│   │   │       ├── TimeAttendanceIcon.razor
+│   │   │       ├── BenefitsIcon.razor
+│   │   │       ├── ReportingIcon.razor
+│   │   │       ├── RecruitingIcon.razor
+│   │   │       └── PerformanceIcon.razor
 │   │   └── wwwroot/
 │   │       ├── css/
 │   │       │   └── app.css               # CSS custom properties (design tokens)
 │   │       └── favicon.ico
 │   │
-│   ├── BlazorHR.Core/                    # Shared contracts and base types
+│   ├── AllWorkHRIS.Core/                 # Shared contracts and base types
 │   │   ├── Composition/
 │   │   │   ├── IPlatformModule.cs
 │   │   │   └── MenuContribution.cs
@@ -54,21 +63,21 @@ BlazorHR.sln
 │   │   │   └── IAuditableEntity.cs
 │   │   ├── Security/
 │   │   │   └── ClaimsPrincipalExtensions.cs
-│	│   └── Events/
-│	│       ├── IEventPublisher.cs
-│	│       ├── InProcessEventBus.cs
-│	│       ├── HireEventPayload.cs
-│	│       ├── RehireEventPayload.cs
-│	│       ├── TerminationEventPayload.cs
-│	│       ├── CompensationChangeEventPayload.cs
-│	│       ├── LeaveApprovedPayload.cs
-│	│       └── ReturnToWorkPayload.cs
+│   │   └── Events/
+│   │       ├── IEventPublisher.cs
+│   │       ├── InProcessEventBus.cs
+│   │       ├── HireEventPayload.cs
+│   │       ├── RehireEventPayload.cs
+│   │       ├── TerminationEventPayload.cs
+│   │       ├── CompensationChangeEventPayload.cs
+│   │       ├── LeaveApprovedPayload.cs
+│   │       └── ReturnToWorkPayload.cs
 │   │
 │   └── modules/                          # Module assemblies drop folder
 │       └── (deployed module .dlls)
 │
 └── tests/
-    └── BlazorHR.Host.Tests/
+    └── AllWorkHRIS.Web.Tests/
 ```
 
 ---
@@ -88,7 +97,7 @@ The following environment variables are required at startup. The application sha
 | `AUTH_CLIENT_ID` | Yes | OAuth2 client ID |
 | `AUTH_CLIENT_SECRET` | Yes | OAuth2 client secret |
 | `MODULES_PATH` | No | Path to module assemblies folder; defaults to `./modules` |
-| `APP_DISPLAY_NAME` | No | Display name shown in the shell top bar; defaults to `BlazorHR` |
+| `APP_DISPLAY_NAME` | No | Display name shown in the shell top bar; defaults to `AllWorkHRIS` |
 
 For local development, environment variables are declared in `launchSettings.json` under `environmentVariables`. This file shall not contain production credential values.
 
@@ -194,7 +203,7 @@ public static class ModuleDiscovery
         if (!Directory.Exists(modulesPath))
             return [];
 
-        var catalog = new DirectoryCatalog(modulesPath, "BlazorHR.Module.*.dll");
+        var catalog = new DirectoryCatalog(modulesPath, "AllWorkHRIS.Module.*.dll");
         var container = new CompositionContainer(catalog);
 
         try
@@ -218,18 +227,18 @@ public static class ModuleDiscovery
 }
 ```
 
-Module assembly naming convention: `BlazorHR.Module.{ModuleName}.dll`
-Examples: `BlazorHR.Module.Hris.dll`, `BlazorHR.Module.Payroll.dll`
+Module assembly naming convention: `AllWorkHRIS.Module.{ModuleName}.dll`
+Examples: `AllWorkHRIS.Module.Hris.dll`, `AllWorkHRIS.Module.Payroll.dll`
 
 ---
 
 ## 5. IPlatformModule Contract
 
 ```csharp
-// BlazorHR.Core/Composition/IPlatformModule.cs
+// AllWorkHRIS.Core/Composition/IPlatformModule.cs
 using Autofac;
 
-namespace BlazorHR.Core.Composition;
+namespace AllWorkHRIS.Core.Composition;
 
 public interface IPlatformModule
 {
@@ -255,8 +264,8 @@ public interface IPlatformModule
 ## 6. MenuContribution Contract
 
 ```csharp
-// BlazorHR.Core/Composition/MenuContribution.cs
-namespace BlazorHR.Core.Composition;
+// AllWorkHRIS.Core/Composition/MenuContribution.cs
+namespace AllWorkHRIS.Core.Composition;
 
 public sealed class MenuContribution
 {
@@ -309,10 +318,10 @@ public sealed class MenuContribution
 ## 7. IConnectionFactory Contract
 
 ```csharp
-// BlazorHR.Core/Data/IConnectionFactory.cs
+// AllWorkHRIS.Core/Data/IConnectionFactory.cs
 using System.Data;
 
-namespace BlazorHR.Core.Data;
+namespace AllWorkHRIS.Core.Data;
 
 public interface IConnectionFactory
 {
@@ -359,10 +368,10 @@ public sealed class ConnectionFactory : IConnectionFactory
 ## 8. IUnitOfWork Contract
 
 ```csharp
-// BlazorHR.Core/Data/IUnitOfWork.cs
+// AllWorkHRIS.Core/Data/IUnitOfWork.cs
 using System.Data;
 
-namespace BlazorHR.Core.Data;
+namespace AllWorkHRIS.Core.Data;
 
 public interface IUnitOfWork : IDisposable
 {
@@ -453,7 +462,7 @@ public async Task<Guid> CreateEmploymentAsync(CreateEmploymentCommand command)
 
 @code {
     private string AppDisplayName =>
-        Environment.GetEnvironmentVariable("APP_DISPLAY_NAME") ?? "BlazorHR";
+        Environment.GetEnvironmentVariable("APP_DISPLAY_NAME") ?? "AllWorkHRIS";
 }
 ```
 
@@ -534,43 +543,51 @@ The NavMenu component renders the assembled `List<MenuContribution>` filtered by
 All colours, spacing, and typography values are expressed as CSS custom properties in `app.css`. Module and component styles reference these tokens — never hardcoded values.
 
 ```css
-/* app.css — BlazorHR design tokens */
+/* app.css — AllWorkHRIS design tokens */
 :root {
-    /* Brand palette — muted Caribbean pastels */
-    --color-primary:          #5B8FA8;   /* Muted Caribbean blue */
-    --color-primary-light:    #A8C5D6;   /* Light blue */
-    --color-primary-dark:     #3D6478;   /* Deep blue */
+    /* Brand palette — AllWorkHRIS */
+    --aw-brown:   #8A5A38;   /* warm earth */
+    --aw-blue:    #5B87A5;   /* calm sky */
+    --aw-green:   #6AAE63;   /* fresh growth */
+    --aw-coral:   #E9836B;   /* energetic warmth */
+    --aw-purple:  #6657B5;   /* creative depth */
+    --aw-teal:    #2F9C9E;   /* trusted stability */
+    --aw-gold:    #C79A55;   /* valued reward */
+    --aw-navy:    #2F4350;   /* HR anchor / sidebar */
 
-    --color-accent-teal:      #4ECDC4;   /* HRIS module */
-    --color-accent-coral:     #F4A98A;   /* Payroll module */
-    --color-accent-sage:      #8DB596;   /* Benefits module */
-    --color-accent-lavender:  #A89BC2;   /* T&A module */
-    --color-accent-sand:      #C9B99A;   /* Reporting module */
+    /* Module accent assignments */
+    --module-hris:        var(--aw-teal);
+    --module-payroll:     var(--aw-coral);
+    --module-ta:          var(--aw-blue);
+    --module-benefits:    var(--aw-green);
+    --module-reporting:   var(--aw-gold);
+    --module-recruiting:  var(--aw-purple);
+    --module-performance: var(--aw-brown);
 
     /* Semantic colours */
-    --color-success:          #5BA85B;
-    --color-warning:          #C9A84C;
-    --color-danger:           #C96B6B;
-    --color-info:             #5B8FA8;
+    --color-success:      #6AAE63;   /* aligned with --aw-green */
+    --color-warning:      #C79A55;   /* aligned with --aw-gold */
+    --color-danger:       #E9836B;   /* aligned with --aw-coral */
+    --color-info:         #5B87A5;   /* aligned with --aw-blue */
 
     /* Shell layout */
-    --sidebar-bg:             #1E2430;   /* Dark sidebar background */
-    --sidebar-width:          220px;
-    --sidebar-text:           #CBD5E0;
-    --sidebar-text-active:    #FFFFFF;
-    --sidebar-item-hover:     #2D3748;
-    --topbar-bg:              #FFFFFF;
-    --topbar-height:          56px;
-    --content-bg:             #F7F9FC;
+    --sidebar-bg:         var(--aw-navy);
+    --sidebar-width:      220px;
+    --sidebar-text:       #CBD5E0;
+    --sidebar-text-active:#FFFFFF;
+    --sidebar-item-hover: #3D5464;
+    --topbar-bg:          #FFFFFF;
+    --topbar-height:      56px;
+    --content-bg:         #F7F9FC;
 
     /* Typography */
-    --font-family-base:       'Inter', 'Segoe UI', system-ui, sans-serif;
-    --font-size-base:         14px;
-    --font-size-sm:           12px;
-    --font-size-lg:           16px;
-    --font-weight-normal:     400;
-    --font-weight-medium:     500;
-    --font-weight-semibold:   600;
+    --font-family-base:   'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-size-base:     14px;
+    --font-size-sm:       12px;
+    --font-size-lg:       16px;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
 
     /* Spacing scale */
     --space-1:    4px;
@@ -594,24 +611,256 @@ All colours, spacing, and typography values are expressed as CSS custom properti
     --shadow-lg:  0 4px 16px rgba(0,0,0,0.16);
 
     /* Syncfusion theme alignment */
-    --sf-primary: var(--color-primary);
+    --sf-primary: var(--aw-teal);
+
+    /* Icon background opacity for decorated module icons */
+    --icon-bg-opacity: 0.15;
 }
 ```
 
 ---
+## 12.1 Module Icon Components
+
+All module icons are Razor components located in `AllWorkHRIS.Web/Components/Icons/`. Each component:
+- Uses a decorated Tabler SVG icon with a soft circular background fill
+- Accepts a `Size` parameter (default 24) for use at both nav menu and larger display sizes
+- Uses CSS custom properties for colour — never hardcoded hex values
+- Scales cleanly from 20px (nav menu) to 96px (landing pages, empty states)
+
+### Icon decoration pattern
+
+Each icon applies the same two-layer decoration:
+1. A soft circular background at `--icon-bg-opacity` (0.15) in the module colour
+2. The Tabler icon path stroked at full module colour intensity
+
+### HrisIcon.razor — Tabler `user`
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/HrisIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-hris)"
+          opacity="var(--icon-bg-opacity)"/>
+  <path stroke="var(--module-hris)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0-8 0
+           M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### PayrollIcon.razor — Tabler `report-money`
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/PayrollIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-payroll)"
+          opacity="var(--icon-bg-opacity)"/>
+  <path stroke="var(--module-payroll)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2
+           M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2
+           M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2
+           M9 14l2 2l4-4
+           M9 17h4"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### TimeAttendanceIcon.razor — Tabler `clock`
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/TimeAttendanceIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-ta)"
+          opacity="var(--icon-bg-opacity)"/>
+  <circle cx="12" cy="12" r="7"
+          stroke="var(--module-ta)"
+          stroke-width="1.5"
+          fill="none"/>
+  <path stroke="var(--module-ta)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+        d="M12 9v3l2 2"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### BenefitsIcon.razor — Tabler `heart-handshake`
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/BenefitsIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-benefits)"
+          opacity="var(--icon-bg-opacity)"/>
+  <path stroke="var(--module-benefits)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        d="M19.5 12.572L12 20l-7.5-7.428
+           A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.572
+           M12 6l-1.5 2.5L8 10l2.5 1.5L12 14l1.5-2.5L16 10l-2.5-1.5Z"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### ReportingIcon.razor — Tabler `chart-bar`
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/ReportingIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-reporting)"
+          opacity="var(--icon-bg-opacity)"/>
+  <path stroke="var(--module-reporting)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        d="M3 12h4v7H3z
+           M10 8h4v11h-4z
+           M17 4h4v15h-4z
+           M3 21h18"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### RecruitingIcon.razor — Tabler `user-search` (future module)
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/RecruitingIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-recruiting)"
+          opacity="var(--icon-bg-opacity)"/>
+  <path stroke="var(--module-recruiting)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0-8 0
+           M6 21v-2a4 4 0 0 1 4-4h2
+           M16.5 18.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0
+           M21 21l-1.5-1.5"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### PerformanceIcon.razor — Tabler `target` (future module)
+
+```razor
+@* AllWorkHRIS.Web/Components/Icons/PerformanceIcon.razor *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11"
+          fill="var(--module-performance)"
+          opacity="var(--icon-bg-opacity)"/>
+  <circle cx="12" cy="12" r="7"
+          stroke="var(--module-performance)"
+          stroke-width="1.5"
+          fill="none"/>
+  <circle cx="12" cy="12" r="3"
+          stroke="var(--module-performance)"
+          stroke-width="1.5"
+          fill="none"/>
+  <path stroke="var(--module-performance)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        fill="none"
+        d="M12 3v2M12 19v2M3 12h2M19 12h2"/>
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+}
+```
+
+### Usage in NavMenu
+
+```razor
+@* Size=20 for nav menu items *@
+<HrisIcon Size="20" />
+<PayrollIcon Size="20" />
+
+@* Size=48 for module landing page cards *@
+<HrisIcon Size="48" />
+```
+
+### Usage in MenuContribution
+
+The `Icon` field on `MenuContribution` carries the component name as a string identifier. The `NavMenu.razor` component resolves this to the correct Razor component using a `RenderFragment` lookup:
+
+```razor
+@* NavMenu.razor — icon resolution *@
+private RenderFragment? ResolveIcon(string? iconName, int size) => iconName switch
+{
+    "HrisIcon"            => @<HrisIcon Size="@size" />,
+    "PayrollIcon"         => @<PayrollIcon Size="@size" />,
+    "TimeAttendanceIcon"  => @<TimeAttendanceIcon Size="@size" />,
+    "BenefitsIcon"        => @<BenefitsIcon Size="@size" />,
+    "ReportingIcon"       => @<ReportingIcon Size="@size" />,
+    "RecruitingIcon"      => @<RecruitingIcon Size="@size" />,
+    "PerformanceIcon"     => @<PerformanceIcon Size="@size" />,
+    _                     => null
+};
+```
 
 ## 12. Module Accent Colors
 
 Each module declares its accent color in its `MenuContribution` entries. The standard module palette:
 
-| Module | AccentColor token | BadgeLabel |
+| Module | AccentColor token | Icon | BadgeLabel |
 |---|---|---|
-| HRIS | `var(--color-accent-teal)` | `HRIS` |
-| Payroll | `var(--color-accent-coral)` | `PAY` |
-| Benefits | `var(--color-accent-sage)` | `BEN` |
-| Time & Attendance | `var(--color-accent-lavender)` | `T&A` |
-| Reporting | `var(--color-accent-sand)` | `RPT` |
-| Host (Home, Diagnostics) | `none` | `HOST` |
+| HRIS | `var(--module-hris)` | `HrisIcon` | `HRIS` |
+| Payroll | `var(--module-payroll)` | `PayrollIcon` | `PAY` |
+| Benefits | `var(--module-benefits)` | `BenefitsIcon` | `BEN` |
+| Time & Attendance | `var(--module-ta)` | `TimeAttendanceIcon` | `T&A` |
+| Reporting | `var(--module-reporting)` | `ReportingIcon` | `RPT` |
+| Recruiting (future) | `var(--module-recruiting)` | `RecruitingIcon` | `REC` |
+| Performance (future) | `var(--module-performance)` | `PerformanceIcon` | `PRF` |
+| Host (Home, Diagnostics) | `none` | `none` | `HOST` |
 
 ---
 
@@ -689,6 +938,6 @@ public static class EnvironmentValidator
 | TC-HST-013 | `UnitOfWork` commits successfully | Both operations in the transaction are persisted; connection disposed |
 | TC-HST-014 | `UnitOfWork` rolls back on exception | Neither operation in the transaction is persisted; connection disposed |
 | TC-HST-015 | `APP_DISPLAY_NAME` environment variable set to custom value | Shell top bar displays custom name |
-| TC-HST-016 | `APP_DISPLAY_NAME` not set | Shell top bar displays default `BlazorHR` |
+| TC-HST-016 | `APP_DISPLAY_NAME` not set | Shell top bar displays default `AllWorkHRIS` |
 | TC-HST-017 | Minimal API endpoint receives request without authentication token | Returns HTTP 401 |
 | TC-HST-018 | NavMenu renders with two modules contributing items | Items from both modules appear in nav, sorted by SortOrder, with correct AccentColor badges |

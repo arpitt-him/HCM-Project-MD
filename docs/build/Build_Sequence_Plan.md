@@ -1,9 +1,9 @@
-# BlazorHR — Build Sequence Plan
+# AllWorkHRIS — Build Sequence Plan
 
 | Field | Detail |
 |---|---|
 | **Document Type** | Build Planning |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/build/Build_Sequence_Plan.md` |
@@ -14,7 +14,7 @@
 
 ## Purpose
 
-Defines the sequenced build order for the BlazorHR platform. Each phase has a clear completion gate — a working, runnable state that proves the foundation before the next phase builds on it. No phase begins until its predecessor's gate is passed.
+Defines the sequenced build order for the AllWorkHRIS platform. Each phase has a clear completion gate — a working, runnable state that proves the foundation before the next phase builds on it. No phase begins until its predecessor's gate is passed.
 
 The sequence is designed so that after Phase 2, a minimum working HRIS application exists that each subsequent module can be developed from. Phase 2 ends with a formal HRIS Standalone Test that proves the HRIS module operates correctly with no other modules present — no Payroll schema, no Payroll module, no cross-module dependencies.
 
@@ -83,7 +83,7 @@ Phase 0 (Infrastructure)
   ```
   docker run -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16
   ```
-- Create development database: `blazorhr_dev`
+- Create development database: `allworkhris_dev`
 - Apply HRIS schema only: `schemas/ddl/hris_schema.sql`
 - Verify schema applied cleanly with no errors
 - **Do NOT apply `payroll_core_schema.sql` at this stage** — Payroll schema is applied at the start of Phase 4
@@ -101,8 +101,8 @@ Phase 0 (Infrastructure)
     -e KEYCLOAK_ADMIN_PASSWORD=admin \
     quay.io/keycloak/keycloak:latest start-dev
   ```
-- Create realm: `blazorhr`
-- Create client: `blazorhr-app` with Authorization Code flow, set redirect URI to `https://localhost:5001/*`
+- Create realm: `allworkhris`
+- Create client: `allworkhris-app` with Authorization Code flow, set redirect URI to `https://localhost:5001/*`
 - Create test users with platform roles as JWT claims:
   - `admin@test.com` — roles: `HrisAdmin`, `PayrollAdmin`, `ReportAdmin`
   - `hr@test.com` — roles: `HrisAdmin`, `HrisViewer`
@@ -113,18 +113,18 @@ Phase 0 (Infrastructure)
 - Note authority URL, client ID, and client secret for `launchSettings.json`
 
 **0.4 — Solution scaffold**
-- Create `BlazorHR.sln`
+- Create `AllWorkHRIS.sln`
 - Create projects (empty, no code yet):
-  - `src/BlazorHR.Core` (class library)
-  - `src/BlazorHR.Host` (Blazor Server)
-  - `tests/BlazorHR.Host.Tests` (xUnit)
-- Add NuGet packages to `BlazorHR.Core`:
+  - `src/AllWorkHRIS.Core` (class library)
+  - `src/AllWorkHRIS.Host` (Blazor Server)
+  - `tests/AllWorkHRIS.Host.Tests` (xUnit)
+- Add NuGet packages to `AllWorkHRIS.Core`:
   - `Autofac`
   - `Dapper`
   - `Npgsql`
   - `Microsoft.Data.SqlClient`
   - `MySql.Data`
-- Add NuGet packages to `BlazorHR.Host`:
+- Add NuGet packages to `AllWorkHRIS.Host`:
   - `Autofac.Extensions.DependencyInjection`
   - `Syncfusion.Blazor` (version 33.1.44)
   - `Microsoft.AspNetCore.Authentication.OpenIdConnect`
@@ -132,11 +132,11 @@ Phase 0 (Infrastructure)
 **0.5 — Environment configuration**
 - Create `launchSettings.json` with all required environment variables:
   - `SYNCFUSION_LICENSE_KEY`
-  - `DATABASE_CONNECTION_STRING` = `Host=localhost;Database=blazorhr_dev;Username=postgres;Password=dev`
+  - `DATABASE_CONNECTION_STRING` = `Host=localhost;Database=allworkhris_dev;Username=postgres;Password=dev`
   - `DATABASE_PROVIDER` = `postgresql`
   - `APP_ENVIRONMENT` = `Development`
-  - `AUTH_AUTHORITY` = `http://localhost:8080/realms/blazorhr`
-  - `AUTH_CLIENT_ID` = `blazorhr-app`
+  - `AUTH_AUTHORITY` = `http://localhost:8080/realms/allworkhris`
+  - `AUTH_CLIENT_ID` = `allworkhris-app`
   - `AUTH_CLIENT_SECRET` = (from Keycloak client configuration)
   - `TEMPORAL_OVERRIDE_ENABLED` = `true`
 
@@ -154,11 +154,11 @@ Phase 0 (Infrastructure)
 **Goal:** A running Blazor Server application that authenticates users, renders the shell layout with an empty nav menu, and proves the MEF + Autofac composition pipeline works end to end.
 
 **Spec:** `SPEC/Host_Application_Shell`
-**Projects:** `BlazorHR.Core`, `BlazorHR.Host`
+**Projects:** `AllWorkHRIS.Core`, `AllWorkHRIS.Host`
 
 ### Deliverables
 
-**1.1 — BlazorHR.Core**
+**1.1 — AllWorkHRIS.Core**
 
 Implement in order:
 1. `IPlatformModule` interface
@@ -178,7 +178,7 @@ Implement in order:
     - `LeaveApprovedPayload`
     - `ReturnToWorkPayload`
 
-**1.2 — BlazorHR.Host**
+**1.2 — AllWorkHRIS.Host**
 
 Implement in order:
 1. `Program.cs` — full startup sequence per `SPEC/Host_Application_Shell` §3:
@@ -229,15 +229,15 @@ Implement `TenantConnectionMiddleware` and `TenantRegistry` per ADR-010:
 **Goal:** A working HR administrator can hire an employee, view the employee list, and open the employee detail page. Phase 2 ends with the HRIS Standalone Test proving full module independence.
 
 **Spec:** `SPEC/HRIS_Core_Module`
-**Project:** `BlazorHR.Module.Hris` (new class library)
+**Project:** `AllWorkHRIS.Module.Hris` (new class library)
 **Database:** HRIS schema already applied in Phase 0 — no changes
 
 ### Deliverables
 
 **2.1 — Module project setup**
-- Create `BlazorHR.Module.Hris` class library
+- Create `AllWorkHRIS.Module.Hris` class library
 - Add NuGet packages: `Autofac`, `Dapper`, `Npgsql`
-- Add project reference to `BlazorHR.Core` only — no references to any other module
+- Add project reference to `AllWorkHRIS.Core` only — no references to any other module
 - Create folder structure per `SPEC/HRIS_Core_Module` §1
 
 **2.2 — Domain types**
@@ -281,7 +281,7 @@ Implement against HRIS schema using Dapper:
 - `Register(ContainerBuilder builder)` — all repositories and services; no event publisher registration (bus is registered in Host)
 - `GetMenuContributions()` — Employees, Organisation, Jobs & Positions menu items
 
-**2.7 — UI components (in BlazorHR.Host)**
+**2.7 — UI components (in AllWorkHRIS.Host)**
 
 Organised under `Pages/Hris/` namespace:
 - `Shared/DateRangeFilter.razor` — platform-wide reusable component per ADR-006
@@ -291,7 +291,7 @@ Organised under `Pages/Hris/` namespace:
 - `HireEmployeePanel.razor` — multi-step hire form; `PayrollContextId` field optional/hidden when Payroll module absent
 
 **2.8 — Drop module into host**
-- Build `BlazorHR.Module.Hris.dll`
+- Build `AllWorkHRIS.Module.Hris.dll`
 - Copy to `./modules` folder
 - Verify MEF discovers it and Autofac registers its services
 - Verify Employees menu item appears in nav with teal accent badge
@@ -315,8 +315,8 @@ Organised under `Pages/Hris/` namespace:
 
 All 8 steps must pass before Phase 2 is considered complete:
 
-1. Confirm `payroll_run` table does NOT exist in `blazorhr_dev`
-2. Confirm only `BlazorHR.Module.Hris.dll` is present in `./modules` — no other module DLLs
+1. Confirm `payroll_run` table does NOT exist in `allworkhris_dev`
+2. Confirm only `AllWorkHRIS.Module.Hris.dll` is present in `./modules` — no other module DLLs
 3. Start the application — verify it starts without errors
 4. Authenticate as `admin@test.com` — verify shell renders; only HRIS menu items present
 5. Hire a new employee with `PayrollContextId` left blank/null — verify hire succeeds
@@ -333,7 +333,7 @@ All 8 steps passing = HRIS module independence confirmed. Phase 2 complete.
 **Goal:** Leave management, document upload, and onboarding workflow are operational within the HRIS module. The application is now a complete minimum HRIS suitable for client use.
 
 **Specs:** `SPEC/HRIS_Leave_and_Absence`, `SPEC/HRIS_Document_Management`, `SPEC/Onboarding_Workflow`
-**Project:** Additions to `BlazorHR.Module.Hris`
+**Project:** Additions to `AllWorkHRIS.Module.Hris`
 **Database:** HRIS schema only — two additive changes
 
 ### Deliverables
@@ -341,7 +341,7 @@ All 8 steps passing = HRIS module independence confirmed. Phase 2 complete.
 **3.1 — Schema additions**
 - Add `leave_balance` table to `hcm_hris.dbml` per `HRIS_Leave_and_Absence` §12
 - Add `legal_hold_flag` column to `document` table per `HRIS_Document_Management` §13
-- Regenerate `hris_schema.sql` and apply additive changes to `blazorhr_dev`
+- Regenerate `hris_schema.sql` and apply additive changes to `allworkhris_dev`
 - Verify HRIS schema still works end to end after additions
 
 **3.2 — Leave and Absence**
@@ -384,18 +384,18 @@ All 8 steps passing = HRIS module independence confirmed. Phase 2 complete.
 **Goal:** A payroll operator can initiate a regular payroll run for employees hired in Phases 2/3, watch it calculate in real time, review the pay register, and approve the run.
 
 **Spec:** `SPEC/Payroll_Core_Module`
-**Project:** `BlazorHR.Module.Payroll` (new class library)
+**Project:** `AllWorkHRIS.Module.Payroll` (new class library)
 
 ### Deliverables
 
 **4.0 — Apply Payroll schema**
-- Apply `schemas/ddl/payroll_core_schema.sql` to `blazorhr_dev`
+- Apply `schemas/ddl/payroll_core_schema.sql` to `allworkhris_dev`
 - Verify schema applied cleanly — `payroll_run` table now exists
 - Verify HRIS tables are unaffected — smoke query against `employment` table
 
 **4.1 — Module project setup**
-- Create `BlazorHR.Module.Payroll` class library
-- Add project reference to `BlazorHR.Core` only — no reference to `BlazorHR.Module.Hris`
+- Create `AllWorkHRIS.Module.Payroll` class library
+- Add project reference to `AllWorkHRIS.Core` only — no reference to `AllWorkHRIS.Module.Hris`
 - Create folder structure per `SPEC/Payroll_Core_Module` §1
 
 **4.2 — Domain types**
@@ -462,10 +462,10 @@ All domain types per SPEC §1 folder structure
 **Goal:** HR administrator can configure deduction codes, enter employee benefit elections, and verify those deductions appear correctly in the payroll run.
 
 **Spec:** `SPEC/Benefits_Minimum_Module`
-**Project:** `BlazorHR.Module.Benefits` (new class library)
+**Project:** `AllWorkHRIS.Module.Benefits` (new class library)
 
 ### Deliverables
-- Module project setup — references `BlazorHR.Core` only
+- Module project setup — references `AllWorkHRIS.Core` only
 - `DeductionCode`, `BenefitDeductionElection` domain types
 - `IDeductionCodeRepository`, `IBenefitElectionRepository`
 - `IBenefitElectionService` — full lifecycle including versioning pattern per SPEC §7
@@ -496,10 +496,10 @@ All domain types per SPEC §1 folder structure
 **Goal:** Employees can submit time, managers can approve it, overtime is correctly detected, and approved time flows into payroll calculation.
 
 **Spec:** `SPEC/Time_Attendance_Minimum_Module`
-**Project:** `BlazorHR.Module.TimeAttendance` (new class library)
+**Project:** `AllWorkHRIS.Module.TimeAttendance` (new class library)
 
 ### Deliverables
-- Module project setup — references `BlazorHR.Core` only
+- Module project setup — references `AllWorkHRIS.Core` only
 - `TimeEntry`, `TimeEntryStatus`, `TimeCategory` domain types
 - `ITimeEntryRepository`, `IWorkScheduleRepository`
 - `ITimeEntryService` — submit/approve/reject/correct lifecycle
@@ -531,11 +531,11 @@ All domain types per SPEC §1 folder structure
 **Goal:** All 16 pre-built operational reports are accessible, filterable, and exportable in CSV, XLSX, and PDF formats. Report execution history is recorded and queryable.
 
 **Spec:** `SPEC/Reporting_Minimum_Module` (v0.2)
-**Project:** `BlazorHR.Module.Reporting` (new class library)
+**Project:** `AllWorkHRIS.Module.Reporting` (new class library)
 **NuGet packages:** `ClosedXML`, `QuestPDF`
 
 ### Deliverables
-- Module project setup — references `BlazorHR.Core` only
+- Module project setup — references `AllWorkHRIS.Core` only
 - `ReportExecutionHistory` domain type
 - All 16 report query classes (8 payroll + 8 HR) per SPEC §7
 - `IReportHistoryRepository` / `ReportHistoryRepository`

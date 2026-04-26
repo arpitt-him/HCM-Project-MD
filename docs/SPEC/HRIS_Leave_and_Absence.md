@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/SPEC/HRIS_Leave_and_Absence.md` |
@@ -21,10 +21,10 @@ HRIS owns leave requests and leave balances. Payroll consumes leave state signal
 
 ## 1. Module Assembly Additions
 
-The following additions are made to the `BlazorHR.Module.Hris` assembly structure from `SPEC/HRIS_Core_Module`:
+The following additions are made to the `AllWorkHRIS.Module.Hris` assembly structure from `SPEC/HRIS_Core_Module`:
 
 ```
-BlazorHR.Module.Hris/
+AllWorkHRIS.Module.Hris/
 │
 ├── Domain/
 │   └── Leave/

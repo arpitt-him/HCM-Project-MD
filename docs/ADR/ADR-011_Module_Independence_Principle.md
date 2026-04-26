@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-011_Module_Independence_Principle.md` |
@@ -22,7 +22,7 @@ During the specification phase, several coupling points were identified that wou
 The hire command requires a `PayrollContextId` field, forcing the operator to supply payroll-specific context even when the Payroll module is not deployed. In an HRIS-only deployment, no payroll contexts exist and this field has no valid value.
 
 **Coupling point 2 — Event payloads defined in module assemblies.**
-`HireEventPayload`, `TerminationEventPayload`, `CompensationChangeEventPayload`, `LeaveApprovedPayload`, and `ReturnToWorkPayload` are defined in `BlazorHR.Module.Hris`. The Payroll module's `IPayrollEventSubscriber` references these types — giving Payroll a compile-time dependency on HRIS. This violates the independence principle: if HRIS is not deployed, Payroll cannot compile.
+`HireEventPayload`, `TerminationEventPayload`, `CompensationChangeEventPayload`, `LeaveApprovedPayload`, and `ReturnToWorkPayload` are defined in `AllWorkHRIS.Module.Hris`. The Payroll module's `IPayrollEventSubscriber` references these types — giving Payroll a compile-time dependency on HRIS. This violates the independence principle: if HRIS is not deployed, Payroll cannot compile.
 
 **Coupling point 3 — Event publisher calls module subscribers directly.**
 The HRIS event publisher was specified to "notify in-process subscribers (Payroll module service, T&A module service) synchronously post-commit." This means HRIS has runtime knowledge of Payroll and T&A — it must reference their subscriber interfaces to call them. If those modules are absent, the call fails.
@@ -36,18 +36,18 @@ These coupling points were not intentional design decisions — they emerged fro
 
 ## Decision
 
-**Each platform module shall be deployable independently. No module shall have a compile-time or runtime dependency on any other module. The only shared dependency is `BlazorHR.Core`.**
+**Each platform module shall be deployable independently. No module shall have a compile-time or runtime dependency on any other module. The only shared dependency is `AllWorkHRIS.Core`.**
 
 ### Rule 1 — No cross-module project references
 
-A module assembly (`BlazorHR.Module.X`) shall reference only `BlazorHR.Core` and standard NuGet packages. It shall never reference another module assembly (`BlazorHR.Module.Y`). Violation of this rule is a build error.
+A module assembly (`AllWorkHRIS.Module.X`) shall reference only `AllWorkHRIS.Core` and standard NuGet packages. It shall never reference another module assembly (`AllWorkHRIS.Module.Y`). Violation of this rule is a build error.
 
-### Rule 2 — Event payloads live in BlazorHR.Core
+### Rule 2 — Event payloads live in AllWorkHRIS.Core
 
-All inter-module event payloads are defined in `BlazorHR.Core/Events/`. Any module that publishes or subscribes to an event references the payload type from `BlazorHR.Core` — never from another module.
+All inter-module event payloads are defined in `AllWorkHRIS.Core/Events/`. Any module that publishes or subscribes to an event references the payload type from `AllWorkHRIS.Core` — never from another module.
 
 ```
-BlazorHR.Core/
+AllWorkHRIS.Core/
 └── Events/
     ├── HireEventPayload.cs
     ├── TerminationEventPayload.cs
@@ -59,10 +59,10 @@ BlazorHR.Core/
 
 ### Rule 3 — Event publisher is a no-op bus with zero-subscriber safety
 
-The `IEventPublisher` is implemented as an in-process event bus registered in `BlazorHR.Core`. Modules register handlers at startup when present. If no handlers are registered for a given event type, publication is a silent no-op — not an exception.
+The `IEventPublisher` is implemented as an in-process event bus registered in `AllWorkHRIS.Core`. Modules register handlers at startup when present. If no handlers are registered for a given event type, publication is a silent no-op — not an exception.
 
 ```csharp
-// BlazorHR.Core/Events/IEventPublisher.cs
+// AllWorkHRIS.Core/Events/IEventPublisher.cs
 public interface IEventPublisher
 {
     Task PublishAsync<T>(T payload) where T : class;
@@ -75,7 +75,7 @@ public interface IEventPublisher
     void RegisterHandler<T>(Func<T, Task> handler) where T : class;
 }
 
-// BlazorHR.Core/Events/InProcessEventBus.cs
+// AllWorkHRIS.Core/Events/InProcessEventBus.cs
 public sealed class InProcessEventBus : IEventPublisher
 {
     private readonly ConcurrentDictionary<Type, List<Func<object, Task>>> _handlers = new();
@@ -97,7 +97,7 @@ public sealed class InProcessEventBus : IEventPublisher
 }
 ```
 
-The `InProcessEventBus` is registered as a singleton in `BlazorHR.Host` `Program.cs`. Each module registers its handlers in its `Register(ContainerBuilder builder)` method.
+The `InProcessEventBus` is registered as a singleton in `AllWorkHRIS.Host` `Program.cs`. Each module registers its handlers in its `Register(ContainerBuilder builder)` method.
 
 ### Rule 4 — Module-optional fields use nullable types
 
@@ -139,7 +139,7 @@ The following test at the end of Phase 2 formally proves HRIS module independenc
 
 **HRIS Standalone Test:**
 1. Apply `hris_schema.sql` only — no payroll schema
-2. Deploy `BlazorHR.Module.Hris.dll` only — no other modules in `./modules`
+2. Deploy `AllWorkHRIS.Module.Hris.dll` only — no other modules in `./modules`
 3. Start the application
 4. Authenticate and navigate to the Employee List page
 5. Hire a new employee — `PayrollContextId` left null
@@ -161,7 +161,7 @@ All 8 steps must pass before Phase 2 is considered complete.
 - Future message broker adoption (RabbitMQ, Azure Service Bus) requires only replacing `InProcessEventBus` with a broker-backed implementation — `IEventPublisher` contract unchanged
 
 **Constraints to manage:**
-- All new inter-module event payload types must be added to `BlazorHR.Core/Events/` — never to a module assembly
+- All new inter-module event payload types must be added to `AllWorkHRIS.Core/Events/` — never to a module assembly
 - New command fields that are module-specific must always be nullable — no required fields that reference another module's concepts
 - Schema files must be reviewed at creation time to ensure no cross-module table references exist
 - The `InProcessEventBus` handlers list must be thread-safe — `ConcurrentDictionary` is used for this reason
@@ -175,7 +175,7 @@ All 8 steps must pass before Phase 2 is considered complete.
 
 **SPEC/HRIS_Core_Module.md** — amended by companion patch:
 - `PayrollContextId` on `HireEmployeeCommand` changed from `required Guid` to `Guid?`
-- Event payloads moved to `BlazorHR.Core/Events/`
+- Event payloads moved to `AllWorkHRIS.Core/Events/`
 - `IEventPublisher` description updated to reference `InProcessEventBus` with zero-subscriber no-op behaviour
 - `EmployeeEventPublisher` registration replaced with `InProcessEventBus` singleton in `HrisModule.Register`
 
@@ -195,7 +195,7 @@ All 8 steps must pass before Phase 2 is considered complete.
 **Allow module-to-module references with optional loading**
 Modules reference each other but use null checks and feature flags to handle absent modules. Rejected — compile-time dependencies between modules mean all modules must be present for any to compile; deployment independence is impossible.
 
-**Shared Events assembly (BlazorHR.Events) separate from BlazorHR.Core**
+**Shared Events assembly (AllWorkHRIS.Events) separate from AllWorkHRIS.Core**
 Event payloads in their own assembly rather than in Core. Rejected — adds a third assembly every module must reference without meaningful benefit over putting events in Core; Core is already the universal shared dependency.
 
 **Message broker from day one**

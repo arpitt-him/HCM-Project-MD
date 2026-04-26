@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Benefits_Minimum_Module.md` |
@@ -26,7 +26,7 @@ The scope boundary is precise:
 ## 1. Module Assembly Structure
 
 ```
-BlazorHR.Module.Benefits/
+AllWorkHRIS.Module.Benefits/
 │
 ├── BenefitsModule.cs                     # IPlatformModule implementation
 │

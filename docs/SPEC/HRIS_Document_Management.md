@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/SPEC/HRIS_Document_Management.md` |
@@ -21,15 +21,15 @@ Documents are governed records attached to Person or Employment. They are versio
 
 ## 1. Module Assembly Additions
 
-The following additions are made to the `BlazorHR.Module.Hris` assembly:
+The following additions are made to the `AllWorkHRIS.Module.Hris` assembly:
 
 ```
-BlazorHR.Module.Hris/
+AllWorkHRIS.Module.Hris/
 │
 ├── Domain/
 │   └── Documents/
-│       ├── HrDocument.cs              # Domain record (named to avoid conflict with System.Document)
-│       ├── DocumentType.cs            # Enum — I9, W4, OFFER_LETTER, etc.
+│       ├── HrDocument.cs             # Domain record (named to avoid conflict with System.Document)
+│       ├── DocumentType.cs           # Enum — I9, W4, OFFER_LETTER, etc.
 │       └── DocumentStatus.cs         # Enum — STATE-DOC-001 through 004
 │
 ├── Commands/
