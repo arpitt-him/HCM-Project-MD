@@ -8,6 +8,27 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-26 — Build_Sequence_Plan.md updated — Phase 2 HRIS as core application
+
+- Phase 2 project reference updated — AllWorkHRIS.Web replaces AllWorkHRIS.Module.Hris
+- Deliverable 2.1 replaced — HRIS folder structure in AllWorkHRIS.Web; no separate
+  class library
+- Deliverable 2.6 replaced — HRIS services registered in Program.cs; no HrisModule class
+- Deliverable 2.7 location reference updated — AllWorkHRIS.Web replaces AllWorkHRIS.Host
+- Deliverable 2.8 replaced — verification step replacing module drop-in step
+- HRIS Standalone Test Step 2 updated — ./modules folder empty rather than HRIS DLL present
+
+### 2026-04-26 — HRIS_Core_Module.md updated to v0.4 — HRIS as core application
+
+- §1 restructured — AllWorkHRIS.Module.Hris eliminated; HRIS domain types, repositories,
+  services, commands, and queries organised under AllWorkHRIS.Web/ with Hris/ namespace
+  subfolder; implementation and interface files shown together
+- §2 replaced — HrisModule class and IPlatformModule implementation eliminated; HRIS
+  repositories and services registered directly in Program.cs Autofac container build;
+  HRIS menu contributions registered as fixed list prepended to module-discovered items
+- Purpose section updated — HRIS described as core application not plug-in module
+- TC-HRS-026 wording updated to reflect no module assembly
+
 ### 2026-04-26 — 'AllWorkHRIS' branding replaces 'BlazorHR' branding
 
 - Renamed all BlazorHR references to AllWorkHRIS / AllWorkHRIS.Web / AllWorkHRIS.Core throughout

@@ -229,16 +229,17 @@ Implement `TenantConnectionMiddleware` and `TenantRegistry` per ADR-010:
 **Goal:** A working HR administrator can hire an employee, view the employee list, and open the employee detail page. Phase 2 ends with the HRIS Standalone Test proving full module independence.
 
 **Spec:** `SPEC/HRIS_Core_Module`
-**Project:** `AllWorkHRIS.Module.Hris` (new class library)
+**Project:** `AllWorkHRIS.Web` — HRIS repositories, services, domain types, and UI pages implemented directly in the host application
 **Database:** HRIS schema already applied in Phase 0 — no changes
 
 ### Deliverables
 
-**2.1 — Module project setup**
-- Create `AllWorkHRIS.Module.Hris` class library
-- Add NuGet packages: `Autofac`, `Dapper`, `Npgsql`
-- Add project reference to `AllWorkHRIS.Core` only — no references to any other module
-- Create folder structure per `SPEC/HRIS_Core_Module` §1
+**2.1 — HRIS folder structure in AllWorkHRIS.Web**
+- Create HRIS folder structure within `AllWorkHRIS.Web` per `SPEC/HRIS_Core_Module` §1
+- No separate project or class library — HRIS lives in the host application
+- Namespaces: `AllWorkHRIS.Web.Domain.Hris`, `AllWorkHRIS.Web.Repositories.Hris`,
+  `AllWorkHRIS.Web.Services.Hris`, `AllWorkHRIS.Web.Commands.Hris`,
+  `AllWorkHRIS.Web.Queries.Hris`
 
 **2.2 — Domain types**
 - `Person`, `PersonAddress` records
@@ -276,12 +277,14 @@ Implement against HRIS schema using Dapper:
 - `ICompensationService` / `CompensationService`
 - `IOrgStructureService` / `OrgStructureService`
 
-**2.6 — HrisModule registration**
-- `HrisModule` implementing `IPlatformModule`
-- `Register(ContainerBuilder builder)` — all repositories and services; no event publisher registration (bus is registered in Host)
-- `GetMenuContributions()` — Employees, Organisation, Jobs & Positions menu items
+**2.6 — Register HRIS services in Program.cs**
+- Add HRIS repository and service registrations to the Autofac container build in
+  `Program.cs` per `SPEC/HRIS_Core_Module` §2
+- Add HRIS menu contributions as a fixed list prepended to module-discovered items
+  per `SPEC/HRIS_Core_Module` §2
+- No `HrisModule` class; no `IPlatformModule` implementation for HRIS
 
-**2.7 — UI components (in AllWorkHRIS.Host)**
+**2.7 — UI components (in AllWorkHRIS.Web)**
 
 Organised under `Pages/Hris/` namespace:
 - `Shared/DateRangeFilter.razor` — platform-wide reusable component per ADR-006
@@ -290,11 +293,11 @@ Organised under `Pages/Hris/` namespace:
 - `OrgPage.razor` — hierarchy view + list view
 - `HireEmployeePanel.razor` — multi-step hire form; `PayrollContextId` field optional/hidden when Payroll module absent
 
-**2.8 — Drop module into host**
-- Build `AllWorkHRIS.Module.Hris.dll`
-- Copy to `./modules` folder
-- Verify MEF discovers it and Autofac registers its services
-- Verify Employees menu item appears in nav with teal accent badge
+**2.8 — Verify HRIS registration**
+- Start the application
+- Verify Employees menu items appear in nav with teal accent colour
+- Verify `./modules` folder is empty — no plug-in module DLLs present
+- Confirm HRIS repositories and services resolve correctly from the Autofac container
 
 ### Gate — TC-HRS test cases
 - TC-HRS-001: Hire command creates Person, Employment, Assignment, Compensation, Event atomically ✓
@@ -316,7 +319,7 @@ Organised under `Pages/Hris/` namespace:
 All 8 steps must pass before Phase 2 is considered complete:
 
 1. Confirm `payroll_run` table does NOT exist in `allworkhris_dev`
-2. Confirm only `AllWorkHRIS.Module.Hris.dll` is present in `./modules` — no other module DLLs
+2. Confirm `./modules` folder is empty — no plug-in module DLLs present
 3. Start the application — verify it starts without errors
 4. Authenticate as `admin@test.com` — verify shell renders; only HRIS menu items present
 5. Hire a new employee with `PayrollContextId` left blank/null — verify hire succeeds

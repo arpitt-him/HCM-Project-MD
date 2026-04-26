@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/SPEC/HRIS_Core_Module.md` |
@@ -13,194 +13,239 @@
 
 ## Purpose
 
-Defines the implementation-ready specification for the HRIS Core module — the platform's system of record for person identity, employment, organisational structure, job and position management, compensation, and lifecycle events.
+Defines the implementation-ready specification for the AllWorkHRIS HRIS core — the
+platform's system of record for person identity, employment, organisational structure,
+job and position management, compensation, and lifecycle events.
 
-This document covers the module assembly structure, repository interfaces, service contracts, domain commands, event publication, Blazor component specifications for core HRIS screens, and test cases.
+HRIS is the core application, not a plug-in module. HRIS domain types, repositories,
+services, and UI pages are implemented directly in `AllWorkHRIS.Web` and registered
+in `Program.cs` at startup. They are always present — there is no deployment scenario
+where the platform runs without them.
 
-The HRIS module does not calculate pay, manage accumulators, or own deduction elections. It publishes governed lifecycle events that downstream modules consume.
+This document covers the AllWorkHRIS.Web folder structure for HRIS, repository interfaces,
+service contracts, domain commands, event publication, Blazor component specifications
+for core HRIS screens, and test cases.
+
+HRIS does not calculate pay, manage accumulators, or own deduction elections. It publishes
+governed lifecycle events that plug-in modules consume.
 
 ---
 
-## 1. Module Assembly Structure
+## 1. AllWorkHRIS.Web — HRIS Folder Structure
+
+HRIS domain types, repositories, services, and commands are organised within
+`AllWorkHRIS.Web` under the following namespace structure. There is no separate
+`AllWorkHRIS.Module.Hris` project — HRIS is the host application.
 
 ```
-AllWorkHRIS.Module.Hris/
-│
-├── HrisModule.cs                         # IPlatformModule implementation
+AllWorkHRIS.Web/
 │
 ├── Domain/
-│   ├── Person/
-│   │   ├── Person.cs                     # Domain record type
-│   │   └── PersonAddress.cs
-│   ├── Employment/
-│   │   ├── Employment.cs
-│   │   └── EmploymentStatus.cs           # Enum — STATE-EMP-010 through 015
-│   ├── Assignment/
-│   │   └── Assignment.cs
-│   ├── Compensation/
-│   │   └── CompensationRecord.cs
-│   ├── OrgUnit/
-│   │   ├── OrgUnit.cs
-│   │   └── OrgUnitType.cs
-│   ├── Job/
-│   │   └── Job.cs
-│   ├── Position/
-│   │   └── Position.cs
-│   └── Events/
-│       ├── EmployeeEvent.cs              # Lifecycle event record
-│       └── EmployeeEventType.cs          # Enum of event types
+│   └── Hris/
+│       ├── Person/
+│       │   ├── Person.cs
+│       │   └── PersonAddress.cs
+│       ├── Employment/
+│       │   ├── Employment.cs
+│       │   └── EmploymentStatus.cs       # Enum — STATE-EMP-010 through 015
+│       ├── Assignment/
+│       │   └── Assignment.cs
+│       ├── Compensation/
+│       │   └── CompensationRecord.cs
+│       ├── OrgUnit/
+│       │   ├── OrgUnit.cs
+│       │   └── OrgUnitType.cs
+│       ├── Job/
+│       │   └── Job.cs
+│       ├── Position/
+│       │   └── Position.cs
+│       └── Events/
+│           ├── EmployeeEvent.cs          # Lifecycle event record
+│           └── EmployeeEventType.cs      # Enum of event types
 │
 ├── Commands/
-│   ├── HireEmployeeCommand.cs
-│   ├── RehireEmployeeCommand.cs
-│   ├── TerminateEmployeeCommand.cs
-│   ├── ChangeCompensationCommand.cs
-│   ├── TransferEmployeeCommand.cs
-│   ├── UpdatePersonCommand.cs
-│   └── ChangeManagerCommand.cs
+│   └── Hris/
+│       ├── HireEmployeeCommand.cs
+│       ├── RehireEmployeeCommand.cs
+│       ├── TerminateEmployeeCommand.cs
+│       ├── ChangeCompensationCommand.cs
+│       ├── TransferEmployeeCommand.cs
+│       ├── UpdatePersonCommand.cs
+│       └── ChangeManagerCommand.cs
 │
 ├── Repositories/
-│   ├── IPersonRepository.cs
-│   ├── IEmploymentRepository.cs
-│   ├── IAssignmentRepository.cs
-│   ├── ICompensationRepository.cs
-│   ├── IOrgUnitRepository.cs
-│   ├── IJobRepository.cs
-│   ├── IPositionRepository.cs
-│   └── IEmployeeEventRepository.cs
+│   └── Hris/
+│       ├── IPersonRepository.cs
+│       ├── PersonRepository.cs
+│       ├── IEmploymentRepository.cs
+│       ├── EmploymentRepository.cs
+│       ├── IAssignmentRepository.cs
+│       ├── AssignmentRepository.cs
+│       ├── ICompensationRepository.cs
+│       ├── CompensationRepository.cs
+│       ├── IOrgUnitRepository.cs
+│       ├── OrgUnitRepository.cs
+│       ├── IJobRepository.cs
+│       ├── JobRepository.cs
+│       ├── IPositionRepository.cs
+│       ├── PositionRepository.cs
+│       ├── IEmployeeEventRepository.cs
+│       └── EmployeeEventRepository.cs
 │
 ├── Services/
-│   ├── IPersonService.cs
-│   ├── IEmploymentService.cs
-│   ├── ILifecycleEventService.cs
-│   ├── ICompensationService.cs
-│   ├── IOrgStructureService.cs
-│   └── IEventPublisher.cs
+│   └── Hris/
+│       ├── IPersonService.cs
+│       ├── PersonService.cs
+│       ├── IEmploymentService.cs
+│       ├── EmploymentService.cs
+│       ├── ILifecycleEventService.cs
+│       ├── LifecycleEventService.cs
+│       ├── ICompensationService.cs
+│       ├── CompensationService.cs
+│       ├── IOrgStructureService.cs
+│       └── OrgStructureService.cs
 │
-└── Queries/
-    ├── EmployeeListQuery.cs
-    ├── EmployeeDetailQuery.cs
-    └── OrgHierarchyQuery.cs
+├── Queries/
+│   └── Hris/
+│       ├── EmployeeListQuery.cs
+│       ├── EmployeeDetailQuery.cs
+│       └── OrgHierarchyQuery.cs
+│
+└── Pages/
+	└── Hris/
+		├── EmployeeList.razor
+		├── EmployeeDetail.razor
+		├── OrgPage.razor
+		└── HireEmployeePanel.razor
 ```
 
 ---
 
-## 2. HrisModule Registration
+## 2. HRIS Registration in Program.cs
+
+HRIS repositories and services are registered directly in `AllWorkHRIS.Web/Program.cs`
+as part of the core Autofac container build — not via MEF module discovery. There is
+no `HrisModule` class and no `IPlatformModule` implementation for HRIS.
 
 ```csharp
-[Export(typeof(IPlatformModule))]
-public sealed class HrisModule : IPlatformModule
-{
-    public void Register(ContainerBuilder builder)
-    {
-        // Repositories — scoped per user session
-        builder.RegisterType<PersonRepository>()
-               .As<IPersonRepository>()
-               .InstancePerLifetimeScope();
+// Program.cs — Autofac container builder (within builder.Host.ConfigureContainer)
+// HRIS core — always registered; no module discovery required
 
-        builder.RegisterType<EmploymentRepository>()
-               .As<IEmploymentRepository>()
-               .InstancePerLifetimeScope();
+// Repositories
+autofacBuilder.RegisterType<PersonRepository>()
+              .As<IPersonRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<AssignmentRepository>()
-               .As<IAssignmentRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<EmploymentRepository>()
+              .As<IEmploymentRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<CompensationRepository>()
-               .As<ICompensationRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<AssignmentRepository>()
+              .As<IAssignmentRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<OrgUnitRepository>()
-               .As<IOrgUnitRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<CompensationRepository>()
+              .As<ICompensationRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<JobRepository>()
-               .As<IJobRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<OrgUnitRepository>()
+              .As<IOrgUnitRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<PositionRepository>()
-               .As<IPositionRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<JobRepository>()
+              .As<IJobRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<EmployeeEventRepository>()
-               .As<IEmployeeEventRepository>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<PositionRepository>()
+              .As<IPositionRepository>()
+              .InstancePerLifetimeScope();
 
-        // Services — scoped per user session
-        builder.RegisterType<PersonService>()
-               .As<IPersonService>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<EmployeeEventRepository>()
+              .As<IEmployeeEventRepository>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<EmploymentService>()
-               .As<IEmploymentService>()
-               .InstancePerLifetimeScope();
+// Services
+autofacBuilder.RegisterType<PersonService>()
+              .As<IPersonService>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<LifecycleEventService>()
-               .As<ILifecycleEventService>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<EmploymentService>()
+              .As<IEmploymentService>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<CompensationService>()
-               .As<ICompensationService>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<LifecycleEventService>()
+              .As<ILifecycleEventService>()
+              .InstancePerLifetimeScope();
 
-        builder.RegisterType<OrgStructureService>()
-               .As<IOrgStructureService>()
-               .InstancePerLifetimeScope();
+autofacBuilder.RegisterType<CompensationService>()
+              .As<ICompensationService>()
+              .InstancePerLifetimeScope();
 
-        // The InProcessEventBus is registered as a singleton in AllWorkHRIS.Host Program.cs.
-        // The HRIS module does not register the bus — it resolves it to register its own
-        // outbound event handler registrations if needed.
-        // Per ADR-011: HRIS publishes events; other modules register handlers.
-        // HRIS has no knowledge of who is listening.
-	}
-	
-	Note — IEventPublisher registration: The InProcessEventBus singleton is registered in
-	AllWorkHRIS.Host Program.cs, not in any module.  Modules resolve IEventPublisher from the
-	container to publish events. Subscribing modules (Payroll, T&A, Benefits) register their
-	own handlers on the bus in their own Register methods. HRIS never references subscriber
-	interfaces from other modules.
-
-    public IEnumerable<MenuContribution> GetMenuContributions() =>
-    [
-        new MenuContribution
-        {
-            Label       = "Employees",
-            Icon        = "hris-employees-icon",
-            SortOrder   = 10,
-            AccentColor = "var(--color-accent-teal)",
-            BadgeLabel  = "HRIS",
-            RequiredRole = "HrisViewer"
-        },
-        new MenuContribution
-        {
-            Label        = "Employees",
-            Href         = "/hris/employees",
-            Icon         = "icon-people",
-            SortOrder    = 1,
-            ParentLabel  = "Employees",
-            RequiredRole = "HrisViewer"
-        },
-        new MenuContribution
-        {
-            Label        = "Organisation",
-            Href         = "/hris/org",
-            Icon         = "icon-hierarchy",
-            SortOrder    = 2,
-            ParentLabel  = "Employees",
-            RequiredRole = "HrisViewer"
-        },
-        new MenuContribution
-        {
-            Label        = "Jobs & Positions",
-            Href         = "/hris/jobs",
-            Icon         = "icon-briefcase",
-            SortOrder    = 3,
-            ParentLabel  = "Employees",
-            RequiredRole = "HrisAdmin"
-        }
-    ];
-}
+autofacBuilder.RegisterType<OrgStructureService>()
+              .As<IOrgStructureService>()
+              .InstancePerLifetimeScope();
 ```
+
+HRIS menu contributions are also registered directly in `Program.cs` as a fixed list —
+not collected via `GetMenuContributions()`. Since HRIS is always present, its menu items
+are always present:
+
+```csharp
+// Program.cs — HRIS menu contributions (added to the assembled menu list)
+var hrisMenuItems = new List<MenuContribution>
+{
+    new MenuContribution
+    {
+        Label        = "Employees",
+        Icon         = "HrisIcon",
+        SortOrder    = 10,
+        AccentColor  = "var(--module-hris)",
+        BadgeLabel   = "HRIS",
+        RequiredRole = "HrisViewer"
+    },
+    new MenuContribution
+    {
+        Label        = "Employees",
+        Href         = "/hris/employees",
+        Icon         = "HrisIcon",
+        SortOrder    = 1,
+        ParentLabel  = "Employees",
+        RequiredRole = "HrisViewer"
+    },
+    new MenuContribution
+    {
+        Label        = "Organisation",
+        Href         = "/hris/org",
+        Icon         = "HrisIcon",
+        SortOrder    = 2,
+        ParentLabel  = "Employees",
+        RequiredRole = "HrisViewer"
+    },
+    new MenuContribution
+    {
+        Label        = "Jobs & Positions",
+        Href         = "/hris/jobs",
+        Icon         = "HrisIcon",
+        SortOrder    = 3,
+        ParentLabel  = "Employees",
+        RequiredRole = "HrisAdmin"
+    }
+};
+
+// HRIS menu items are prepended to the module-discovered contributions
+var allMenuItems = hrisMenuItems
+    .Concat(platformModules.SelectMany(m => m.GetMenuContributions()))
+    .OrderBy(c => c.SortOrder)
+    .ToList();
+
+builder.Services.AddSingleton(allMenuItems);
+```
+
+Note — `IEventPublisher` (InProcessEventBus) is registered as a singleton before HRIS
+registrations. HRIS services resolve `IEventPublisher` from the container to publish
+events. Plug-in modules register their own handlers on the bus in their own
+`IPlatformModule.Register` methods. HRIS never references subscriber interfaces from
+other modules.
 
 ---
 
@@ -740,4 +785,4 @@ Role assignments are managed through the platform's Security and Access Control 
 | TC-HRS-023 | Event publisher NOT called if uow.Rollback() | No event payload published on failed transaction |
 | TC-HRS-024 | Hire employee with PayrollContextId = null (HRIS-only deployment) | Hire succeeds; Person, Employment, Assignment, Compensation, Event all created; HireEventPayload published with null PayrollContextId |
 | TC-HRS-025 | HireEventPayload published with no Payroll module present | PublishAsync completes without exception; no handlers invoked; no error |
-| TC-HRS-026 | HRIS module starts with no other modules in ./modules folder | Application starts; HRIS menu items appear; all HRIS pages functional |
+| TC-HRS-026 | Application starts with no plug-in modules in ./modules folder — HRIS pages functional | Application starts; HRIS menu items present; Employee List renders; hire succeeds |
