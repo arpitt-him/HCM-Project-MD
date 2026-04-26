@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/SPEC/HRIS_Core_Module.md` |
@@ -147,11 +147,18 @@ public sealed class HrisModule : IPlatformModule
                .As<IOrgStructureService>()
                .InstancePerLifetimeScope();
 
-        // Event publisher — singleton; stateless
-        builder.RegisterType<EmployeeEventPublisher>()
-               .As<IEventPublisher>()
-               .SingleInstance();
-    }
+        // The InProcessEventBus is registered as a singleton in BlazorHR.Host Program.cs.
+        // The HRIS module does not register the bus — it resolves it to register its own
+        // outbound event handler registrations if needed.
+        // Per ADR-011: HRIS publishes events; other modules register handlers.
+        // HRIS has no knowledge of who is listening.
+	}
+	
+	Note — IEventPublisher registration: The InProcessEventBus singleton is registered in
+	BlazorHR.Host Program.cs, not in any module.  Modules resolve IEventPublisher from the
+	container to publish events. Subscribing modules (Payroll, T&A, Benefits) register their
+	own handlers on the bus in their own Register methods. HRIS never references subscriber
+	interfaces from other modules.
 
     public IEnumerable<MenuContribution> GetMenuContributions() =>
     [
@@ -220,7 +227,10 @@ public sealed record HireEmployeeCommand
     public required DateOnly EmploymentStartDate  { get; init; }
     public required string FlsaStatus             { get; init; }  // EXEMPT / NON_EXEMPT
     public required string FullOrPartTimeStatus   { get; init; }
-    public required Guid   PayrollContextId       { get; init; }
+    public Guid?           PayrollContextId       { get; init; }
+    // Null in HRIS-only deployments where Payroll module is not present.
+    // When Payroll is deployed, this value is carried in the HireEventPayload
+    // and used by the Payroll module to assign the employment to a pay group.
 
     // Initial assignment
     public required Guid   JobId                  { get; init; }
@@ -443,42 +453,66 @@ public async Task<HireResult> HireEmployeeAsync(HireEmployeeCommand command)
 
 ## 7. Event Publisher
 
+The HRIS module publishes lifecycle events to the platform-wide `IEventPublisher` 
+(implemented as `InProcessEventBus` in `BlazorHR.Core`). The publisher has no knowledge 
+of who is listening. If no modules are deployed that subscribe to a given event type, 
+publication is a silent no-op — not an exception. This is the correct and expected 
+behaviour in HRIS-only deployments.
+
+Per ADR-011, all event payload types are defined in `BlazorHR.Core/Events/` — not in 
+the HRIS module. Both the publishing module (HRIS) and any subscribing modules (Payroll, 
+T&A) reference the shared payload types from `BlazorHR.Core`.
+
+### Event payload types (defined in BlazorHR.Core/Events/)
+
+| Payload Type | Published When | Key Fields |
+|---|---|---|
+| `HireEventPayload` | After `HireEmployeeAsync` commits | EmploymentId, PersonId, EventId, EffectiveDate, LegalEntityId, PayrollContextId (nullable), FlsaStatus |
+| `RehireEventPayload` | After `RehireEmployeeAsync` commits | EmploymentId, PersonId, EventId, EffectiveDate, PriorEmploymentId |
+| `TerminationEventPayload` | After `TerminateEmployeeAsync` commits | EmploymentId, PersonId, EventId, TerminationDate, EventType, ReasonCode |
+| `CompensationChangeEventPayload` | After `ChangeCompensationAsync` commits | EmploymentId, EventId, EffectiveDate, RateType, NewBaseRate, PayFrequency, IsRetroactive |
+
+Leave-related payloads (`LeaveApprovedPayload`, `ReturnToWorkPayload`) are defined in 
+`BlazorHR.Core/Events/` and published by the HRIS Leave service — see 
+`SPEC/HRIS_Leave_and_Absence`.
+
+### IEventPublisher interface (defined in BlazorHR.Core)
+
 ```csharp
-// Services/IEventPublisher.cs
+// BlazorHR.Core/Events/IEventPublisher.cs
 public interface IEventPublisher
 {
-    Task PublishAsync<T>(T eventPayload) where T : class;
+    /// <summary>
+    /// Publishes an event to all registered handlers.
+    /// If no handlers are registered for type T, this is a silent no-op.
+    /// Must be called AFTER uow.Commit() — never before.
+    /// </summary>
+    Task PublishAsync<T>(T payload) where T : class;
+
+    /// <summary>
+    /// Registers a handler for event type T.
+    /// Called by subscribing modules in their IPlatformModule.Register method.
+    /// </summary>
+    void RegisterHandler<T>(Func<T, Task> handler) where T : class;
 }
-
-// Event payloads — one per event type
-public sealed record HireEventPayload(
-    Guid EmploymentId,
-    Guid PersonId,
-    Guid EventId,
-    DateOnly EffectiveDate,
-    Guid LegalEntityId,
-    Guid PayrollContextId,
-    string FlsaStatus);
-
-public sealed record TerminationEventPayload(
-    Guid EmploymentId,
-    Guid PersonId,
-    Guid EventId,
-    DateOnly TerminationDate,
-    string EventType,
-    string ReasonCode);
-
-public sealed record CompensationChangeEventPayload(
-    Guid EmploymentId,
-    Guid EventId,
-    DateOnly EffectiveDate,
-    string RateType,
-    decimal NewBaseRate,
-    string PayFrequency,
-    bool IsRetroactive);
 ```
 
-In v1 the event publisher persists events to the `employee_events` table and notifies in-process subscribers (Payroll module service, T&A module service) synchronously post-commit. A message broker can replace this without changing the publisher interface.
+### Publication pattern in HRIS services
+
+```csharp
+// After uow.Commit() — never before
+await _eventPublisher.PublishAsync(new HireEventPayload(
+    EmploymentId:    employmentId,
+    PersonId:        personId,
+    EventId:         eventId,
+    EffectiveDate:   command.EmploymentStartDate,
+    LegalEntityId:   command.LegalEntityId,
+    PayrollContextId: command.PayrollContextId,  // nullable — null in HRIS-only deployments
+    FlsaStatus:      command.FlsaStatus
+));
+// If Payroll module is present: its handler fires
+// If Payroll module is absent: silent no-op — correct behaviour
+```
 
 ---
 
@@ -704,3 +738,6 @@ Role assignments are managed through the platform's Security and Access Control 
 | TC-HRS-021 | Org hierarchy page renders parent-child tree | Org units display in correct hierarchy; expand/collapse works |
 | TC-HRS-022 | Event publisher called after uow.Commit() | Event payload contains correct EmploymentId, PersonId, EffectiveDate |
 | TC-HRS-023 | Event publisher NOT called if uow.Rollback() | No event payload published on failed transaction |
+| TC-HRS-024 | Hire employee with PayrollContextId = null (HRIS-only deployment) | Hire succeeds; Person, Employment, Assignment, Compensation, Event all created; HireEventPayload published with null PayrollContextId |
+| TC-HRS-025 | HireEventPayload published with no Payroll module present | PublishAsync completes without exception; no handlers invoked; no error |
+| TC-HRS-026 | HRIS module starts with no other modules in ./modules folder | Application starts; HRIS menu items appear; all HRIS pages functional |

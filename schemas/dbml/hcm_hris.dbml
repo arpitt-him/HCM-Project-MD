@@ -667,6 +667,35 @@ Table leave_balance {
 }
 
 // ============================================================
+// REPORT EXECUTION HISTORY
+// ============================================================
+
+Table report_execution_history {
+	execution_id        uuid          [pk, not null, note: "Primary key"]
+	report_id           varchar(50)   [not null, note: "Report identifier e.g. PAY-RPT-001"]
+	report_title        varchar(200)  [not null, note: "Display title at time of execution"]
+	requested_by        uuid          [not null, note: "Employment ID or user ID of requesting user"]
+	execution_status    varchar(20)   [not null, note: "RUNNING, COMPLETED, FAILED, ASYNC_PENDING"]
+	parameters_json     text          [not null, note: "JSON serialisation of ReportParameters used for this execution"]
+	row_count           integer       [note: "Null until execution completes"]
+	export_format       varchar(10)   [note: "CSV, XLSX, PDF, or null for on-screen view"]
+	storage_reference   varchar(500)  [note: "Non-null when export file retained in storage; null for CSV and after retention expiry"]
+	async_job_id        uuid          [note: "Non-null when execution submitted as async job"]
+	started_at          timestamptz   [not null, note: "Timestamp when execution began"]
+	completed_at        timestamptz   [note: "Null until execution reaches terminal state"]
+	error_message       text          [note: "Non-null on FAILED status"]
+	created_timestamp   timestamptz   [not null]
+	last_update_timestamp timestamptz [not null]
+
+	indexes {
+	  requested_by                    [name: "idx_report_execution_requested_by"]
+	  (report_id, started_at)         [name: "idx_report_execution_report_date"]
+	  (requested_by, started_at)      [name: "idx_report_execution_user_date"]
+	  execution_status                [name: "idx_report_execution_status"]
+	}
+}
+
+// ============================================================
 // TABLE GROUPS
 // ============================================================
 
@@ -694,4 +723,8 @@ TableGroup workforce_management {
   onboarding_plan
   onboarding_task
   leave_balance
+}
+
+TableGroup reporting {
+  report_execution_history
 }

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Reporting_Minimum_Module.md` |
@@ -40,7 +40,11 @@ BlazorHR.Module.Reporting/
 │   ├── ReportDefinition.cs
 │   ├── ReportData.cs
 │   ├── ReportColumn.cs
-│   └── ReportResult.cs
+│   ├── ReportResult.cs
+│   └── ReportExecutionHistory.cs 
+│
+├── Repositories/
+│   └── IReportHistoryRepository.cs
 │
 ├── Reports/
 │   ├── Payroll/
@@ -104,6 +108,10 @@ public sealed class ReportingModule : IPlatformModule
         builder.RegisterType<XlsxExporter>().AsSelf()
                .InstancePerLifetimeScope();
         builder.RegisterType<PdfExporter>().AsSelf()
+               .InstancePerLifetimeScope();
+			   
+		builder.RegisterType<ReportHistoryRepository>()
+               .As<IReportHistoryRepository>()
                .InstancePerLifetimeScope();
     }
 
@@ -193,8 +201,10 @@ public interface IReportService
 {
     /// <summary>
     /// Runs a report for on-screen display.
-    /// Returns data inline for result sets under the async threshold.
-    /// Returns Job_ID for larger result sets.
+    /// Creates a ReportExecutionHistory record before execution.
+    /// Updates the record on completion or failure.
+    /// Returns data inline for small result sets.
+    /// Returns Job_ID for large result sets.
     /// </summary>
     Task<ReportResult> RunReportAsync(string reportId,
         ReportParameters parameters, Guid requestedBy,
@@ -202,39 +212,64 @@ public interface IReportService
 
     Task<IEnumerable<ReportDefinition>> GetAvailableReportsAsync(
         ClaimsPrincipal user);
+
+    /// <summary>
+    /// Returns the most recent report executions for the current user.
+    /// </summary>
+    Task<IEnumerable<ReportExecutionHistory>> GetRecentExecutionsAsync(
+        Guid requestedBy, int count = 20);
+
+    /// <summary>
+    /// Re-runs a previous execution using its recorded parameters.
+    /// Creates a new ReportExecutionHistory record — does not overwrite the original.
+    /// </summary>
+    Task<ReportResult> ReRunAsync(Guid executionId, Guid requestedBy,
+        CancellationToken ct = default);
 }
 
 // Services/IReportExportService.cs
 public interface IReportExportService
 {
     /// <summary>
-    /// Streams all rows as plain CSV. No library dependency.
-    /// Always fetches all rows regardless of async threshold.
+    /// Exports as CSV. Creates and updates a ReportExecutionHistory record.
+    /// CSV is not retained — StorageReference will be null.
     /// </summary>
-    Task<Stream> ExportCsvAsync(string reportId,
+    Task<ExportResult> ExportCsvAsync(string reportId,
         ReportParameters parameters, Guid requestedBy,
         CancellationToken ct = default);
 
     /// <summary>
-    /// Generates a formatted Excel workbook using ClosedXML.
-    /// Includes column headers, number formatting, column width
-    /// auto-sizing, freeze panes on row 3, and a title block.
-    /// Always fetches all rows regardless of async threshold.
+    /// Exports as XLSX using ClosedXML.
+    /// Creates and updates a ReportExecutionHistory record.
+    /// Retains the file for the configured retention period (default 7 days).
     /// </summary>
-    Task<Stream> ExportXlsxAsync(string reportId,
+    Task<ExportResult> ExportXlsxAsync(string reportId,
         ReportParameters parameters, Guid requestedBy,
         CancellationToken ct = default);
 
     /// <summary>
-    /// Generates a formatted PDF document using QuestPDF.
-    /// Landscape orientation for wide reports. Includes report
-    /// title, parameter summary, generated timestamp, and
-    /// page numbers. Always fetches all rows.
+    /// Exports as PDF using QuestPDF.
+    /// Creates and updates a ReportExecutionHistory record.
+    /// Retains the file for the configured retention period (default 7 days).
     /// </summary>
-    Task<Stream> ExportPdfAsync(string reportId,
+    Task<ExportResult> ExportPdfAsync(string reportId,
         ReportParameters parameters, Guid requestedBy,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Re-downloads a previously generated export by execution ID.
+    /// Requires the storage reference to still be within retention period.
+    /// Logs re-download in ReportExecutionHistory.
+    /// </summary>
+    Task<ExportResult> ReDownloadAsync(Guid executionId, Guid requestedBy,
         CancellationToken ct = default);
 }
+
+public sealed record ExportResult(
+    Stream      Content,
+    string      MimeType,
+    string      FileName,
+    Guid        ExecutionId);
 ```
 
 ---
@@ -248,39 +283,77 @@ public async Task<ReportResult> RunReportAsync(string reportId,
     ReportParameters parameters, Guid requestedBy,
     CancellationToken ct = default)
 {
-    // 1. Authorisation — does this user have access to this report?
+    // 1. Authorisation
     if (!_accessControl.CanAccessReport(reportId, requestedBy))
         throw new AuthorizationException(
             $"User does not have access to report {reportId}.");
 
-    // 2. Scope enforcement — constrain parameters to user's authorised scope
+    // 2. Scope enforcement
     var scopedParams = _scopeEnforcer.Enforce(parameters, requestedBy);
 
     // 3. Resolve operative date — Temporal Override aware
     var asOf = scopedParams.AsOfDate
         ?? DateOnly.FromDateTime(_temporalContext.GetOperativeDate());
 
-    // 4. Execute query
-    var data = await _queryExecutor.ExecuteAsync(
-        reportId, scopedParams, asOf, ct);
-
-    // 5. Audit log
-    await _auditLogger.LogReportAccessAsync(
-        reportId, requestedBy, scopedParams, data.RowCount);
-
-    // 6. Async threshold — submit as background job for large result sets
-    if (data.RowCount > _config.AsyncThreshold)
+    // 4. Create execution history record — status RUNNING
+    var definition = _reportRegistry.Get(reportId);
+    var executionId = Guid.NewGuid();
+    using (var uow = new UnitOfWork(_connectionFactory))
     {
-        var jobId = await _jobService.SubmitReportJobAsync(
-            reportId, scopedParams, requestedBy);
-        return ReportResult.Async(jobId);
+        await _historyRepository.InsertAsync(new ReportExecutionHistory
+        {
+            ExecutionId     = executionId,
+            ReportId        = reportId,
+            ReportTitle     = definition.Title,
+            RequestedBy     = requestedBy,
+            ExecutionStatus = "RUNNING",
+            ParametersJson  = JsonSerializer.Serialize(scopedParams),
+            StartedAt       = DateTimeOffset.UtcNow
+        }, uow);
+        uow.Commit();
     }
 
-    return ReportResult.Inline(data);
+    try
+    {
+        // 5. Execute query
+        var data = await _queryExecutor.ExecuteAsync(
+            reportId, scopedParams, asOf, ct);
+
+        // 6. Large result set — submit as async job
+        if (data.RowCount > _config.AsyncThreshold)
+        {
+            var jobId = await _jobService.SubmitReportJobAsync(
+                reportId, scopedParams, requestedBy, executionId);
+
+            using var uow2 = new UnitOfWork(_connectionFactory);
+            await _historyRepository.UpdateAsyncCompletedAsync(
+                executionId, jobId, 0, null, uow2);
+            uow2.Commit();
+
+            return ReportResult.Async(jobId, executionId);
+        }
+
+        // 7. Update history — COMPLETED
+        using var uow3 = new UnitOfWork(_connectionFactory);
+        await _historyRepository.UpdateCompletedAsync(
+            executionId, data.RowCount, null, uow3);
+        uow3.Commit();
+
+        return ReportResult.Inline(data, executionId);
+    }
+    catch (Exception ex)
+    {
+        // 8. Update history — FAILED
+        using var uow4 = new UnitOfWork(_connectionFactory);
+        await _historyRepository.UpdateFailedAsync(
+            executionId, ex.Message, uow4);
+        uow4.Commit();
+        throw;
+    }
 }
 ```
 
-**Async threshold:** Configurable per deployment; default 10,000 rows. Built-in reports for a 250-employee client will rarely approach this. The threshold is a safety valve for future growth.
+**Async threshold:** Configurable per deployment; default 10,000 rows. Every execution — inline or async — creates a ReportExecutionHistory record that operators and auditors can query.
 
 ---
 
@@ -640,7 +713,78 @@ Scheduled reports execute as `REPORT_GENERATION` background jobs. Recipients rec
 
 ---
 
-## 10. Report Catalogue Summary
+## 10. Report Execution History
+
+Every report execution — on-screen view, export, and async job — creates a `ReportExecutionHistory` record. This record serves two purposes:
+
+**Operator convenience:** The Report History panel shows the current user's 20 most recent executions with Re-run and Re-download buttons. Re-run submits a new execution with the same parameters — the original record is never overwritten.
+
+**Audit trail:** Auditors with the `Auditor` role can query execution history by user and date range. This answers questions such as "what reports did this operator run before the payroll was released?" or "who accessed the compensation summary report last month?"
+
+### ReportExecutionHistory domain type
+
+| Field | Type | Notes |
+|---|---|---|
+| `execution_id` | uuid | Primary key |
+| `report_id` | varchar(50) | Report identifier e.g. PAY-RPT-001 |
+| `report_title` | varchar(200) | Display title at time of execution |
+| `requested_by` | uuid | User who requested the report |
+| `execution_status` | varchar(20) | RUNNING, COMPLETED, FAILED, ASYNC_PENDING |
+| `parameters_json` | text | Serialised ReportParameters — enables Re-run |
+| `row_count` | integer | Null until execution completes |
+| `export_format` | varchar(10) | CSV, XLSX, PDF, or null for on-screen view |
+| `storage_reference` | varchar(500) | Non-null for retained XLSX/PDF exports |
+| `async_job_id` | uuid | Non-null for async executions |
+| `started_at` | timestamptz | When execution began |
+| `completed_at` | timestamptz | Null until terminal state |
+| `error_message` | text | Non-null on FAILED |
+
+### IReportHistoryRepository
+
+```csharp
+public interface IReportHistoryRepository
+{
+    Task<Guid> InsertAsync(ReportExecutionHistory execution, IUnitOfWork uow);
+    Task UpdateCompletedAsync(Guid executionId, int rowCount,
+        string? storageReference, IUnitOfWork uow);
+    Task UpdateFailedAsync(Guid executionId, string errorMessage,
+        IUnitOfWork uow);
+    Task UpdateAsyncCompletedAsync(Guid executionId, Guid jobId,
+        int rowCount, string? storageReference, IUnitOfWork uow);
+    Task<IEnumerable<ReportExecutionHistory>> GetRecentByUserAsync(
+        Guid requestedBy, int count = 20);
+    Task<IEnumerable<ReportExecutionHistory>> GetByReportAndDateRangeAsync(
+        string reportId, DateOnly from, DateOnly to);
+    Task<IEnumerable<ReportExecutionHistory>> GetByUserAndDateRangeAsync(
+        Guid requestedBy, DateOnly from, DateOnly to);
+}
+```
+
+### Export file retention
+
+XLSX and PDF exports are retained in `IDocumentStorageService` for a configurable period (default 7 days). The `StorageReference` field is the retrieval key. CSV exports are not retained — they are streamed directly and `StorageReference` is null.
+
+After the retention period, a cleanup job removes the file from storage and nulls the `StorageReference` on the history record.
+
+### Report History UI component
+
+The Report Hub pages (`/reports/payroll` and `/reports/hr`) include a History tab rendering the `ReportHistoryGrid` component. This component shows the current user's 20 most recent executions filtered to reports in that hub's domain.
+
+**Grid columns:** Report Name, Run At, Status (badge), Rows, Format, Actions (Re-run / Download).
+
+**Filters:** Report Name, Date Range (platform standard `DateRangeFilter` per ADR-006), Status, Export Format.
+
+**Re-run:** Creates a new execution with identical parameters. Navigates to the report runner with results.
+
+**Download:** Available only when `StorageReference` is non-null (XLSX/PDF within retention period). Calls `ReDownloadAsync`.
+
+### Auditor access
+
+A dedicated page (`/reports/audit-history`) visible only to the `Auditor` role allows querying all executions by user and date range. This page answers regulatory audit questions about data access patterns.
+
+---
+
+## 11. Report Catalogue Summary
 
 ### Payroll Operational Reports
 
@@ -670,17 +814,19 @@ Scheduled reports execute as `REPORT_GENERATION` background jobs. Recipients rec
 
 ---
 
-## 11. Blazor Component Specifications
+## 12. Blazor Component Specifications
 
-### 11.1 Report Hub Pages
+### 12.1 Report Hub Pages
 
 Two pages — `/reports/payroll` and `/reports/hr`. Card layout — one card per report, role-filtered.
 
 Each card: report name, brief description, primary users badge, "Run Report" button. Cards for reports the current user cannot access are not rendered.
 
+A **History** tab on each hub page renders the `ReportHistoryGrid` component showing the current user's 20 most recent executions for reports in that domain. The History tab includes Re-run and Re-download actions.
+
 ---
 
-### 11.2 ReportRunner Component
+### 12.2 ReportRunner Component
 
 Shared component used by all 16 reports:
 
@@ -802,13 +948,13 @@ Shared component used by all 16 reports:
 
 ---
 
-### 11.3 Individual Report Pages
+### 12.3 Individual Report Pages
 
 Each of the 16 reports has a dedicated Blazor page that renders the `ReportRunner` component with the correct `ReportId` and configures the parameter panel for that report's specific filters. All 16 pages are thin wrappers — the business logic is entirely in `ReportRunner` and the query classes.
 
 ---
 
-## 12. Access Control
+## 13. Access Control
 
 Default role-to-report access per REQ-RPT-062. The `CanAccessReport` method in the access control layer enforces this. Role-to-report mappings are configurable without a code change per REQ-RPT-063.
 
@@ -823,7 +969,7 @@ Default role-to-report access per REQ-RPT-062. The `CanAccessReport` method in t
 
 ---
 
-## 13. Role Definitions
+## 14. Role Definitions
 
 | Role | Description |
 |---|---|
@@ -832,7 +978,7 @@ Default role-to-report access per REQ-RPT-062. The `CanAccessReport` method in t
 
 ---
 
-## 14. Test Cases
+## 15. Test Cases
 
 | ID | Description | Expected Result |
 |---|---|---|
@@ -854,3 +1000,14 @@ Default role-to-report access per REQ-RPT-062. The `CanAccessReport` method in t
 | TC-RPT-016 | Regenerate historical PAY-RPT-001 | Same results as original generation; corrections reflected if applicable |
 | TC-RPT-017 | XLSX export includes totals row for numeric columns | Totals row present at bottom of workbook for sum-eligible columns |
 | TC-RPT-018 | PDF export switches to landscape for wide reports | PAY-RPT-001 renders in landscape; narrower HR reports may use portrait |
+| TC-RPT-019 | Run report — execution history record created | ReportExecutionHistory record inserted with RUNNING status before query executes |
+| TC-RPT-020 | Report completes successfully | ExecutionHistory record updated to COMPLETED; RowCount populated; CompletedAt set |
+| TC-RPT-021 | Report fails during query execution | ExecutionHistory record updated to FAILED; ErrorMessage populated |
+| TC-RPT-022 | Export XLSX — storage reference populated | StorageReference non-null on history record; file retrievable within retention period |
+| TC-RPT-023 | Export CSV — storage reference null | CSV not retained; StorageReference null on history record |
+| TC-RPT-024 | Re-run from history | New execution created with identical parameters; original history record unmodified |
+| TC-RPT-025 | Re-download within retention period | File retrieved from storage; re-download logged |
+| TC-RPT-026 | Re-download after retention period expires | StorageReference null; re-download rejected with informative message |
+| TC-RPT-027 | History grid shows 20 most recent executions for current user | Grid renders correct executions; other users' history not visible |
+| TC-RPT-028 | Auditor queries by user and date range | Returns all executions for specified user in date range; requires Auditor role |
+| TC-RPT-029 | Non-auditor attempts audit history query | AuthorizationException thrown |

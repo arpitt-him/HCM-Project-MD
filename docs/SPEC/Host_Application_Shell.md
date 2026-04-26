@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Host_Application_Shell.md` |
@@ -52,8 +52,17 @@ BlazorHR.sln
 │   │   │   └── IUnitOfWork.cs
 │   │   ├── Domain/
 │   │   │   └── IAuditableEntity.cs
-│   │   └── Security/
-│   │       └── ClaimsPrincipalExtensions.cs
+│   │   ├── Security/
+│   │   │   └── ClaimsPrincipalExtensions.cs
+│	│   └── Events/
+│	│       ├── IEventPublisher.cs
+│	│       ├── InProcessEventBus.cs
+│	│       ├── HireEventPayload.cs
+│	│       ├── RehireEventPayload.cs
+│	│       ├── TerminationEventPayload.cs
+│	│       ├── CompensationChangeEventPayload.cs
+│	│       ├── LeaveApprovedPayload.cs
+│	│       └── ReturnToWorkPayload.cs
 │   │
 │   └── modules/                          # Module assemblies drop folder
 │       └── (deployed module .dlls)
@@ -125,6 +134,11 @@ builder.Host.ConfigureContainer<ContainerBuilder>(autofacBuilder =>
     foreach (var module in platformModules)
         module.Register(autofacBuilder);
 });
+
+// 5a. Register InProcessEventBus as singleton — before modules register handlers
+	autofacBuilder.RegisterType<InProcessEventBus>()
+				  .As<IEventPublisher>()
+				  .SingleInstance();
 
 // 6. Collect menu contributions and register as singleton
 var menuContributions = platformModules

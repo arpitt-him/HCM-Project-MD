@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.7 |
+| **Version** | v1.8 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -56,6 +56,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | ADR | Platform | ADR-008_API_Surface_Architecture | docs/ADR | Complete | Accepted | Core Platform | Minimal API for HTTP endpoints; MVC explicitly excluded; Blazor Server + Minimal API coexistence pattern; no routing conflicts |
 | ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
 | ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
+| ADR | Platform | ADR-011_Module_Independence_Principle | docs/ADR | Complete | Accepted | Core Platform | Six rules governing module independence; event payloads in BlazorHR.Core; InProcessEventBus zero-subscriber no-op; PayrollContextId nullable; schemas applied per module; subscribers register own handlers |
 
 ### DATA — Entity Specifications
 
@@ -93,7 +94,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Functional Specification | Platform | Temporal_Override | docs/SPEC | Complete | Draft | Core Platform | Tenant-scoped operative date displacement for non-production testing; environment-gated; governed operative date principle |
 | Functional Specification | Platform | Host_Application_Shell | docs/SPEC | Complete | Draft | Core Platform | Solution structure, startup sequence, IPlatformModule contract, MenuContribution, IConnectionFactory, IUnitOfWork, shell layout, NavMenu, CSS design tokens, auth scaffold, 18 test cases |
 | Spec | Platform | API_Surface_Map | docs/SPEC | Complete | Draft | Core Platform | 21 integration points across HRIS, Payroll, Benefits, Compliance, T&A (future) |
-| Functional Specification | HRIS | HRIS_Core_Module | docs/SPEC | Complete | Draft | Core Platform / HRIS | Module assembly structure, repository and service interfaces, domain commands, lifecycle event pattern, event publisher, Blazor component specs for Employee List/Detail/Org pages, DateRangeFilter component, 23 test cases |
+| Functional Specification | HRIS | HRIS_Core_Module | docs/SPEC | Complete | Draft | Core Platform / HRIS | Module assembly structure, repository and service interfaces, domain commands, lifecycle event pattern, event publisher, Blazor component specs for Employee List/Detail/Org pages, DateRangeFilter component, 26 test cases (v0.2 — PayrollContextId nullable, InProcessEventBus pattern, 3 independence test cases added) |
 | Functional Specification | HRIS | HRIS_Leave_and_Absence | docs/SPEC | Complete | Draft | Core Platform / HRIS | Leave request lifecycle, manager approval, balance tracking, payroll impact signals, return from leave, leave_balance schema addition, 20 test cases |
 | Functional Specification | HRIS | HRIS_Document_Management | docs/SPEC | Complete | Draft | Core Platform / HRIS | Document upload, versioning, supersession, I-9 and W-4 specific handling, expiration tracking, compliance alerts, access control, storage abstraction, retention rules, 20 test cases |
 | Functional Specification | Payroll | Payroll_Core_Module | docs/SPEC | Complete | Draft | Core Platform / Payroll | Module assembly, HRIS event subscriptions, run initiation async pattern, ordered computation flow, accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components, 23 test cases |
@@ -101,6 +102,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Functional Specification | T&A | Time_Attendance_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, time entry lifecycle, overtime detection and FLSA reclassification, payroll handoff, correction of locked entries, batch import, HRIS event integration, Blazor component specs, 20 test cases |
 | ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
 | ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
+
 ### Conventions
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
@@ -296,6 +298,13 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Control Artifact | Architecture Control | Architecture_Model_Inventory | docs/architecture | Active | Draft | Core Platform | This document — v3.0 |
 | Control Artifact | Architecture Control | PRD_to_Architecture_Coverage_Map | docs/architecture | Active | Draft | Core Platform | Traceability artifact |
 
+---
+
+### Build — Build Planning Artifacts
+
+| Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
+|---|---|---|---|---|---|---|---|
+| Build Plan | Platform | Build_Sequence_Plan | docs/build | Complete | Active | Core Platform | 9-phase build sequence; Phase 0 HRIS schema only; Phase 2 includes HRIS Standalone Test (8 steps); Payroll schema added at Phase 4; dependency map; NuGet package reference (v0.2) |
 ---
 
 ## Legend

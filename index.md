@@ -63,6 +63,7 @@ ADRs document significant architectural decisions — the context, the decision 
 | [ADR-008_API_Surface_Architecture.md](docs/ADR/ADR-008_API_Surface_Architecture.md) | Minimal API for all HTTP endpoints; MVC explicitly excluded; clean Blazor Server + Minimal API coexistence |
 | [ADR-009_Authentication_Identity_Strategy.md](docs/ADR/ADR-009_Authentication_Identity_Strategy.md) | OIDC provider-agnostic authentication; Keycloak as on-premises default; role claim mapping; tenant_id claim bridge to ADR-010 |
 | [ADR-010_Tenant_Isolation_Strategy.md](docs/ADR/ADR-010_Tenant_Isolation_Strategy.md) | Three isolation models as client deployment options; Autofac per-request IConnectionFactory resolution; TenantRegistry pattern; repositories completely isolation-model agnostic |
+| [ADR-011_Module_Independence_Principle.md](docs/ADR/ADR-011_Module_Independence_Principle.md) | Six rules governing module independence; InProcessEventBus zero-subscriber no-op; event payloads in BlazorHR.Core; nullable module-optional fields; per-module schema application |
 
 ---
 
@@ -126,6 +127,14 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [Benefits_Minimum_Module.md](docs/SPEC/Benefits_Minimum_Module.md) | Deduction code management, benefit election lifecycle and versioning, HRIS event integration, batch import async pattern, payroll consumption boundary, UI component specs |
 | [Time_Attendance_Minimum_Module.md](docs/SPEC/Time_Attendance_Minimum_Module.md) | Time entry lifecycle, manager approval, FLSA overtime detection and reclassification, payroll handoff, locked entry correction, batch import, HRIS event integration, My Timecard and Timecards UI |
 | [Reporting_Minimum_Module.md](docs/SPEC/Reporting_Minimum_Module.md) | 16 pre-built operational reports (8 payroll, 8 HR), CSV/XLSX/PDF export using ClosedXML and QuestPDF, async threshold pattern, scheduled delivery, role-scoped access enforcement, shared ReportRunner component |
+
+---
+
+## Build — Build Planning
+
+| Document | Purpose |
+|---|---|
+| [Build_Sequence_Plan.md](docs/build/Build_Sequence_Plan.md) | Sequenced 9-phase build plan from infrastructure through hardening; phase gates, deliverables, test case mapping, dependency map, and NuGet package reference |
 
 ---
 

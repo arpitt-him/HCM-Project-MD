@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-04-25T21:29:13.867Z
+-- Generated at: 2026-04-26T03:38:01.348Z
 
 CREATE TYPE "person_status" AS ENUM (
   'ACTIVE',
@@ -444,6 +444,7 @@ CREATE TABLE "document" (
   "verified_by" uuid,
   "verification_date" timestamptz,
   "superseded_by_document_id" uuid,
+  "legal_hold_flag" boolean NOT NULL DEFAULT false,
   "created_by" uuid NOT NULL,
   "creation_timestamp" timestamptz NOT NULL
 );
@@ -491,6 +492,24 @@ CREATE TABLE "leave_balance" (
   "plan_year_end" date NOT NULL,
   "last_accrual_date" date,
   "last_updated_run_id" uuid,
+  "created_timestamp" timestamptz NOT NULL,
+  "last_update_timestamp" timestamptz NOT NULL
+);
+
+CREATE TABLE "report_execution_history" (
+  "execution_id" uuid PRIMARY KEY NOT NULL,
+  "report_id" varchar(50) NOT NULL,
+  "report_title" varchar(200) NOT NULL,
+  "requested_by" uuid NOT NULL,
+  "execution_status" varchar(20) NOT NULL,
+  "parameters_json" text NOT NULL,
+  "row_count" integer,
+  "export_format" varchar(10),
+  "storage_reference" varchar(500),
+  "async_job_id" uuid,
+  "started_at" timestamptz NOT NULL,
+  "completed_at" timestamptz,
+  "error_message" text,
   "created_timestamp" timestamptz NOT NULL,
   "last_update_timestamp" timestamptz NOT NULL
 );
@@ -609,6 +628,14 @@ CREATE INDEX ON "leave_balance" ("employment_id");
 
 CREATE INDEX ON "leave_balance" ("employment_id", "leave_type", "plan_year_start");
 
+CREATE INDEX "idx_report_execution_requested_by" ON "report_execution_history" ("requested_by");
+
+CREATE INDEX "idx_report_execution_report_date" ON "report_execution_history" ("report_id", "started_at");
+
+CREATE INDEX "idx_report_execution_user_date" ON "report_execution_history" ("requested_by", "started_at");
+
+CREATE INDEX "idx_report_execution_status" ON "report_execution_history" ("execution_status");
+
 COMMENT ON COLUMN "person"."person_id" IS 'System-generated. Immutable. Enduring human identity key.';
 
 COMMENT ON COLUMN "person"."person_number" IS 'Optional human-facing or integration-facing identifier';
@@ -693,8 +720,36 @@ COMMENT ON COLUMN "document"."employment_id" IS 'Null for person-level documents
 
 COMMENT ON COLUMN "document"."storage_reference" IS 'Secure reference to stored file';
 
+COMMENT ON COLUMN "document"."legal_hold_flag" IS 'True if document is under legal hold; prevents archival and disposal';
+
 COMMENT ON COLUMN "onboarding_plan"."onboarding_plan_id" IS 'System-generated. Immutable.';
 
 COMMENT ON COLUMN "onboarding_task"."task_id" IS 'System-generated. Immutable.';
 
 COMMENT ON COLUMN "leave_balance"."leave_balance_id" IS 'System-generated. Immutable.';
+
+COMMENT ON COLUMN "report_execution_history"."execution_id" IS 'Primary key';
+
+COMMENT ON COLUMN "report_execution_history"."report_id" IS 'Report identifier e.g. PAY-RPT-001';
+
+COMMENT ON COLUMN "report_execution_history"."report_title" IS 'Display title at time of execution';
+
+COMMENT ON COLUMN "report_execution_history"."requested_by" IS 'Employment ID or user ID of requesting user';
+
+COMMENT ON COLUMN "report_execution_history"."execution_status" IS 'RUNNING, COMPLETED, FAILED, ASYNC_PENDING';
+
+COMMENT ON COLUMN "report_execution_history"."parameters_json" IS 'JSON serialisation of ReportParameters used for this execution';
+
+COMMENT ON COLUMN "report_execution_history"."row_count" IS 'Null until execution completes';
+
+COMMENT ON COLUMN "report_execution_history"."export_format" IS 'CSV, XLSX, PDF, or null for on-screen view';
+
+COMMENT ON COLUMN "report_execution_history"."storage_reference" IS 'Non-null when export file retained in storage; null for CSV and after retention expiry';
+
+COMMENT ON COLUMN "report_execution_history"."async_job_id" IS 'Non-null when execution submitted as async job';
+
+COMMENT ON COLUMN "report_execution_history"."started_at" IS 'Timestamp when execution began';
+
+COMMENT ON COLUMN "report_execution_history"."completed_at" IS 'Null until execution reaches terminal state';
+
+COMMENT ON COLUMN "report_execution_history"."error_message" IS 'Non-null on FAILED status';

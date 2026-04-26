@@ -8,6 +8,46 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — ADR-011 and module independence patches applied
+
+- Added `docs/ADR/ADR-011_Module_Independence_Principle.md` — six rules governing module independence: no cross-module project references; event payloads in BlazorHR.Core/Events/; InProcessEventBus with zero-subscriber no-op; nullable module-optional command fields; per-module schema application; subscribers register own handlers. Formally closes coupling points identified between HRIS and Payroll modules.
+- Patched `docs/SPEC/HRIS_Core_Module.md` to v0.2 — PayrollContextId on HireEmployeeCommand changed from required Guid to Guid?; event payload definitions moved to BlazorHR.Core/Events/; IEventPublisher §7 updated to InProcessEventBus pattern; added TC-HRS-024, TC-HRS-025, TC-HRS-026 (26 test cases total)
+- Patched `docs/build/Build_Sequence_Plan.md` to v0.2 — Phase Overview table updated with schema state column; Phase 0 applies HRIS schema only; Phase 2 gate includes 8-step HRIS Standalone Test; Phase 4 adds 4.0 Apply Payroll Schema step
+- Updated Architecture_Model_Inventory.md — new ADR-011 row; updated HRIS_Core_Module and Build_Sequence_Plan row notes
+- Updated index.md — new ADR-011 table entry
+- Note: BlazorHR.Core/Events/ folder and InProcessEventBus registration in Program.cs are Phase 1 build deliverables — not yet implemented
+
+### 2026-04-25 — HRIS_Core_Module.md updated to v0.2 — module independence
+
+- PayrollContextId on HireEmployeeCommand changed from required Guid to Guid? per ADR-011
+- Event payload definitions removed from §7 — moved to BlazorHR.Core/Events/ per ADR-011
+- IEventPublisher updated to reflect InProcessEventBus zero-subscriber no-op behaviour
+- HrisModule.Register updated — EmployeeEventPublisher replaced with InProcessEventBus pattern
+- Added TC-HRS-024, TC-HRS-025, TC-HRS-026 — HRIS standalone and module independence test cases
+
+### 2026-04-25 — Build Sequence Plan added
+
+- Created `docs/build/` folder — new document type for build planning artifacts
+- Added `docs/build/Build_Sequence_Plan.md` — 9-phase build sequence: Phase 0 (Infrastructure — PostgreSQL, Keycloak, solution scaffold), Phase 1 (Core + Host Shell — minimum running application with authentication), Phase 2 (HRIS Core — minimum working HRIS; hire/list/detail), Phase 3 (HRIS Supporting — leave, documents, onboarding), Phase 4 (Payroll Core — run initiation, calculation, pay register), Phase 5 (Benefits), Phase 6 (T&A), Phase 7 (Reporting), Phase 8 (Hardening — full test suite, security audit, multi-tenant config store, performance validation); each phase has gate criteria tied directly to SPEC test cases; dependency map shows Phases 5/6/7 can run in parallel after Phase 4; NuGet package reference included
+- Updated Architecture_Model_Inventory.md — new Build section with Build_Sequence_Plan row
+
+### 2026-04-25 — Reporting_Minimum_Module.md updated to v0.2
+
+- Added report execution history capability — ReportExecutionHistory domain type, IReportHistoryRepository interface, updated IReportService (GetRecentExecutionsAsync, ReRunAsync), updated IReportExportService (ExportResult return type, ReDownloadAsync), updated execution pattern to create/update history records
+- Added §10a — Report Execution History covering domain type, repository interface, export file retention, History UI component, and auditor access
+- Added History tab to Report Hub pages — ReportHistoryGrid component with Re-run and Re-download actions
+- Added 11 new test cases (TC-RPT-019 through TC-RPT-029) — total reporting test cases now 29
+- Version bumped from v0.1 to v0.2
+
+### 2026-04-25 — report_execution_history table added to HRIS schema
+
+- Added report_execution_history table to hcm_hris.dbml under new reporting TableGroup
+- Columns: execution_id, report_id, report_title, requested_by, execution_status, parameters_json, row_count, export_format, storage_reference, async_job_id, started_at, completed_at, error_message, created_timestamp, last_update_timestamp
+- Four indexes: requested_by; (report_id, started_at); (requested_by, started_at); execution_status
+- Regenerate hris_schema.sql from updated DBML
+- Supports Reporting_Minimum_Module patch — report execution history, re-run, re-download, auditor access
+- Updated index.md — new Build section
+
 ### 2026-04-25 — PRD_to_Architecture_Coverage_Map updated to v0.8
 
 - Version bumped from v0.7 to v0.8
