@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.6 |
+| **Version** | v1.7 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
@@ -54,6 +54,8 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | ADR | Platform | ADR-006_UI_Component_Library | docs/ADR | Complete | Accepted | Core Platform | Platform UI requires a comprehensive set of data-entry and data-display components - Syncfusion UI license exists |
 | ADR | Platform | ADR-007_Module_Composition_DI_Lifetime | docs/ADR | Complete | Accepted | Core Platform | MEF for assembly discovery only; Autofac owns all lifetimes; IPlatformModule contract; menu contribution model; UI components in host assembly only |
 | ADR | Platform | ADR-008_API_Surface_Architecture | docs/ADR | Complete | Accepted | Core Platform | Minimal API for HTTP endpoints; MVC explicitly excluded; Blazor Server + Minimal API coexistence pattern; no routing conflicts |
+| ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
+| ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
 
 ### DATA — Entity Specifications
 
@@ -97,7 +99,8 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Functional Specification | Payroll | Payroll_Core_Module | docs/SPEC | Complete | Draft | Core Platform / Payroll | Module assembly, HRIS event subscriptions, run initiation async pattern, ordered computation flow, accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components, 23 test cases |
 | Functional Specification | Benefits | Benefits_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, deduction code management, election lifecycle, versioning pattern, HRIS event integration, batch import async pattern, payroll boundary, Blazor component specs, 20 test cases |
 | Functional Specification | T&A | Time_Attendance_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, time entry lifecycle, overtime detection and FLSA reclassification, payroll handoff, correction of locked entries, batch import, HRIS event integration, Blazor component specs, 20 test cases |
-
+| ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
+| ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
 ### Conventions
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |

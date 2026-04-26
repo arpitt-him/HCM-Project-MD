@@ -8,6 +8,26 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-25 — PRD_to_Architecture_Coverage_Map updated to v0.8
+
+- Version bumped from v0.7 to v0.8
+- Updated Multi-Tenant Support row — added ADR-010_Tenant_Isolation_Strategy reference
+- Updated Modular Architecture row — added ADR-007 and SPEC/Host_Application_Shell references
+- Updated Asynchronous Job Execution row — added ADR-005 reference
+- Added new Platform capability rows: Authentication and Identity (ADR-009), Tenant Isolation (ADR-010), UI Technology Stack (ADR-003), Data Access Strategy (ADR-004), API Surface Architecture (ADR-008)
+- Updated HRIS capability rows — added SPEC/HRIS_Core_Module references to Person/Employment, Lifecycle Events, Compensation rows; SPEC/HRIS_Leave_and_Absence to Leave row; SPEC/HRIS_Document_Management to Document Storage row
+- Updated Benefits row — added SPEC/Benefits_Minimum_Module reference
+- Added new T&A Capabilities section (PRD-1100) — Time Entry Capture/Approval, Overtime Detection, Payroll Handoff, FLSA Compliance
+- Updated all 16 Reporting (Minimum) rows — added SPEC/Reporting_Minimum_Module reference
+- Added new Payroll Module Capabilities section — Payroll Run Lifecycle, Ordered Calculation Engine, Accumulator Mutation Chain, HRIS Event Subscription, Employee-Level Failure Isolation; all rows reference SPEC/Payroll_Core_Module
+
+### 2026-04-25 — Architecture Decision Records ADR-009 and ADR-010 added
+
+- Added `docs/ADR/ADR-009_Authentication_Identity_Strategy.md` — OIDC as required authentication protocol; provider-agnostic (Keycloak recommended for on-premises deployments); roles issued as JWT claims and mapped to platform role vocabulary; tenant_id JWT claim bridges to ADR-010; no proprietary auth; no platform-managed passwords
+- Added `docs/ADR/ADR-010_Tenant_Isolation_Strategy.md` — three isolation models supported as client deployment options (Option 1: dedicated database per tenant; Option 2: shared database with tenant_id column filtering; Option 3: shared database with separate schema per tenant); Autofac per-request lifetime scope resolves correct IConnectionFactory per tenant_id JWT claim; repositories and services completely unaware of isolation model; TenantScopedConnection wrapper enforces Option 2 filtering at connection level; IsolationModel selection guide for client engagement conversations
+- Updated Architecture_Model_Inventory.md — two new ADR rows
+- Updated index.md — two new ADR table entries
+
 ### 2026-04-25 — Reporting Minimum Module specification added
 
 - Added `docs/SPEC/Reporting_Minimum_Module.md` — build-ready spec covering module assembly, 16 pre-built reports (PAY-RPT-001 through 008, HR-RPT-001 through 008), common ReportParameters model, report execution pattern (authorisation → scope enforcement → operative date → Dapper query → audit log → async if >10k rows), CSV export (no library), XLSX export (ClosedXML MIT — freeze panes, number formatting, auto-sized columns, totals row), PDF export (QuestPDF Community — landscape/portrait, header block, page numbers), async threshold with SignalR progress, scheduled report delivery, role-scoped access table, shared ReportRunner Blazor component, 18 test cases

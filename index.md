@@ -61,6 +61,9 @@ ADRs document significant architectural decisions — the context, the decision 
 | [ADR-006_UI_Component_Library.md](docs/ADR/ADR-006_UI_Component_Library.md) | Complete | Accepted | Core Platform | Platform UI requires a comprehensive set of data-entry and data-display components - Syncfusion UI license exists |
 | [ADR-007_Module_Composition_DI_Lifetime.md](docs/ADR/ADR-007_Module_Composition_DI_Lifetime.md) | MEF for module discovery only; Autofac owns all service lifetimes; IPlatformModule contract; menu contribution model |
 | [ADR-008_API_Surface_Architecture.md](docs/ADR/ADR-008_API_Surface_Architecture.md) | Minimal API for all HTTP endpoints; MVC explicitly excluded; clean Blazor Server + Minimal API coexistence |
+| [ADR-009_Authentication_Identity_Strategy.md](docs/ADR/ADR-009_Authentication_Identity_Strategy.md) | OIDC provider-agnostic authentication; Keycloak as on-premises default; role claim mapping; tenant_id claim bridge to ADR-010 |
+| [ADR-010_Tenant_Isolation_Strategy.md](docs/ADR/ADR-010_Tenant_Isolation_Strategy.md) | Three isolation models as client deployment options; Autofac per-request IConnectionFactory resolution; TenantRegistry pattern; repositories completely isolation-model agnostic |
+
 ---
 
 ## DATA — Entity Specifications
