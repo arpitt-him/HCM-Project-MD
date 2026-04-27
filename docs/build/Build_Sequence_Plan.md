@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Build Planning |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/build/Build_Sequence_Plan.md` |
@@ -79,12 +79,12 @@ Phase 0 (Infrastructure)
 ### Deliverables
 
 **0.1 — PostgreSQL**
-- Install PostgreSQL 16 locally or via Docker:
+- Install PostgreSQL 18 locally or via Docker:
   ```
   docker run -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16
   ```
 - Create development database: `allworkhris_dev`
-- Apply HRIS schema only: `schemas/ddl/hris_schema.sql`
+- Apply HRIS schema only: `schemas/ddl/postgres/hris_schema.sql`
 - Verify schema applied cleanly with no errors
 - **Do NOT apply `payroll_core_schema.sql` at this stage** — Payroll schema is applied at the start of Phase 4
 
@@ -392,7 +392,7 @@ All 8 steps passing = HRIS module independence confirmed. Phase 2 complete.
 ### Deliverables
 
 **4.0 — Apply Payroll schema**
-- Apply `schemas/ddl/payroll_core_schema.sql` to `allworkhris_dev`
+- Apply `schemas/ddl/postgres/payroll_core_schema.sql` to `allworkhris_dev`
 - Verify schema applied cleanly — `payroll_run` table now exists
 - Verify HRIS tables are unaffected — smoke query against `employment` table
 

@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-004_Data_Access_Strategy.md` |
@@ -43,7 +43,7 @@ Dapper provides lightweight mapping between SQL query results and C# objects wit
 
 **DBMS portability.** Dapper works through any ADO.NET-compatible provider. Switching between PostgreSQL (Npgsql), SQL Server (Microsoft.Data.SqlClient), and MySQL (MySql.Data or Pomelo) requires only a connection string and provider package change. The SQL itself uses standard ANSI syntax where possible, with dialect differences managed through a thin provider abstraction. Parameter syntax (`@paramname`) is consistent across PostgreSQL, SQL Server, and MySQL — minimising dialect-specific handling.
 
-**Schema independence.** Dapper has no knowledge of schema structure and does not manage migrations. The DBML-sourced DDL files in `schemas/ddl/` remain the sole source of truth for schema definition. This separation is intentional — schema evolution is a deployment concern, not an application concern.
+**Schema independence.** Dapper has no knowledge of schema structure and does not manage migrations. The DBML-sourced DDL files in `schemas/ddl/*` remain the sole source of truth for schema definition. This separation is intentional — schema evolution is a deployment concern, not an application concern.
 
 **No stored procedures.** Business logic resides entirely in the application layer. Stored procedures fragment domain logic across application and database, complicate version control, and create a maintenance surface that grows with platform complexity. They are not used.
 

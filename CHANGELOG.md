@@ -8,6 +8,10 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
+### 2026-04-27 - Added 'postgres' sub-folder to 'schemas/ddl' folder; use of Postgres 18
+- Files updated: build/Build_Sequence_Plan (updated to v0.3)
+				 ADR/ADR-004_Data_Access_Strategy.md (updated to v0.2)
+
 ### 2026-04-26 — Build_Sequence_Plan.md updated — Phase 2 HRIS as core application
 
 - Phase 2 project reference updated — AllWorkHRIS.Web replaces AllWorkHRIS.Module.Hris
