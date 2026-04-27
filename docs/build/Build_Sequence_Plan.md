@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Build Planning |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/build/Build_Sequence_Plan.md` |
@@ -131,7 +131,6 @@ Phase 0 (Infrastructure)
 
 **0.5 — Environment configuration**
 - Create `launchSettings.json` with all required environment variables:
-  - `SYNCFUSION_LICENSE_KEY`
   - `DATABASE_CONNECTION_STRING` = `Host=localhost;Database=allworkhris_dev;Username=postgres;Password=dev`
   - `DATABASE_PROVIDER` = `postgresql`
   - `APP_ENVIRONMENT` = `Development`
@@ -139,6 +138,9 @@ Phase 0 (Infrastructure)
   - `AUTH_CLIENT_ID` = `allworkhris-app`
   - `AUTH_CLIENT_SECRET` = (from Keycloak client configuration)
   - `TEMPORAL_OVERRIDE_ENABLED` = `true`
+
+**0.6 — User-secret configuration**
+- Store the `Syncfusion:LicenseKey` as a .Net user-secret for project AllWorkHRIS.Host
 
 ### Gate
 - PostgreSQL starts and accepts connections

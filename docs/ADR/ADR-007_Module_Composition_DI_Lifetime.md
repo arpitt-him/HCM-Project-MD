@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Architecture Decision Record |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Accepted |
 | **Owner** | Core Platform |
 | **Location** | `docs/ADR/ADR-007_Module_Composition_DI_Lifetime.md` |
@@ -174,10 +174,10 @@ The following lifetime rules apply to all module service registrations:
 
 ## Syncfusion License Registration
 
-Per ADR-006, the Syncfusion license key shall be registered in `Program.cs` before the host is built — not inside any MEF part or Autofac module:
+Per ADR-006, the Syncfusion license key shall be registered in `Program.cs` immediately after the host is built — not inside any MEF part or Autofac module:
 
 ```csharp
-// Program.cs — before builder.Build()
+// Program.cs — right after builder.Build()
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("YOUR_KEY");
 ```
 

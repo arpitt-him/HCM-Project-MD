@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Functional Specification |
-| **Version** | v0.3 |
+| **Version** | v0.4 |
 | **Status** | Draft |
 | **Owner** | Core Platform |
 | **Location** | `docs/SPEC/Host_Application_Shell.md` |
@@ -88,7 +88,6 @@ The following environment variables are required at startup. The application sha
 
 | Variable | Required | Description |
 |---|---|---|
-| `SYNCFUSION_LICENSE_KEY` | Yes | Syncfusion Essential Studio license key |
 | `DATABASE_CONNECTION_STRING` | Yes | ADO.NET connection string for the primary database |
 | `DATABASE_PROVIDER` | Yes | `postgresql`, `sqlserver`, or `mysql` |
 | `APP_ENVIRONMENT` | Yes | `Development`, `Staging`, or `Production` |
@@ -101,6 +100,12 @@ The following environment variables are required at startup. The application sha
 
 For local development, environment variables are declared in `launchSettings.json` under `environmentVariables`. This file shall not contain production credential values.
 
+## 2.1 User-secret Configuration
+
+The `Syncfusion:LicenseKey` label represents the Syncfusion license key.
+Its registration in the application is required for use of the Syncfusion Essential Studio UI components.
+Its value will be stored as a .Net user-secret in the development environment.  This is being done so that it does not end up as a raw string in the GitHub repo.
+
 ---
 
 ## 3. Program.cs Startup Sequence
@@ -108,16 +113,18 @@ For local development, environment variables are declared in `launchSettings.jso
 The startup sequence is strictly ordered. Each step must complete successfully before the next begins.
 
 ```csharp
-// 1. Register Syncfusion license — must be first, before any component renders
-var syncfusionKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY")
-    ?? throw new InvalidOperationException(
-        "SYNCFUSION_LICENSE_KEY environment variable is not set.");
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionKey);
-
-// 2. Create builder
+// 1. Create builder — must be first in the sequence to load Syncfusion license key from user-secrets
 var builder = WebApplication.CreateBuilder(args);
 
-// 3. Validate required environment variables
+// 2. Retrieve Syncfusion license key from configuration (originated as user-secret)
+var syncfusionKey = builder.Configuration["Syncfusion:LicenseKey"]
+    ?? throw new InvalidOperationException(
+        "Syncfusion:LicenseKey user-secret is not configured.");
+
+// 3. Register Syncfusion license - must occur before any component renders
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionKey);
+
+// 4. Validate required environment variables
 EnvironmentValidator.ValidateRequired(
     "DATABASE_CONNECTION_STRING",
     "DATABASE_PROVIDER",
@@ -126,11 +133,11 @@ EnvironmentValidator.ValidateRequired(
     "AUTH_CLIENT_ID",
     "AUTH_CLIENT_SECRET");
 
-// 4. Discover modules via MEF
+// 5. Discover modules via MEF
 var modulesPath = Environment.GetEnvironmentVariable("MODULES_PATH") ?? "./modules";
 var platformModules = ModuleDiscovery.DiscoverModules(modulesPath);
 
-// 5. Build Autofac container
+// 6. Build Autofac container
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(autofacBuilder =>
 {
@@ -144,50 +151,50 @@ builder.Host.ConfigureContainer<ContainerBuilder>(autofacBuilder =>
         module.Register(autofacBuilder);
 });
 
-// 5a. Register InProcessEventBus as singleton — before modules register handlers
+// 6a. Register InProcessEventBus as singleton — before modules register handlers
 	autofacBuilder.RegisterType<InProcessEventBus>()
 				  .As<IEventPublisher>()
 				  .SingleInstance();
 
-// 6. Collect menu contributions and register as singleton
+// 7. Collect menu contributions and register as singleton
 var menuContributions = platformModules
     .SelectMany(m => m.GetMenuContributions())
     .OrderBy(c => c.SortOrder)
     .ToList();
 builder.Services.AddSingleton(menuContributions);
 
-// 7. Register Syncfusion services
+// 8. Register Syncfusion services
 builder.Services.AddSyncfusionBlazor();
 
-// 8. Register Blazor Server
+// 9. Register Blazor Server
 builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-// 9. Register authentication
+// 10. Register authentication
 builder.Services.AddAuthentication(...)
                 .AddOpenIdConnect(...);
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-// 10. Build application
+// 11. Build application
 var app = builder.Build();
 
-// 11. Configure middleware pipeline
+// 12. Configure middleware pipeline
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 12. Register Minimal API endpoints
+// 13. Register Minimal API endpoints
 HrisEndpoints.Map(app);
 PayrollEndpoints.Map(app);
 // Additional module endpoints registered here as modules are built
 
-// 13. Map Blazor hub and fallback
+// 14. Map Blazor hub and fallback
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-// 14. Run
+// 15. Run
 app.Run();
 ```
 
@@ -923,7 +930,7 @@ public static class EnvironmentValidator
 
 | ID | Description | Expected Result |
 |---|---|---|
-| TC-HST-001 | Application starts with all required environment variables set | Application starts successfully; Syncfusion license registered; all modules discovered and registered |
+| TC-HST-001 | Application starts with all required environment variables and user-secrets set | Application starts successfully; Syncfusion license registered; all modules discovered and registered |
 | TC-HST-002 | Application starts with `SYNCFUSION_LICENSE_KEY` missing | Application throws `InvalidOperationException` with message identifying the missing variable before rendering any UI |
 | TC-HST-003 | Application starts with `DATABASE_CONNECTION_STRING` missing | `EnvironmentValidator` throws `InvalidOperationException` listing the missing variable |
 | TC-HST-004 | Module assembly present in modules folder | Module is discovered, `Register` called, services available in DI container |

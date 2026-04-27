@@ -8,7 +8,12 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 ## April-2026
 
-### 2026-04-27 - Added 'postgres' sub-folder to 'schemas/ddl' folder; use of Postgres 18
+### 2026-04-27 - Changed Syncfusion license key from environment variable to .Net user-secret
+- Files updated: build/Build_Sequence_Plan (updated to v0.4)
+				 SPEC/Host_Application_Shell.md (updated to v0.4)
+				 ADR/ADR-007_Module_Composition_DI_Lifetime.md (updated to v0.2)
+
+### 2026-04-27 - Added 'postgres' sub-folder to 'schemas/ddl' folder to contain currently existing ddl-files; Recorded development use of Postgres 18
 - Files updated: build/Build_Sequence_Plan (updated to v0.3)
 				 ADR/ADR-004_Data_Access_Strategy.md (updated to v0.2)
 
