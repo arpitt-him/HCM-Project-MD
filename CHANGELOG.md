@@ -6,7 +6,151 @@ Format: `YYYY-MM-DD — Description of change — Author/Owner`
 
 --- 
 
+## May-2026
+
+### 2026-05-04 — Phase 9/10 specs, ADR-012 job remediation, and Jurisdiction Category Code Model
+
+**ADR-012 activation job remediation (BenefitElectionActivationJob, LeaveStatusTransitionJob)**
+
+Both background jobs were updated to comply with ADR-012 Decisions 2 and 3. Each now holds a `_lastRunDate` field (forward-only guard — skips the write cycle if the operative date has not advanced past the last run) and a `volatile bool _tdo` flag set by `ITemporalOverrideService.OnChanged` (TDO wake-up — exits the 24-hour sleep loop immediately on a forward TDO shift). The `ITemporalOverrideService` is injected at construction; `NullTemporalOverrideService` in production, `OverridableTemporalContext` in dev.
+
+**Import SUPERSEDED fix (BenefitElectionImportService)**
+
+`SubmitBatchAsync` now calls `ImportElectionAsync` instead of `CreateElectionAsync`. `ImportElectionAsync` opens a SERIALIZABLE scope, calls `GetOverlappingByDeductionAsync`, marks each prior overlapping election SUPERSEDED, then inserts the new one — so intra-batch duplicates produce SUPERSEDED records rather than constraint errors.
+
+**BenefitElectionsPage UI improvements**
+
+Wizard panel and terminate confirmation panel repositioned above the filter bar (but below the page header) so they remain accessible without scrolling as the elections list grows. Both panels styled with `border: 2px solid #2F4350; border-radius: 10px; padding: 1.5rem` (nav bar colour).
+
+**Phase 9 and Phase 10 added to Build_Sequence_Plan.md**
+
+Pay Register Drilldown (Phase 9) and Accumulators Drilldown (Phase 10) added to the build sequence. Former Phase 9 (Reporting) renumbered to Phase 11; former Phase 10 (Hardening) to Phase 12. Both new phases reference their standalone spec documents.
+
+- New files:
+  - `docs/SPEC/Pay_Register_Drilldown.md` — complete functional spec for `/payroll/pay-register`: run selection via year/month navigator; Company Summary (Payroll Cost Summary, Tax Liability, Benefit Summary, Hours conditional on T&A, Headcount, Total Cash Required for ACH prefunding); Org Rollup by Department/Location/Job with inline employee expansion; Employee Detail with result line expansion; CSV export and GL-import line-detail export; role-based access; 11 gate tests TC-PREG-001–011
+  - `docs/SPEC/Accumulator_Display.md` — complete functional spec for `/payroll/accumulators`: three-layer architecture (Definition/Impact/Value); rollup behavior types (INDEPENDENT/DERIVED/HYBRID); consumer-oriented views (By Family for Payroll Operations/Management Accounting; By Employee for Corporate Accounting/External Reporting/Carrier Reconciliation); cap enforcement (amber ≤10%, CAP REACHED, REVIEW REQUIRED); retroactivity display with REVERSAL/CORRECTION badges; reset history; cross-scope validation surface; 14 gate tests TC-ACUM-001–014
+  - `docs/accumulators/Jurisdiction_Category_Code_Model.md` — new architecture model defining the classification layer above accumulator definitions: tax categories (authority-down from national jurisdiction through sub-jurisdiction; legal entities reference only); benefit categories (entity-up from legal entity provider contracts to national jurisdiction plan types); full schema definitions for `national_jurisdiction`, `sub_jurisdiction`, `tax_category_code`, `benefit_type_code`, `legal_entity_benefit_plan`, `sub_jurisdiction_reciprocity`; US seed data (9 national tax codes, state sub-jurisdiction examples including SDI/PFL/TDI/PFML, 14 benefit type codes including HRA and commuter benefits with MONTHLY period type); 34 bilateral US state reciprocity agreement pairs with exemption form references; reciprocity vs. credit agreement architectural distinction; SUI always follows work state rule; known gaps documented (age-stratified 401k caps, QPIP partial supersession, Puerto Rico, multinational expats)
+
+- Files updated:
+  - `docs/build/Build_Sequence_Plan.md` — Phase 9 and 10 entries replaced with spec document references; Phase 11/12 renumbering
+  - `docs/SPEC/Accumulator_Display.md` — Related Documents updated; §1 Conceptual Model expanded with three-layer architecture (§1.1), rollup behavior (§1.3), consumer-oriented views (§1.4); §9 Data Notes updated with Value/Impact layer terminology, DERIVED badge, SCOPE MISMATCH banner, rule versioning note; TC-ACUM-013 and TC-ACUM-014 added
+  - `docs/accumulators/Accumulator_Model_Detailed.md` — §8 updated with cross-reference to Jurisdiction_Category_Code_Model
+  - `docs/architecture/Architecture_Model_Inventory.md` — Jurisdiction_Category_Code_Model added to Accumulators section
+
+---
+
+### 2026-05-04 — Benefits calculation model, temporal integrity, and pipeline timing alignment
+
+Two connected bodies of work completing the Benefits minimum module design and aligning the payroll pipeline with real-world benefit timing requirements.
+
+**Benefits calculation model and temporal integrity (ADR-012, migrations 011–012, SPEC v0.3)**
+
+The benefits deduction model was expanded from a single fixed-amount mode to a full rule-based calculation taxonomy. The `deduction_code` table was renamed `deduction` and extended with `calculation_mode` (six modes), `wage_base` (for PCT modes), and `age_as_of_rule` (for coverage-based modes). New tables were added for rate lookups (`deduction_rate_table`, `deduction_rate_entry`) and employer match rules (`deduction_employer_match`). The `benefit_deduction_election` record was extended with mode-specific election parameters. An `ANNUAL_TRUE_UP` match timing type and a `partial_period_rule` column on `payroll_context` were added in a follow-on migration.
+
+Temporal integrity decisions were documented in ADR-012: activation jobs are required for all date-gated entities; TDO forward shifts trigger immediate activation cycles; TDO backward shifts are read-only (no demotions); retroactive payroll must use date-overlap filtering rather than status filtering; non-overlapping date ranges are enforced via SERIALIZABLE transactions; mid-period amendments use a trim-and-supersede pattern; bulk import uses sort-and-sweep overlap resolution. The SPEC was rewritten to v0.3, adding 14 test cases (34 total).
+
+- New files:
+  - `docs/ADR/ADR-012_Benefit_Election_Temporal_Integrity.md` — 7 decisions on activation jobs, TDO handling, retroactive query strategy, overlap enforcement, amendment workflow, and bulk import resolution
+  - `schemas/ddl/postgres/migrations/011_benefits_deduction_model.sql` — rename deduction_code→deduction, add calculation modes, rate tables, employer match, election parameter extensions
+  - `schemas/ddl/postgres/migrations/012_benefits_timing_alignment.sql` — add `partial_period_rule` to `payroll_context`; add `match_type` to `deduction_employer_match`
+
+- Files updated:
+  - `docs/SPEC/Benefits_Minimum_Module.md` — v0.2 → v0.3 — full rewrite: §1 Calculation Modes, §7 Amend Election pattern, §8 Payroll Calculator Dispatch, §10 Batch Import sort-and-sweep, §11 Activation Job; 34 test cases
+
+**Pipeline timing alignment — coverage fraction and phase boundary (SPEC v0.4, code changes)**
+
+The payroll pipeline was extended to support pay period boundaries, partial-period proration, and a correct DisposableIncome capture point. `PipelineRequest` and `CalculationContext` were extended with `PayPeriodStart`, `PayPeriodEnd`, `PayDatesInPeriodMonth`, `PayDateOrdinalInMonth`, `PartialPeriodRule`, and `ThreePaycheckMonthRule`. The `IBenefitStepProvider` interface was changed to accept the full `PipelineRequest`. `BenefitStepProvider` was refactored to query elections overlapping the full pay period (not just active on pay date), and compute a coverage fraction per election using the configured partial-period rule. Two new pipeline step types support the expanded calculation model: `PostTaxPctBenefitStep` (reads post-deduction gross at execute time for PCT_POST_TAX mode) and `MatchBenefitStep` (reads employee contribution from StepResults at execute time). The pipeline was split into two passes at sequence 800 so that `DisposableIncome` is captured after tax and pre-tax deductions but before post-tax deductions — correctly positioning it for future garnishment steps.
+
+- New files:
+  - `src/AllWorkHRIS.Module.Benefits/Steps/PostTaxPctBenefitStep.cs` — PCT_POST_TAX late-binding step; reads `ctx.IncomeTaxableWages` at execute time
+  - `src/AllWorkHRIS.Module.Benefits/Steps/MatchBenefitStep.cs` — employer match step; reads `ctx.StepResults[eeStepCode]` at execute time; applies match rate against period cap
+
+- Files updated:
+  - `src/AllWorkHRIS.Core/Pipeline/PipelineRequest.cs` — added 6 pay period / proration fields (all with safe defaults for existing callers)
+  - `src/AllWorkHRIS.Core/Pipeline/CalculationContext.cs` — mirrored 6 fields; added `WithDisposableIncome()` mutator
+  - `src/AllWorkHRIS.Core/Pipeline/IBenefitStepProvider.cs` — signature changed from `(Guid, DateOnly)` to `(PipelineRequest)`
+  - `src/AllWorkHRIS.Module.Benefits/Repositories/IBenefitElectionRepository.cs` — added `GetElectionsOverlappingPeriodAsync`
+  - `src/AllWorkHRIS.Module.Benefits/Repositories/BenefitElectionRepository.cs` — implemented overlapping-period query
+  - `src/AllWorkHRIS.Module.Benefits/Steps/BenefitStepProvider.cs` — refactored; removed unused `IDeductionCodeRepository` dependency; calls overlapping-period query; computes and applies coverage fraction per election
+  - `src/AllWorkHRIS.Module.Tax/Services/PayrollPipelineService.cs` — updated provider call; propagates period fields to context; two-pass step execution with `DisposableIncome` capture between passes
+  - `tests/AllWorkHRIS.Host.Tests/BenefitsGateTests.cs` — updated `BenefitStepProvider` constructor call (one argument, not two)
+  - `docs/SPEC/Benefits_Minimum_Module.md` — v0.3 → v0.4 — added §17 Timing Alignment Model
+
+---
+
+### 2026-05-01 — Pay Calendar Generation Spec written; calendar generation UI rebuilt; PayDateComputer bug fixes
+
+New functional specification covering how pay dates, input cutoff dates, calculation dates, and transmission dates are generated for each pay frequency. Spec includes convention-based pay date selection (monthly and semi-monthly), offset-based selection (weekly, biweekly, quarterly, annual), the universal non-business day roll-back rule, the 53rd/27th extra-period problem and policy flag, processing chain model with three-zone diagram (work period / processing window / pay date), arrears vs. current pay distinction, data lock gates by date type, six-state period state machine, and day-by-day operational timelines with worked calendar examples for each frequency.
+
+- New files:
+  - `docs/SPEC/Pay_Calendar_Generation.md` — v0.1 — full pay calendar generation spec as described above
+  - `src/AllWorkHRIS.Module.Payroll/Domain/Calendar/PayDateComputer.cs` — new static helper encapsulating all pay date computation logic; used by calendar generation UI and independently testable
+
+- Bug fixed:
+  - `PayDateComputer.cs` — `SM_1_AND_15` and `SM_10_AND_25` were returning pay dates that fell before the period end (e.g. Jan 1 for a period ending Jan 15). Corrected: `SM_1_AND_15` Period A now pays on the 15th (period-end day); Period B pays on the 1st of the following month. `SM_10_AND_25` Period A now pays on the 25th (+10 days); Period B pays on the 10th of the following month (+10 days). `SM_15_AND_END` was already correct.
+
+- Files updated:
+  - `src/AllWorkHRIS.Module.Payroll/Domain/Calendar/PayrollContext.cs` — added `PayDateConvention`, `PayDateOffsetDays` (default 5), `CutoffOffsetDays` (default 3), `ExtraPeriodPolicy` (default `EXTRA_SPECIAL`) properties
+  - `src/AllWorkHRIS.Module.Payroll/Repositories/PayrollRepositories.cs` — `InsertContextAsync` updated to include the four new context columns
+  - `src/AllWorkHRIS.Host/Components/Pages/Payroll/PayrollCalendarDetailPage.razor` — generate form rebuilt: convention radio groups for monthly/semi-monthly, offset fields for weekly/biweekly/quarterly/annual, 53rd/27th period warning banner, January pay date preview for monthly conventions; `GenerateCalendarAsync` uses `PayDateComputer`; `ShiftOffWeekend` removed; `GenerateForm` inner class updated with `Convention` property; cutoff validation fixed for convention-based frequencies
+  - `src/AllWorkHRIS.Host/Components/Pages/Payroll/PayrollCalendarPage.razor` — New Context form updated with convention selector (monthly/semi-monthly), pay date offset and cutoff offset fields, extra period policy selector; `NewContextForm` class extended; `CreateContextAsync` passes new fields to `PayrollContext`
+  - `src/AllWorkHRIS.Host/wwwroot/app.css` — added `.alert-warning` class (amber palette, matching existing `.alert-error` / `.alert-info` pattern)
+
+---
+
+### 2026-05-01 — Entity header suppressed for single-entity deployments
+
+The HRIS and Payroll shell entity headers now render nothing at all when only one legal entity exists, reclaiming the header row space for single-entity (small company) deployments. The entity is still auto-selected silently. In multi-entity deployments the header row with entity pills renders as before. No configuration required — the component detects entity count automatically.
+
+- Files updated:
+  - `Components/Layout/HrisEntityHeader.razor` — removed badge branch; header div + label + pills render only when entity count > 1; single entity silently selected with no UI output
+  - `Components/Layout/PayrollEntityHeader.razor` — same change
+  - `Components/Layout/HrisShell.razor` — removed static header div wrapper; component is placed directly and owns its own wrapper when needed
+  - `Components/Layout/PayrollShell.razor` — same change
+  - `docs/PRD/PRD-0000_Core_Vision.md` — §4.1 updated to reflect full header suppression (not just badge) for single-entity deployments
+
+---
+
+### 2026-05-01 — PEO-to-SMB design philosophy formalised
+
+The underlying rationale for legal entity scoping across all HRIS and Payroll objects has been stated as an explicit design principle: the platform is built for PEO operational complexity but must present zero overhead to a single-entity small company deployment. Multi-entity infrastructure must be invisible when only one entity exists. Entity scoping is enforced at the data and service layers, not only in the UI. Complexity should be proportional to deployment size.
+
+- Files updated:
+  - `docs/PRD/PRD-0000_Core_Vision.md` — v0.2 → v0.3 — added §4.1 Design Philosophy — The PEO-to-SMB Spectrum; states the principle, practical implications, and evaluation test for design decisions
+
+---
+
+### 2026-05-01 — Job and Position legal entity scoping — design decision recorded
+
+Decision: Jobs are scoped to Legal Entities. Legal entities are distinct operating companies that may independently define, title, and grade their roles. Job_Code uniqueness is enforced within a legal entity, not globally. Positions are implicitly scoped through their Org_Unit_ID (no direct Legal_Entity_ID stored on position); the job referenced by a position must belong to the same legal entity as the position's org unit.
+
+- Files updated:
+  - `docs/DATA/Entity_Job.md` — v0.1 → v0.2 — added `Legal_Entity_ID` as required attribute; updated Design Principles, Relationships, and Governance to reflect entity scoping; added within-entity Job_Code uniqueness rule; added cross-entity assignment constraint
+  - `docs/DATA/Entity_Position.md` — v0.1 → v0.2 — added Design Principles clarifying that legal entity is derived via Org_Unit_ID (not stored directly); added cross-entity Job_ID constraint; added Governance rule requiring same-entity job picker in UI
+  - `docs/PRD/HRIS_Module_PRD.md` — added REQ-HRS-063 (job legal entity scoping with business rationale) and REQ-HRS-064 (position-to-job same-entity constraint); updated §8 attribute lists
+  - `docs/build/Build_Sequence_Plan.md` — v0.7 → v0.8 — updated 2.8 JobsPage spec to reflect entity-scoped display, forms, and pickers; added schema migration requirement (`legal_entity_id` column on `job` table); updated `IJobRepository` spec to include `GetByLegalEntityAsync`; updated TC-HRS-029/031/032; added TC-HRS-033 (entity switch reloads jobs/positions) and TC-HRS-034 (cross-entity position-to-job rejected at service layer); updated seed data note
+
+---
+
 ## April-2026
+
+## 2026—04-28 - Build_Sequence_Plan.md updated — Phase 2.9 Schema Review
+- All PostgreSQL native enum type columns in the HRIS and Payroll schemas replaced with integer FK columns referencing dedicated lkp_ lookup/code tables. Driven by DBMS portability (ADR-004), extensibility (new values via INSERT not ALTER TYPE), and functional metadata requirements (e.g. periods_per_year, is_payroll_active, overtime_eligible).
+- New files: schemas/dbml/hcm_hris_lookups.dbml — 28 HRIS lookup tables (v0.1)
+			 schemas/dbml/hcm_payroll_lookups.dbml — 24 Payroll lookup tables (v0.1)
+			 docs/SPEC/LookupCache_Spec.md — ILookupCache service spec (v0.1)
+- Files updated: schemas/dbml/hcm_hris.dbml — v0.1 → v0.2 — enum types removed, integer FK columns
+                 schemas/dbml/hcm_payroll_core.dbml — v0.1 → v0.2 — enum types removed, integer FK columns
+                 docs/build/Build_Sequence_Plan.md — v0.5 → v0.6 — implementation notes, forward impact notes, known issues
+- Design decisions: lkp_ tables use SERIAL integer PKs; entity tables store integer FK (not code string)
+                    is_terminal removed from all lookup tables — state machine concern, not lookup table concern
+                    Removed descriptive-only columns: min_salary_threshold, max_duration_days, hierarchy_level, completion_pct
+                    ILookupCache uses dictionary-of-dictionaries: table name → code → LookupEntry
+                    Loaded once at startup; RefreshAsync() available without restart
+                    Missing code/id throws InvalidOperationException
+- Pending changes: Rebuild database from revised DBML files
+                   Implement ILookupCache per LookupCache_Spec.md (Claude Code task)
+                   Delete Enums.cs; update domain records, repositories, services, and UI dropdowns
 
 ### 2026-04-27 - Changed Syncfusion license key from environment variable to .Net user-secret
 - Files updated: build/Build_Sequence_Plan (updated to v0.4)

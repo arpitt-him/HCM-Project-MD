@@ -3,11 +3,11 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Control Artifact |
-| **Version** | v1.9 |
+| **Version** | v2.0 |
 | **Status** | Active |
 | **Owner** | Core Platform |
 | **Location** | `docs/architecture/Architecture_Model_Inventory.md` |
-| **Last Updated** | April 2026 |
+| **Last Updated** | May 2026 |
 
 ## Purpose
 
@@ -57,6 +57,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
 | ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
 | ADR | Platform | ADR-011_Module_Independence_Principle | docs/ADR | Complete | Accepted | Core Platform | Six rules governing module independence; event payloads in AllWorkHRIS.Core; InProcessEventBus zero-subscriber no-op; PayrollContextId nullable; schemas applied per module; subscribers register own handlers |
+| ADR | Benefits | ADR-012_Benefit_Election_Temporal_Integrity | docs/ADR | Complete | Accepted | Benefits Module | 7 decisions: activation jobs for all date-gated entities (LeaveStatusTransitionJob as reference); TDO forward-shift triggers immediate job cycle; TDO backward-shift is read-only (no demotions); retroactive payroll uses date-overlap filter not status filter; non-overlapping date enforcement via SERIALIZABLE transaction; amendment trim-and-supersede (in-place update for same-start-date); bulk import sort-and-sweep overlap resolution |
 
 ### DATA — Entity Specifications
 
@@ -98,10 +99,12 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Functional Specification | HRIS | HRIS_Leave_and_Absence | docs/SPEC | Complete | Draft | Core Platform / HRIS | Leave request lifecycle, manager approval, balance tracking, payroll impact signals, return from leave, leave_balance schema addition, 20 test cases |
 | Functional Specification | HRIS | HRIS_Document_Management | docs/SPEC | Complete | Draft | Core Platform / HRIS | Document upload, versioning, supersession, I-9 and W-4 specific handling, expiration tracking, compliance alerts, access control, storage abstraction, retention rules, 20 test cases |
 | Functional Specification | Payroll | Payroll_Core_Module | docs/SPEC | Complete | Draft | Core Platform / Payroll | Module assembly, HRIS event subscriptions, run initiation async pattern, ordered computation flow, accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components, 23 test cases |
-| Functional Specification | Benefits | Benefits_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, deduction code management, election lifecycle, versioning pattern, HRIS event integration, batch import async pattern, payroll boundary, Blazor component specs, 20 test cases |
+| Functional Specification | Benefits | Benefits_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | v0.4 — Module assembly, six calculation modes (FIXED_ANNUAL/MONTHLY/PER_PERIOD, PCT_PRE_TAX/POST_TAX, COVERAGE_BASED) with rate tables and employer match rules, SERIALIZABLE overlap enforcement, amendment trim-and-supersede, bulk import sort-and-sweep, activation job (BenefitElectionActivationJob), HRIS event integration, payroll boundary, timing alignment model (§17: coverage fraction, phase boundary, partial-period proration, PostTaxPctBenefitStep, MatchBenefitStep), Blazor component specs, 34 test cases |
 | Functional Specification | T&A | Time_Attendance_Minimum_Module | docs/SPEC | Complete | Draft | Core Platform | Module assembly, time entry lifecycle, overtime detection and FLSA reclassification, payroll handoff, correction of locked entries, batch import, HRIS event integration, Blazor component specs, 20 test cases |
 | ADR | Platform | ADR-009_Authentication_Identity_Strategy | docs/ADR | Complete | Accepted | Core Platform | OIDC provider-agnostic authentication; Keycloak as on-premises default; role mapping from JWT claims; tenant_id claim as trust anchor for ADR-010 |
 | ADR | Platform | ADR-010_Tenant_Isolation_Strategy | docs/ADR | Complete | Accepted | Core Platform | Three isolation models as client deployment options (dedicated DB, shared DB, separate schema); Autofac per-request IConnectionFactory resolution; repositories unaware of isolation model |
+| Functional Specification | Platform | LookupCache_Spec | docs/SPEC | Complete | Ready for Implementation | Core Platform | ILookupCache in-memory lookup cache service. Dictionary-of-dictionaries structure. Covers LookupEntry record, LookupTables constants (51 tables), ILookupCache interface, LookupCache implementation with atomic refresh, Program.cs registration pattern, and complete refactor scope for enum-to-lookup migration including domain records, repositories, services, and UI dropdowns |
+| Functional Specification | Payroll | Pay_Calendar_Generation | docs/SPEC | In Progress | Draft | Payroll Domain | Convention-based pay date selection for all frequencies; non-business day roll-back rule; 53rd/27th extra-period policy; processing chain (PayDate, InputCutoffDate, CalculationDate, TransmissionDate); three-zone period model; arrears vs. current pay; data lock gates; six-state period state machine (UPCOMING→OPEN→CUTOFF→PROCESSING→SUBMITTED→PAID); day-by-day operational timelines with worked examples for weekly, biweekly, semi-monthly, monthly |
 
 ### Conventions
 
@@ -153,6 +156,7 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 | Artifact Type | Domain | Model Name | Folder Location | Status | Lifecycle Status | Owner | PRD Coverage | Confidence |
 |---|---|---|---|---|---|---|---|---|
 | Model | Accumulators | Accumulator_Model_Detailed | docs/accumulators | Complete | Approved | Core Platform | Yes | High |
+| Model | Accumulators / Jurisdiction | Jurisdiction_Category_Code_Model | docs/accumulators | Draft | Review | Core Platform | Yes | High |
 
 ### Architecture Models — Calculation Engine
 
@@ -304,7 +308,8 @@ Complete inventory of all documentation artifacts in the HCM platform repository
 
 | Artifact Type | Domain | Document Name | Folder Location | Status | Lifecycle Status | Owner | Notes |
 |---|---|---|---|---|---|---|---|
-| Build Plan | Platform | Build_Sequence_Plan | docs/build | Complete | Active | Core Platform | 9-phase build sequence; Phase 0 HRIS schema only; Phase 2 includes HRIS Standalone Test (8 steps); Payroll schema added at Phase 4; dependency map; NuGet package reference (v0.2) |
+| Build Plan | Platform | Build_Sequence_Plan | docs/build | Complete | Active | Core Platform | 9-phase build sequence; Phase 0 HRIS schema only; Phase 2 includes HRIS Standalone Test (8 steps); Payroll schema added at Phase 4; dependency map; NuGet package reference (v0.2).  v0.6 adds: Implementation Notes (actual Phase 0–2 decisions differing from v0.4 plan); Forward Impact Notes (8 items affecting Phases 3–8); Known Issues section; Phase 2.9 seed data step and Phase 2.10 schema review step; @rendermode InteractiveServer requirement on all UI page deliverables; Keycloak User Realm Role mapper requirement in Phase 0.3; Phase 3 project reference corrected to AllWorkHRIS.Host/Hris/; Phase 4 module independence note strengthened |
+
 ---
 
 ## Legend

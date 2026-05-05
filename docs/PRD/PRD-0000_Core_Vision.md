@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Product Requirements — Platform Vision |
-| **Version** | v0.2 |
+| **Version** | v0.3 |
 | **Status** | Locked |
 | **Owner** | Core Platform |
 | **Location** | `docs/PRD/PRD-0000_Core_Vision.md` |
@@ -92,6 +92,28 @@ The platform shall support PEO-style client structures with isolated tenant data
 
 **REQ-PLT-008**
 Tenant data isolation shall be enforced at the data layer, not only at the application layer.
+
+---
+
+### 4.1 Design Philosophy — The PEO-to-SMB Spectrum
+
+The platform is built for PEO operational complexity but must present zero overhead to a small single-entity employer. These are not competing goals — they are the same goal expressed at two ends of a spectrum, and every design decision must satisfy both ends simultaneously.
+
+**What this means in practice:**
+
+- **Legal entities are the primary organisational context.** All employee, job, position, payroll, and org structure data is scoped to a legal entity. In a PEO deployment, operators work within and across multiple client entities. In a small company deployment, there is one entity and the user never thinks about it.
+
+- **Multi-entity infrastructure must be invisible in single-entity use.** An entity selector that presents as a clickable pill list in a PEO context is suppressed entirely when only one entity exists — no label, no badge, no header row. The reclaimed space is returned to the page. No configuration is required to achieve the simplified view — the system detects it automatically.
+
+- **Entity scoping is enforced at the data layer, not only the UI layer.** Jobs, positions, org structure, payroll contexts, and profiles are all owned by a specific legal entity. The UI reflects this, but the constraint lives in the service and repository layers so it holds regardless of how data is entered.
+
+- **Complexity should be proportional to deployment size.** A 10-person company using this platform should not encounter concepts, screens, or data structures that only matter at 10,000 employees or 200 client entities. Features that serve PEO-scale complexity are present but surface only when the data warrants them.
+
+**How design decisions should be evaluated against this principle:**
+
+When a feature involves entity scoping, multi-entity data, or cross-entity operations, ask: *Does this work cleanly for a PEO with 200 client entities? Does a single-entity user experience any additional friction or visible complexity as a result?* If yes to both, the design is correct. If the single-entity experience degrades, the design needs adjustment.
+
+---
 
 ## 5. Data Entry Channels
 

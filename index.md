@@ -64,6 +64,7 @@ ADRs document significant architectural decisions — the context, the decision 
 | [ADR-009_Authentication_Identity_Strategy.md](docs/ADR/ADR-009_Authentication_Identity_Strategy.md) | OIDC provider-agnostic authentication; Keycloak as on-premises default; role claim mapping; tenant_id claim bridge to ADR-010 |
 | [ADR-010_Tenant_Isolation_Strategy.md](docs/ADR/ADR-010_Tenant_Isolation_Strategy.md) | Three isolation models as client deployment options; Autofac per-request IConnectionFactory resolution; TenantRegistry pattern; repositories completely isolation-model agnostic |
 | [ADR-011_Module_Independence_Principle.md](docs/ADR/ADR-011_Module_Independence_Principle.md) | Six rules governing module independence; InProcessEventBus zero-subscriber no-op; event payloads in AllWorkHRIS.Core; nullable module-optional fields; per-module schema application |
+| [ADR-012_Benefit_Election_Temporal_Integrity.md](docs/ADR/ADR-012_Benefit_Election_Temporal_Integrity.md) | Seven decisions governing benefit election temporal integrity: activation jobs for all date-gated entities; TDO forward/backward shift behaviour; retroactive payroll dual-filter pattern; non-overlapping date enforcement via serializable transaction; amendment trim-and-supersede workflow; bulk import sort-and-sweep overlap resolution |
 
 ---
 
@@ -124,9 +125,14 @@ SPEC documents define detailed behaviour for specific features or integration pa
 | [HRIS_Leave_and_Absence.md](docs/SPEC/HRIS_Leave_and_Absence.md) | Leave request submission, manager approval workflow, balance tracking, payroll impact signal publication, return from leave handling, leave balance schema |
 | [HRIS_Document_Management.md](docs/SPEC/HRIS_Document_Management.md) | Document upload, versioning, supersession pattern, I-9 and W-4 specific handling, expiration tracking and compliance alerts, access control, storage abstraction, retention rules |
 | [Payroll_Core_Module.md](docs/SPEC/Payroll_Core_Module.md) | Payroll module assembly, HRIS event subscriptions, async run initiation, ordered computation flow (9 steps), accumulator 4-layer mutation chain, PayrollRunJob background service, pay register and run progress UI components |
-| [Benefits_Minimum_Module.md](docs/SPEC/Benefits_Minimum_Module.md) | Deduction code management, benefit election lifecycle and versioning, HRIS event integration, batch import async pattern, payroll consumption boundary, UI component specs |
+| [Benefits_Minimum_Module.md](docs/SPEC/Benefits_Minimum_Module.md) | Deduction code management, six calculation modes with rate tables and employer match, benefit election lifecycle and versioning, SERIALIZABLE overlap enforcement, bulk import sort-and-sweep, activation job, HRIS event integration, payroll consumption boundary and timing alignment model (coverage fraction, phase boundary, partial-period proration), UI component specs — v0.4 — 34 test cases |
+| [Pay_Register_Drilldown.md](docs/SPEC/Pay_Register_Drilldown.md) | Pay Register page (`/payroll/pay-register`) — run selection via year/month navigator, three tabs (Company Summary with Total Cash Required, Org Rollup by dept/location/job, Employee Detail with result line expansion), CSV export and GL-import line-detail export, role-based access — v0.1 — 11 test cases |
+| [Accumulator_Display.md](docs/SPEC/Accumulator_Display.md) | Accumulator Display page (`/payroll/accumulators`) — By Family and By Employee views, three-layer architecture (Definition/Impact/Value), rollup behavior types, consumer-oriented views, cap enforcement (amber/CAP REACHED/REVIEW REQUIRED), retroactivity display, reset history, cross-scope validation surface — v0.1 — 14 test cases |
 | [Time_Attendance_Minimum_Module.md](docs/SPEC/Time_Attendance_Minimum_Module.md) | Time entry lifecycle, manager approval, FLSA overtime detection and reclassification, payroll handoff, locked entry correction, batch import, HRIS event integration, My Timecard and Timecards UI |
 | [Reporting_Minimum_Module.md](docs/SPEC/Reporting_Minimum_Module.md) | 16 pre-built operational reports (8 payroll, 8 HR), CSV/XLSX/PDF export using ClosedXML and QuestPDF, async threshold pattern, scheduled delivery, role-scoped access enforcement, shared ReportRunner component |
+| [LookupCache_Spec.md](docs/SPEC/LookupCache_Spec.md) | ILookupCache in-memory service — dictionary-of-dictionaries cache for all lkp_ lookup tables; LookupEntry, LookupTables constants, interface, implementation with atomic refresh, Program.cs registration, and complete enum-to-lookup refactor scope |
+| [Pay_Calendar_Generation.md](docs/SPEC/Pay_Calendar_Generation.md) | Pay date convention selection for all frequencies; non-business day roll-back rule; 53rd/27th period policy; processing chain (cutoff, calculation, transmission, pay dates); three-zone period model; arrears vs. current pay; data lock gates; six-state period state machine; operational timelines with worked examples |
+| [Platform_Audit_Trail.md](docs/SPEC/Platform_Audit_Trail.md) | Operational logging via Serilog (structured, sink-configurable); compliance-grade audit trail via `platform_audit_event` table; `IAuditService` interface in Core; `AuditService` Host implementation; event scope, JSON change payload convention, tenant scoping, 7-year retention, and audit report UI |
 
 ---
 
@@ -134,7 +140,24 @@ SPEC documents define detailed behaviour for specific features or integration pa
 
 | Document | Purpose |
 |---|---|
-| [Build_Sequence_Plan.md](docs/build/Build_Sequence_Plan.md) | Sequenced 9-phase build plan from infrastructure through hardening; phase gates, deliverables, test case mapping, dependency map, and NuGet package reference |
+| [Build_Sequence_Plan.md](docs/build/Build_Sequence_Plan.md) | Sequenced 9-phase build plan from infrastructure through hardening; phase gates, deliverables, test case mapping, dependency map, and NuGet package reference. v0.6 adds Implementation Notes, Forward Impact Notes, Known Issues, Phase 2.9/2.10 steps, and @rendermode InteractiveServer requirement |
+
+---
+
+## Schema — DBML Source
+DBML files are the source of truth for all database schemas. DDL is generated from these files via dbml-cli. Never edit the generated DDL directly.
+
+### Entity Schemas
+|---|---|
+| Document | Purpose |
+| hcm_hris.dbml | HRIS domain entity schema — Person, Employment, Assignment, Compensation, Org Unit, Job, Position, Leave, Document, Onboarding, Employee Event. v0.2: enum columns replaced with integer FK columns referencing lkp_ table |
+| shcm_payroll_core.dbml | Payroll core entity schema — Payroll Run, Result Sets, Employee Results, Result Lines, Accumulator chain (4 layers), Payroll Check, Payroll Item, Run Scope. v0.2: enum columns replaced with integer FK columns referencing lkp_ tables |
+
+### Lookup / Code Table Schemas
+|---|---|
+| Document | Purpose |
+| hcm_hris_lookups.dbml | All lkp_ lookup/code tables for the HRIS domain. 28 tables covering person lifecycle, employment classification, FLSA/compliance, assignment, compensation/pay, leave/approval, documents, onboarding, organization, and job/position. Integer PKs, domain-specific functional columns |
+| hcm_payroll_lookups.dbml | All lkp_ lookup/code tables for the Payroll domain. 24 tables covering run lifecycle, result sets, employee results, payments/checks, impacts/posting, accumulators, scope/population, and funding/disbursement. Integer PKs, domain-specific functional columns |
 
 ---
 
@@ -279,7 +302,8 @@ Architecture models define *how* the system implements the requirements. They ar
 
 | Document | Purpose |
 |---|---|
-| [Accumulator_Model_Detailed.md](docs/accumulators/Accumulator_Model_Detailed.md) | Detailed accumulator entity structure, rollup behaviour, and reconciliation |
+| [Accumulator_Model_Detailed.md](docs/accumulators/Accumulator_Model_Detailed.md) | Detailed accumulator entity structure, rollup behaviour, reconciliation relationships, consumer-group definitions, and rule versioning integration |
+| [Jurisdiction_Category_Code_Model.md](docs/accumulators/Jurisdiction_Category_Code_Model.md) | Classification layer above accumulator definitions — tax categories (authority-down: national jurisdiction → sub-jurisdiction → legal entity) and benefit categories (entity-up: legal entity plans → national type codes); US seed data; sub-jurisdiction reciprocity agreements (34 bilateral pairs, reciprocity vs. credit distinction, SUI work-state rule); known gaps documented |
 
 ---
 
@@ -350,4 +374,4 @@ Exception catalogue documents define production-grade validation and exception r
 
 ---
 
-*Last updated: April 2026*
+*Last updated: 2026-05-04 (Phase 9/10 specs; Jurisdiction Category Code Model)*

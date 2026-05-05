@@ -238,9 +238,15 @@ The platform shall support Position definitions representing specific organisati
 **REQ-HRS-062**
 Position management shall be optional. Deployments may operate with Job-only structures where position management is not required.
 
-Job attributes: Job_ID, Job_Code, Job_Title, Job_Family, Job_Level, FLSA_Classification, EEO_Category, Effective_Start_Date, Effective_End_Date.
+**REQ-HRS-063**
+Job definitions shall be scoped to a Legal Entity. Legal entities are operating companies that may independently define, title, and grade their roles. Job_Code uniqueness is enforced within a Legal Entity, not globally. A job may not be assigned to an employee whose employing Legal Entity differs from the job's Legal Entity.
 
-Position attributes: Position_ID, Job_ID, Org_Unit_ID, Position_Title (optional), Headcount_Budget, Position_Status, Effective_Start_Date, Effective_End_Date.
+**REQ-HRS-064**
+A position's legal entity is determined through its Org_Unit_ID. The job referenced by a position must belong to the same legal entity as the position's org unit. Cross-entity position-to-job references are rejected at the service layer.
+
+Job attributes: Job_ID, Legal_Entity_ID, Job_Code (unique within Legal Entity), Job_Title, Job_Family, Job_Level, FLSA_Classification, EEO_Category, Effective_Start_Date, Effective_End_Date.
+
+Position attributes: Position_ID, Job_ID, Org_Unit_ID, Position_Title (optional), Headcount_Budget, Position_Status, Effective_Start_Date, Effective_End_Date. Legal entity is derived via Org_Unit_ID and is not stored directly on the position.
 
 Position_Status values:
 

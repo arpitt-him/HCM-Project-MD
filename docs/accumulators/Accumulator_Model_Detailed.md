@@ -1,13 +1,13 @@
 # Accumulator_Model_Detailed
 
-| Field | Detail |
-|---|---|
-| **Document Type** | Architecture Model |
-| **Version** | v0.3 |
-| **Status** | Approved |
-| **Owner** | Core Platform |
-| **Location** | `docs/accumulators/Accumulator_Model_Detailed.md` |
-| **Domain** | Accumulators |
+| Field                 | Detail                                                                                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Document Type**     | Architecture Model                                                                                                                                                                              |
+| **Version**           | v0.3                                                                                                                                                                                            |
+| **Status**            | Approved                                                                                                                                                                                        |
+| **Owner**             | Core Platform                                                                                                                                                                                   |
+| **Location**          | `docs/accumulators/Accumulator_Model_Detailed.md`                                                                                                                                               |
+| **Domain**            | Accumulators                                                                                                                                                                                    |
 | **Related Documents** | PRD-500-Accumulator-Strategy.md, Accumulator_and_Balance_Model, Result_and_Payable_Model, Posting_Rules_and_Mutation_Semantics, Multi_Context_Calendar_Model, Correction_and_Immutability_Model |
 
 ## Purpose

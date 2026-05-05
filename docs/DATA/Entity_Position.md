@@ -3,7 +3,7 @@
 | Field | Detail |
 |---|---|
 | **Document Type** | Data Entity Specification |
-| **Version** | v0.1 |
+| **Version** | v0.2 |
 | **Status** | Draft |
 | **Owner** | Core Platform / HRIS |
 | **Location** | `docs/DATA/Entity_Position.md` |
@@ -19,6 +19,8 @@ Defines the Position entity — a specific organisational headcount slot linked 
 
 - A position is a headcount slot, not a person. It may be open, filled, or frozen.
 - Each position references exactly one Job.
+- **A position's legal entity is determined by its Org_Unit_ID.** The org unit belongs to a legal entity; that entity ownership flows through to the position. Legal_Entity_ID is not stored directly on the position — it is derived via the org unit.
+- **A position's Job_ID must reference a job belonging to the same legal entity as its Org_Unit.** Cross-entity position-to-job references are not permitted.
 - Positions are effective-dated. History is preserved.
 - Position management is optional. When not used, assignments reference Job directly.
 
@@ -68,6 +70,8 @@ Defines the Position entity — a specific organisational headcount slot linked 
 
 - Positions may only be closed if no active assignment occupies them (EXC-EMP rule).
 - Position_Status transitions must follow STATE-EMP-020 to 023 valid paths.
+- A position's Job_ID must belong to the same legal entity as the position's Org_Unit. Violations are rejected at the service layer.
+- When the Jobs & Positions UI is filtered by legal entity, only jobs belonging to that entity are presented in the job picker for new positions.
 - All position changes are audit-logged.
 
 ---

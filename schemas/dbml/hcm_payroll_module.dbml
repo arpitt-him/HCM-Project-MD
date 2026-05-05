@@ -1,0 +1,1619 @@
+// ============================================================
+// HCM Platform — Payroll Domain Schema
+// Version: v0.6
+// Status: Draft
+// Changes from v0.5 (migrations 011 + 012):
+//   - deduction_code table renamed to deduction
+//   - deduction.code_id renamed to deduction_id
+//   - deduction: added calculation_mode, wage_base, age_as_of_rule
+//   - benefit_deduction_election: deduction_code varchar replaced by
+//     deduction_id uuid FK; added contribution_pct, coverage_tier,
+//     annual_coverage_amount, annual_election_amount,
+//     monthly_election_amount, partial_period_rule
+//   - payroll_context: added three_paycheck_month_rule
+//   - New tables: deduction_rate_table, deduction_rate_entry,
+//     deduction_employer_match
+// Changes from v0.4:
+//   - Added deduction_code table
+//   - Added benefit_deduction_election table
+//   - Added benefit_configuration_audit_log table
+//   - New TableGroup: benefits_deductions
+// Changes from v0.3:
+//   - Consolidated: hcm_payroll_lookups.dbml and hcm_tax_pipeline.dbml
+//     absorbed into this file
+//   - payroll_context: added compensation_rate_type_id,
+//     pay_date_convention, pay_date_offset_days, cutoff_offset_days,
+//     extra_period_policy (were missing from core; present in DB)
+//   - payroll_profile: added blocking_tasks_cleared
+//     (was missing from core; present in DB)
+// Changes from v0.1:
+//   - All PostgreSQL enum types removed
+//   - Enum columns replaced with integer FK columns
+//     referencing lookup tables
+// Covers: Payroll lookup tables, Payroll Context, Payroll Period,
+//         Payroll Run, Run Result Set, Employee Payroll Result,
+//         Result Lines, Accumulator chain (4 layers),
+//         Payroll Check, Payroll Item, Run Scope, Payroll Profile,
+//         Tax jurisdiction registry, Legal entity jurisdiction,
+//         Calculation step pipeline, Effective-dated rate tables,
+//         Employee withholding form submissions,
+//         Form field definition registry, Configuration audit log,
+//         Benefits deduction codes and elections, Benefit config audit
+// Note: References are defined as standalone — no FK constraints
+//       applied. Column names are consistent across tables to
+//       support FK addition without renaming.
+// ============================================================
+
+
+// ============================================================
+// LOOKUP TABLES
+// PK Type: SERIAL INTEGER (auto-increment)
+// Naming: lkp_ prefix | snake_case
+// ============================================================
+
+// ────────────────────────────────────────────────────────────
+// FK-TARGET TABLE: lkp_result_class
+// Referenced by: lkp_impact_source_type, lkp_accumulator_family
+// ────────────────────────────────────────────────────────────
+
+Table lkp_result_class {
+  id                integer      [pk, increment]
+  code              varchar(50)  [unique, not null, note: 'e.g. EARNING, DEDUCTION, TAX, EMPLOYER_CONTRIBUTION']
+  label             varchar(100) [not null]
+  description       text
+  sign_convention   varchar(10)  [not null, note: 'POSITIVE (adds to gross) or NEGATIVE (subtracts from gross)']
+  affects_gross_pay boolean      [not null, default: false, note: 'Whether this class factors into gross pay calculation']
+  affects_net_pay   boolean      [not null, default: true, note: 'Whether this class factors into net pay calculation']
+  sort_order        int          [not null, default: 0]
+  is_active         boolean      [not null, default: true]
+  is_default        boolean      [not null, default: false]
+  created_at        timestamptz  [not null, default: `now()`]
+  updated_at        timestamptz  [not null, default: `now()`]
+
+  Note: 'Top-level classification of payroll result lines (Earning, Deduction, Tax, Employer Contribution)'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 1: PAYROLL RUN LIFECYCLE
+// ────────────────────────────────────────────────────────────
+
+Table lkp_run_type {
+  id                   integer      [pk, increment]
+  code                 varchar(50)  [unique, not null, note: 'e.g. REGULAR, ADJUSTMENT, CORRECTION, REPROCESSING, SUPPLEMENTAL, SIMULATION']
+  label                varchar(100) [not null]
+  description          text
+  affects_accumulators boolean      [not null, default: true, note: 'Whether this run type updates accumulator balances']
+  is_reportable        boolean      [not null, default: true, note: 'Whether included in standard payroll reports and filings']
+  requires_base_run    boolean      [not null, default: false, note: 'Whether this type requires a reference to an original/base run']
+  generates_payments   boolean      [not null, default: true, note: 'Whether this run type produces disbursable payments']
+  sort_order           int          [not null, default: 0]
+  is_active            boolean      [not null, default: true]
+  is_default           boolean      [not null, default: false]
+  created_at           timestamptz  [not null, default: `now()`]
+  updated_at           timestamptz  [not null, default: `now()`]
+
+  Note: 'Classification of payroll run types (regular, adjustment, correction, etc.)'
+}
+
+Table lkp_run_status {
+  id                 integer      [pk, increment]
+  code               varchar(50)  [unique, not null, note: 'e.g. DRAFT, OPEN, CALCULATING, CALCULATED, UNDER_REVIEW, APPROVED, RELEASING, RELEASED, CLOSED, FAILED, CANCELLED']
+  label              varchar(100) [not null]
+  description        text
+  is_editable        boolean      [not null, default: false, note: 'Whether payroll inputs can be modified in this state']
+  allows_calculation boolean      [not null, default: false, note: 'Whether the calculation engine can execute']
+  allows_release     boolean      [not null, default: false, note: 'Whether payments can be released in this state']
+  is_error_state     boolean      [not null, default: false, note: 'Whether this state indicates a processing failure']
+  sequence_order     int          [not null, note: 'Expected progression order (1 = first state)']
+  sort_order         int          [not null, default: 0]
+  is_active          boolean      [not null, default: true]
+  is_default         boolean      [not null, default: false]
+  created_at         timestamptz  [not null, default: `now()`]
+  updated_at         timestamptz  [not null, default: `now()`]
+
+  Note: 'Lifecycle status of a payroll run — governs what operations are permitted at each stage'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 2: RESULT SETS
+// ────────────────────────────────────────────────────────────
+
+Table lkp_result_set_type {
+  id           integer      [pk, increment]
+  code         varchar(50)  [unique, not null, note: 'e.g. REGULAR_RUN, OFF_CYCLE, ADJUSTMENT_RUN, CORRECTION_RUN']
+  label        varchar(100) [not null]
+  description  text
+  is_scheduled boolean      [not null, default: false, note: 'Whether this type runs on a regular calendar schedule']
+  is_off_cycle boolean      [not null, default: false, note: 'Whether this type represents an off-cycle / ad-hoc result set']
+  sort_order   int          [not null, default: 0]
+  is_active    boolean      [not null, default: true]
+  is_default   boolean      [not null, default: false]
+  created_at   timestamptz  [not null, default: `now()`]
+  updated_at   timestamptz  [not null, default: `now()`]
+
+  Note: 'Classification of result set origin (regular run, off-cycle, adjustment, correction)'
+}
+
+Table lkp_result_set_status {
+  id          integer      [pk, increment]
+  code        varchar(50)  [unique, not null, note: 'e.g. PENDING, CALCULATED, APPROVED, RELEASED, FINALIZED, ARCHIVED']
+  label       varchar(100) [not null]
+  description text
+  is_editable boolean      [not null, default: false, note: 'Whether result set data can be modified']
+  is_released boolean      [not null, default: false, note: 'Whether funds have been released for this result set']
+  sort_order  int          [not null, default: 0]
+  is_active   boolean      [not null, default: true]
+  is_default  boolean      [not null, default: false]
+  created_at  timestamptz  [not null, default: `now()`]
+  updated_at  timestamptz  [not null, default: `now()`]
+
+  Note: 'Lifecycle status of a payroll result set'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 3: EMPLOYEE RESULTS & LINE ITEMS
+// ────────────────────────────────────────────────────────────
+
+Table lkp_employee_result_status {
+  id             integer      [pk, increment]
+  code           varchar(50)  [unique, not null, note: 'e.g. CALCULATED, APPROVED, RELEASED, FINALIZED, CORRECTED, REVERSED']
+  label          varchar(100) [not null]
+  description    text
+  is_payable     boolean      [not null, default: false, note: 'Whether payment can be issued in this state']
+  is_reversible  boolean      [not null, default: false, note: 'Whether the result can be reversed from this state']
+  sort_order     int          [not null, default: 0]
+  is_active      boolean      [not null, default: true]
+  is_default     boolean      [not null, default: false]
+  created_at     timestamptz  [not null, default: `now()`]
+  updated_at     timestamptz  [not null, default: `now()`]
+
+  Note: 'Lifecycle status of an individual employee payroll result'
+}
+
+Table lkp_item_status {
+  id              integer      [pk, increment]
+  code            varchar(50)  [unique, not null, note: 'e.g. DRAFT, POSTED, VOIDED, CORRECTED']
+  label           varchar(100) [not null]
+  description     text
+  is_active_state boolean      [not null, default: true, note: 'Whether the item is currently in effect']
+  is_reversible   boolean      [not null, default: false, note: 'Whether the item can be voided or corrected from this state']
+  sort_order      int          [not null, default: 0]
+  is_active       boolean      [not null, default: true]
+  is_default      boolean      [not null, default: false]
+  created_at      timestamptz  [not null, default: `now()`]
+  updated_at      timestamptz  [not null, default: `now()`]
+
+  Note: 'Status of a payroll line item (earning line, deduction line, tax line)'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 4: PAYMENTS & CHECKS
+// ────────────────────────────────────────────────────────────
+
+Table lkp_payment_method {
+  id                       integer      [pk, increment]
+  code                     varchar(50)  [unique, not null, note: 'e.g. DIRECT_DEPOSIT, PRINTED_CHECK, PAYCARD, CASH, MANUAL_CHECK, OTHER']
+  label                    varchar(100) [not null]
+  description              text
+  is_electronic            boolean      [not null, default: false, note: 'Whether payment is transmitted electronically (ACH, wire, paycard)']
+  requires_bank_info       boolean      [not null, default: false, note: 'Whether employee bank/routing info is required']
+  requires_physical_delivery boolean    [not null, default: false, note: 'Whether a physical instrument must be delivered']
+  supports_split_payment   boolean      [not null, default: true, note: 'Whether this method supports split/partial allocation']
+  sort_order               int          [not null, default: 0]
+  is_active                boolean      [not null, default: true]
+  is_default               boolean      [not null, default: false]
+  created_at               timestamptz  [not null, default: `now()`]
+  updated_at               timestamptz  [not null, default: `now()`]
+
+  Note: 'How payment is delivered to the employee (direct deposit, check, paycard, etc.)'
+}
+
+Table lkp_payment_context {
+  id           integer      [pk, increment]
+  code         varchar(50)  [unique, not null, note: 'e.g. REGULAR, SUPPLEMENTAL, CORRECTION, FINAL_PAY, OFF_CYCLE']
+  label        varchar(100) [not null]
+  description  text
+  is_scheduled boolean      [not null, default: false, note: 'Whether this context occurs on the regular pay calendar']
+  is_off_cycle boolean      [not null, default: false, note: 'Whether this is an off-cycle payment']
+  is_final     boolean      [not null, default: false, note: 'Whether this context represents final/separation pay']
+  tax_method   varchar(30)  [note: 'Default tax calculation method: AGGREGATE, FLAT_RATE, SUPPLEMENTAL_RATE']
+  sort_order   int          [not null, default: 0]
+  is_active    boolean      [not null, default: true]
+  is_default   boolean      [not null, default: false]
+  created_at   timestamptz  [not null, default: `now()`]
+  updated_at   timestamptz  [not null, default: `now()`]
+
+  Note: 'Context in which a payment is issued — affects tax withholding method and reporting'
+}
+
+Table lkp_check_status {
+  id            integer      [pk, increment]
+  code          varchar(50)  [unique, not null, note: 'e.g. DRAFT, GENERATED, RELEASED, VOIDED, REPLACED, RETURNED']
+  label         varchar(100) [not null]
+  description   text
+  is_negotiable boolean      [not null, default: false, note: 'Whether the check can be cashed/deposited in this state']
+  is_reissuable boolean      [not null, default: false, note: 'Whether a replacement can be issued from this state']
+  sort_order    int          [not null, default: 0]
+  is_active     boolean      [not null, default: true]
+  is_default    boolean      [not null, default: false]
+  created_at    timestamptz  [not null, default: `now()`]
+  updated_at    timestamptz  [not null, default: `now()`]
+
+  Note: 'Lifecycle status of a payroll check or payment instrument'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 5: IMPACTS & POSTING
+// ────────────────────────────────────────────────────────────
+
+Table lkp_impact_status {
+  id              integer      [pk, increment]
+  code            varchar(50)  [unique, not null, note: 'e.g. CALCULATED, POSTED, REVERSED, CORRECTED, SUPERSEDED']
+  label           varchar(100) [not null]
+  description     text
+  is_active_state boolean      [not null, default: true, note: 'Whether the impact is currently reflected in balances']
+  is_reversible   boolean      [not null, default: false, note: 'Whether the impact can be reversed from this state']
+  sort_order      int          [not null, default: 0]
+  is_active       boolean      [not null, default: true]
+  is_default      boolean      [not null, default: false]
+  created_at      timestamptz  [not null, default: `now()`]
+  updated_at      timestamptz  [not null, default: `now()`]
+
+  Note: 'Status of a payroll impact record'
+}
+
+Table lkp_impact_source_type {
+  id                  integer      [pk, increment]
+  code                varchar(50)  [unique, not null, note: 'e.g. EARNINGS_LINE, DEDUCTION_LINE, TAX_LINE, EMPLOYER_CONTRIBUTION_LINE, CORRECTION_LINE, MANUAL_ADJUSTMENT, OTHER']
+  label               varchar(100) [not null]
+  description         text
+  result_class_id     integer      [note: 'FK → lkp_result_class.id; NULL for CORRECTION_LINE, MANUAL_ADJUSTMENT, OTHER']
+  is_system_generated boolean      [not null, default: true, note: 'Whether this source type is created by the calc engine vs manual entry']
+  is_adjustable       boolean      [not null, default: false, note: 'Whether manual adjustments are allowed for this source type']
+  sort_order          int          [not null, default: 0]
+  is_active           boolean      [not null, default: true]
+  is_default          boolean      [not null, default: false]
+  created_at          timestamptz  [not null, default: `now()`]
+  updated_at          timestamptz  [not null, default: `now()`]
+
+  Note: 'Identifies where a payroll impact originated (earnings line, deduction line, tax line, etc.)'
+}
+
+Table lkp_posting_direction {
+  id          integer       [pk, increment]
+  code        varchar(50)   [unique, not null, note: 'e.g. INCREASE, DECREASE, NEUTRAL, DERIVED']
+  label       varchar(100)  [not null]
+  description text
+  multiplier  decimal(3,1)  [note: '+1.0 (INCREASE), -1.0 (DECREASE), 0.0 (NEUTRAL), NULL (DERIVED — computed at runtime)']
+  sort_order  int           [not null, default: 0]
+  is_active   boolean       [not null, default: true]
+  is_default  boolean       [not null, default: false]
+  created_at  timestamptz   [not null, default: `now()`]
+  updated_at  timestamptz   [not null, default: `now()`]
+
+  Note: 'Direction of a posting or accumulator contribution (increase, decrease, neutral, derived)'
+}
+
+Table lkp_contribution_type {
+  id          integer      [pk, increment]
+  code        varchar(50)  [unique, not null, note: 'e.g. STANDARD, REVERSAL, CORRECTION, RESET']
+  label       varchar(100) [not null]
+  description text
+  sort_order  int          [not null, default: 0]
+  is_active   boolean      [not null, default: true]
+  is_default  boolean      [not null, default: false]
+  created_at  timestamptz  [not null, default: `now()`]
+  updated_at  timestamptz  [not null, default: `now()`]
+
+  Note: 'Nature of an accumulator contribution (standard posting, reversal, correction, reset)'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 6: ACCUMULATORS
+// ────────────────────────────────────────────────────────────
+
+Table lkp_accumulator_family {
+  id                integer      [pk, increment]
+  code              varchar(50)  [unique, not null, note: 'e.g. GROSS_WAGES, PRE_TAX_DEDUCTIONS, FEDERAL_TAX_WITHHELD, SOCIAL_SECURITY, MEDICARE, RETIREMENT']
+  label             varchar(100) [not null]
+  description       text
+  result_class_id   integer      [note: 'FK → lkp_result_class.id; primary result class for this family']
+  is_tax_related    boolean      [not null, default: false, note: 'Whether this family relates to tax accumulators']
+  is_reportable     boolean      [not null, default: true, note: 'Whether included in standard year-end reporting']
+  sort_order        int          [not null, default: 0]
+  is_active         boolean      [not null, default: true]
+  is_default        boolean      [not null, default: false]
+  created_at        timestamptz  [not null, default: `now()`]
+  updated_at        timestamptz  [not null, default: `now()`]
+
+  Note: 'Functional grouping of accumulators (gross wages, deductions, taxes, etc.)'
+}
+
+Table lkp_accumulator_scope_type {
+  id                  integer      [pk, increment]
+  code                varchar(50)  [unique, not null, note: 'e.g. EMPLOYEE, EMPLOYER, EMPLOYEE_JURISDICTION, EMPLOYER_JURISDICTION, CLIENT_JURISDICTION']
+  label               varchar(100) [not null]
+  description         text
+  requires_participant boolean     [not null, default: false, note: 'Whether a participant (employee) ID is required']
+  requires_employer   boolean      [not null, default: false, note: 'Whether an employer ID is required']
+  requires_jurisdiction boolean    [not null, default: false, note: 'Whether a jurisdiction ID is required']
+  sort_order          int          [not null, default: 0]
+  is_active           boolean      [not null, default: true]
+  is_default          boolean      [not null, default: false]
+  created_at          timestamptz  [not null, default: `now()`]
+  updated_at          timestamptz  [not null, default: `now()`]
+
+  Note: 'Dimensional scope of an accumulator (employee-level, employer-level, jurisdiction-level)'
+}
+
+Table lkp_accumulator_balance_status {
+  id              integer      [pk, increment]
+  code            varchar(50)  [unique, not null, note: 'e.g. ACTIVE, RESET, ARCHIVED']
+  label           varchar(100) [not null]
+  description     text
+  is_active_state boolean      [not null, default: true, note: 'Whether the balance is currently in use']
+  sort_order      int          [not null, default: 0]
+  is_active       boolean      [not null, default: true]
+  is_default      boolean      [not null, default: false]
+  created_at      timestamptz  [not null, default: `now()`]
+  updated_at      timestamptz  [not null, default: `now()`]
+
+  Note: 'Status of an accumulator balance snapshot (active, reset at period boundary, archived)'
+}
+
+Table lkp_period_context {
+  id              integer      [pk, increment]
+  code            varchar(50)  [unique, not null, note: 'e.g. PTD, QTD, YTD, PLAN_YEAR, LTD']
+  label           varchar(100) [not null]
+  description     text
+  abbreviation    varchar(10)  [not null, note: 'Short display code: PTD, QTD, YTD, PY, LTD']
+  reset_frequency varchar(20)  [not null, note: 'When the accumulator resets: PER_PAY, QUARTERLY, ANNUALLY, PLAN_YEAR, NEVER']
+  reset_boundary  varchar(30)  [note: 'Boundary event: PAY_PERIOD_END, QUARTER_END, YEAR_END, PLAN_YEAR_END, NULL']
+  sort_order      int          [not null, default: 0]
+  is_active       boolean      [not null, default: true]
+  is_default      boolean      [not null, default: false]
+  created_at      timestamptz  [not null, default: `now()`]
+  updated_at      timestamptz  [not null, default: `now()`]
+
+  Note: 'Time window for accumulator balances — period-to-date, quarter-to-date, year-to-date, lifetime'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 7: SCOPE & POPULATION
+// ────────────────────────────────────────────────────────────
+
+Table lkp_scope_type {
+  id                    integer      [pk, increment]
+  code                  varchar(50)  [unique, not null, note: 'e.g. FULL, CATCH_UP, RETRO, RECOVERY']
+  label                 varchar(100) [not null]
+  description           text
+  is_retroactive        boolean      [not null, default: false, note: 'Whether this scope reaches back to prior periods']
+  requires_date_range   boolean      [not null, default: false, note: 'Whether a lookback date range is required']
+  affects_prior_periods boolean      [not null, default: false, note: 'Whether accumulator adjustments are applied to prior periods']
+  sort_order            int          [not null, default: 0]
+  is_active             boolean      [not null, default: true]
+  is_default            boolean      [not null, default: false]
+  created_at            timestamptz  [not null, default: `now()`]
+  updated_at            timestamptz  [not null, default: `now()`]
+
+  Note: 'Scope of a payroll calculation — full run, catch-up, retroactive, recovery'
+}
+
+Table lkp_scope_status {
+  id             integer      [pk, increment]
+  code           varchar(50)  [unique, not null, note: 'e.g. DRAFT, VALIDATED, READY, RUNNING, COMPLETED, FAILED, CANCELLED']
+  label          varchar(100) [not null]
+  description    text
+  is_runnable    boolean      [not null, default: false, note: 'Whether the scope/batch can be submitted for processing']
+  is_editable    boolean      [not null, default: false, note: 'Whether scope parameters can be modified']
+  is_error_state boolean      [not null, default: false, note: 'Whether this state indicates a processing failure']
+  sort_order     int          [not null, default: 0]
+  is_active      boolean      [not null, default: true]
+  is_default     boolean      [not null, default: false]
+  created_at     timestamptz  [not null, default: `now()`]
+  updated_at     timestamptz  [not null, default: `now()`]
+
+  Note: 'Lifecycle status of a processing scope or batch'
+}
+
+Table lkp_population_method {
+  id                integer      [pk, increment]
+  code              varchar(50)  [unique, not null, note: 'e.g. EXPLICIT, QUERY, EXCEPTION']
+  label             varchar(100) [not null]
+  description       text
+  is_dynamic        boolean      [not null, default: false, note: 'Whether population is evaluated at runtime (QUERY) vs fixed at setup (EXPLICIT)']
+  supports_preview  boolean      [not null, default: true, note: 'Whether the resolved population can be previewed before run']
+  supports_override boolean      [not null, default: false, note: 'Whether individual members can be added/removed after resolution']
+  sort_order        int          [not null, default: 0]
+  is_active         boolean      [not null, default: true]
+  is_default        boolean      [not null, default: false]
+  created_at        timestamptz  [not null, default: `now()`]
+  updated_at        timestamptz  [not null, default: `now()`]
+
+  Note: 'How the employee population for a payroll run is determined (explicit list, dynamic query, exception-based)'
+}
+
+// ────────────────────────────────────────────────────────────
+// GROUP 8: FUNDING & DISBURSEMENT
+// ────────────────────────────────────────────────────────────
+
+Table lkp_funding_status {
+  id                  integer      [pk, increment]
+  code                varchar(50)  [unique, not null, note: 'e.g. FUNDED, PARTIALLY_FUNDED, FAILED']
+  label               varchar(100) [not null]
+  description         text
+  is_complete         boolean      [not null, default: false, note: 'Whether funding is fully satisfied']
+  allows_disbursement boolean      [not null, default: false, note: 'Whether disbursement can proceed in this state']
+  is_error_state      boolean      [not null, default: false, note: 'Whether this state indicates a funding failure']
+  sort_order          int          [not null, default: 0]
+  is_active           boolean      [not null, default: true]
+  is_default          boolean      [not null, default: false]
+  created_at          timestamptz  [not null, default: `now()`]
+  updated_at          timestamptz  [not null, default: `now()`]
+
+  Note: 'Whether payroll funding (employer bank draw) succeeded, partially succeeded, or failed'
+}
+
+Table lkp_remittance_status {
+  id             integer      [pk, increment]
+  code           varchar(50)  [unique, not null, note: 'e.g. PREPARED, RELEASED, TRANSMITTED, ACCEPTED, REJECTED']
+  label          varchar(100) [not null]
+  description    text
+  is_transmitted boolean      [not null, default: false, note: 'Whether the remittance has been sent to the receiving party']
+  is_accepted    boolean      [not null, default: false, note: 'Whether the receiving party has acknowledged receipt']
+  is_error_state boolean      [not null, default: false, note: 'Whether this state indicates a remittance failure']
+  sort_order     int          [not null, default: 0]
+  is_active      boolean      [not null, default: true]
+  is_default     boolean      [not null, default: false]
+  created_at     timestamptz  [not null, default: `now()`]
+  updated_at     timestamptz  [not null, default: `now()`]
+
+  Note: 'Status of a tax or benefit remittance to an agency or vendor'
+}
+
+Table lkp_disbursement_status {
+  id             integer      [pk, increment]
+  code           varchar(50)  [unique, not null, note: 'e.g. PREPARED, RELEASED, SETTLED, RETURNED']
+  label          varchar(100) [not null]
+  description    text
+  is_released    boolean      [not null, default: false, note: 'Whether funds have been released for transfer']
+  is_settled     boolean      [not null, default: false, note: 'Whether the transfer has fully settled']
+  is_error_state boolean      [not null, default: false, note: 'Whether this state indicates a disbursement failure']
+  sort_order     int          [not null, default: 0]
+  is_active      boolean      [not null, default: true]
+  is_default     boolean      [not null, default: false]
+  created_at     timestamptz  [not null, default: `now()`]
+  updated_at     timestamptz  [not null, default: `now()`]
+
+  Note: 'Status of an employee payment disbursement through the banking settlement lifecycle'
+}
+
+
+// ============================================================
+// PAYROLL CONTEXT
+// ============================================================
+
+Table payroll_context {
+  payroll_context_id          uuid          [pk, not null,   note: "System-generated. Immutable."]
+  payroll_context_code        varchar(50)   [not null, unique, note: "Short human-readable code, e.g. BIWK-HQ-USD"]
+  payroll_context_name        varchar(200)  [not null,        note: "Display name, e.g. HQ Biweekly Salaried"]
+  legal_entity_id             uuid          [not null,        note: "FK → org_unit.org_unit_id (LEGAL_ENTITY type)"]
+  pay_frequency_id            integer       [not null,        note: "FK → lkp_pay_frequency.id"]
+  compensation_rate_type_id   integer       [null,            note: "FK → lkp_compensation_rate_type.id (SALARY, HOURLY, etc.). Classifies the compensation basis for this pay group."]
+  context_status              varchar(20)   [not null,        note: "DEFINED | CONFIGURED | ACTIVE | SUSPENDED | CLOSED"]
+  parent_payroll_context_id   uuid          [null,            note: "Lineage — prior context version this supersedes"]
+  root_payroll_context_id     uuid          [null,            note: "Root context in lineage chain"]
+  context_version_number      int           [not null, default: 1]
+  context_change_reason_code  varchar(50)   [null,            note: "Reason for this version e.g. CALENDAR_CHANGE"]
+  effective_start_date        date          [not null]
+  effective_end_date          date          [null,            note: "Null = currently active"]
+  pay_date_convention         varchar(30)   [null,            note: "Convention code for monthly/semi-monthly: MONTH_END, MID_MONTH, FIRST_FOLLOWING, FIXED_25, SM_15_AND_END, SM_1_AND_15, SM_10_AND_25. Null for offset-model frequencies (weekly, biweekly)."]
+  pay_date_offset_days        integer       [not null, default: 5, note: "Days after period end to pay. Used by offset-model frequencies (weekly, biweekly). Ignored when pay_date_convention is set."]
+  cutoff_offset_days          integer       [not null, default: 3, note: "Days before pay_date that input cutoff falls. Applied to all frequencies."]
+  extra_period_policy         varchar(20)   [not null, default: 'EXTRA_SPECIAL', note: "Policy for 53rd (weekly) or 27th (biweekly) period in a year: EXTRA_SPECIAL | ABSORB_PREV | ABSORB_NEXT"]
+  three_paycheck_month_rule   varchar(10)   [not null, default: 'PRORATE', note: "PRORATE | SKIP — how benefit deductions are handled in a 3-paycheck month"]
+  created_by                  uuid          [not null]
+  creation_timestamp          timestamptz   [not null]
+  last_updated_by             uuid          [not null]
+  last_update_timestamp       timestamptz   [not null]
+
+  indexes {
+    legal_entity_id
+    pay_frequency_id
+    context_status
+    payroll_context_code
+    parent_payroll_context_id
+    (legal_entity_id, context_status)
+  }
+}
+
+// ============================================================
+// PAYROLL PERIOD  (Calendar Entry)
+// ============================================================
+
+Table payroll_period {
+  period_id                   uuid          [pk, not null,   note: "System-generated. Also used as calendar_context_id in accumulator_balance and payroll_check."]
+  payroll_context_id          uuid          [not null,       note: "FK → payroll_context.payroll_context_id"]
+  period_year                 int           [not null,       note: "Calendar year e.g. 2026"]
+  period_number               int           [not null,       note: "Period sequence within the year, 1-based"]
+  period_start_date           date          [not null]
+  period_end_date             date          [not null]
+  pay_date                    date          [not null,       note: "Immutable once runs reference this period"]
+  input_cutoff_date           date          [not null,       note: "Last date payroll inputs are accepted"]
+  calculation_date            date          [null,           note: "Scheduled calculation date; null until set"]
+  correction_window_close_date date         [null,           note: "Last date corrections are permitted"]
+  finalization_date           date          [null]
+  transmission_date           date          [null]
+  calendar_status             varchar(20)   [not null,       note: "OPEN | IN_PROGRESS | CALCULATED | APPROVED | RELEASED | CLOSED"]
+  parent_calendar_entry_id    uuid          [null,           note: "Prior calendar entry in lineage"]
+  root_calendar_entry_id      uuid          [null,           note: "Root calendar entry in lineage chain"]
+  calendar_version_number     int           [not null, default: 1]
+  calendar_change_reason_code varchar(50)   [null]
+  created_by                  uuid          [not null]
+  creation_timestamp          timestamptz   [not null]
+  last_updated_by             uuid          [not null]
+  last_update_timestamp       timestamptz   [not null]
+
+  indexes {
+    payroll_context_id
+    period_year
+    calendar_status
+    pay_date
+    (payroll_context_id, period_year, period_number) [unique, note: "One entry per period per context per year"]
+    parent_calendar_entry_id
+  }
+}
+
+// ============================================================
+// PAYROLL RUN
+// ============================================================
+
+Table payroll_run {
+  run_id                          uuid          [pk, not null, note: "System-generated. Immutable."]
+  payroll_context_id              uuid          [not null, note: "The payroll group this run belongs to"]
+  period_id                       uuid          [not null, note: "The payroll calendar period"]
+  pay_date                        date          [not null, note: "Inherited from calendar entry; immutable"]
+  run_type_id                     integer       [not null, note: "FK → lkp_run_type.id"]
+  run_status_id                   integer       [not null, note: "FK → lkp_run_status.id"]
+  run_description                 varchar(500)  [null]
+  parent_run_id                   uuid          [null, note: "Links correction or rerun to original run"]
+  related_run_group_id            uuid          [null, note: "Groups related supplemental or adjustment runs"]
+  rule_and_config_version_ref     varchar(200)  [null, note: "Snapshot of configuration version used"]
+  temporal_override_active_flag   boolean       [null, default: false]
+  temporal_override_date          date          [null, note: "Override date at initiation time; null if no override"]
+  initiated_by                    uuid          [not null]
+  run_start_timestamp             timestamptz   [null]
+  run_end_timestamp               timestamptz   [null]
+  created_by                      uuid          [not null]
+  creation_timestamp              timestamptz   [not null]
+  last_updated_by                 uuid          [not null]
+  last_update_timestamp           timestamptz   [not null]
+
+  indexes {
+    payroll_context_id
+    period_id
+    run_status_id
+    parent_run_id
+    (payroll_context_id, period_id, run_type_id)
+  }
+}
+
+// ============================================================
+// RUN SCOPE
+// ============================================================
+
+Table run_scope {
+  run_scope_id                uuid        [pk, not null, note: "System-generated. Immutable."]
+  parent_run_id               uuid        [not null, note: "References the finalized parent payroll_run"]
+  payroll_context_id          uuid        [not null]
+  scope_type_id               integer     [not null, note: "FK → lkp_scope_type.id"]
+  scope_status_id             integer     [not null, note: "FK → lkp_scope_status.id"]
+  trigger_reason              varchar(500) [not null]
+  population_method_id        integer     [not null, note: "FK → lkp_population_method.id"]
+  population_definition       text        [not null, note: "Serialized query or explicit list reference"]
+  population_count            int         [not null]
+  population_resolved_flag    boolean     [not null, default: false]
+  resolution_timestamp        timestamptz [null]
+  exception_derived_flag      boolean     [null, default: false]
+  priority_level              varchar(50) [not null, note: "STANDARD, CATCH_UP, RECOVERY, EMERGENCY"]
+  adjustment_flag             boolean     [not null, default: false]
+  execution_start_timestamp   timestamptz [null]
+  execution_end_timestamp     timestamptz [null]
+  execution_result            varchar(50) [null, note: "SUCCESS, FAILED"]
+  created_by                  uuid        [not null]
+  creation_timestamp          timestamptz [not null]
+
+  indexes {
+    parent_run_id
+    scope_status_id
+    scope_type_id
+    payroll_context_id
+  }
+}
+
+// ============================================================
+// PAYROLL RUN RESULT SET
+// ============================================================
+
+Table payroll_run_result_set {
+  payroll_run_result_set_id             uuid        [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_id                        uuid        [not null]
+  run_scope_id                          uuid        [null, note: "Present when result set is from a scoped execution"]
+  source_period_id                      uuid        [not null, note: "Original payroll period"]
+  execution_period_id                   uuid        [not null, note: "Period during which execution occurred"]
+  parent_payroll_run_result_set_id      uuid        [null, note: "Prior result set in lineage"]
+  root_payroll_run_result_set_id        uuid        [null, note: "Root result set in lineage chain"]
+  result_set_lineage_sequence           int         [null]
+  correction_reference_id               uuid        [null]
+  result_set_status_id                  integer     [not null, note: "FK → lkp_result_set_status.id"]
+  result_set_type_id                    integer     [not null, note: "FK → lkp_result_set_type.id"]
+  execution_start_timestamp             timestamptz [null]
+  execution_end_timestamp               timestamptz [null]
+  approval_required_flag                boolean     [not null, default: false]
+  approved_by_user_id                   uuid        [null]
+  approval_timestamp                    timestamptz [null]
+  finalization_timestamp                timestamptz [null]
+  created_timestamp                     timestamptz [not null]
+  updated_timestamp                     timestamptz [not null]
+
+  indexes {
+    payroll_run_id
+    run_scope_id
+    result_set_status_id
+    source_period_id
+    parent_payroll_run_result_set_id
+    root_payroll_run_result_set_id
+  }
+}
+
+// ============================================================
+// EMPLOYEE PAYROLL RESULT
+// ============================================================
+
+Table employee_payroll_result {
+  employee_payroll_result_id            uuid          [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_result_set_id             uuid          [not null]
+  payroll_run_id                        uuid          [not null]
+  run_scope_id                          uuid          [null]
+  employment_id                         uuid          [not null, note: "Payroll anchor — never person_id"]
+  person_id                             uuid          [not null]
+  payroll_context_id                    uuid          [not null]
+  source_period_id                      uuid          [not null]
+  execution_period_id                   uuid          [not null]
+  parent_employee_payroll_result_id     uuid          [null, note: "Prior worker-level result in lineage"]
+  root_employee_payroll_result_id       uuid          [null, note: "Root worker-level result in lineage chain"]
+  result_lineage_sequence               int           [null]
+  correction_reference_id               uuid          [null]
+  result_status_id                      integer       [not null, note: "FK → lkp_employee_result_status.id"]
+  pay_period_start_date                 date          [not null]
+  pay_period_end_date                   date          [not null]
+  pay_date                              date          [not null]
+  gross_pay_amount                      decimal(18,4) [not null]
+  total_deductions_amount               decimal(18,4) [not null]
+  total_employee_tax_amount             decimal(18,4) [not null]
+  total_employer_contribution_amount    decimal(18,4) [not null]
+  net_pay_amount                        decimal(18,4) [not null]
+  created_timestamp                     timestamptz   [not null]
+  updated_timestamp                     timestamptz   [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    payroll_run_id
+    employment_id
+    person_id
+    result_status_id
+    source_period_id
+    parent_employee_payroll_result_id
+    root_employee_payroll_result_id
+  }
+}
+
+// ============================================================
+// RESULT LINES
+// ============================================================
+
+Table earnings_result_line {
+  earnings_result_line_id       uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  earnings_code                 varchar(50)   [not null]
+  earnings_description          varchar(200)  [not null]
+  quantity                      decimal(18,4) [null, note: "Hours, units, or quantity"]
+  rate                          decimal(18,4) [null]
+  calculated_amount             decimal(18,4) [not null]
+  jurisdiction_split_flag       boolean       [not null, default: false]
+  taxable_flag                  boolean       [not null]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamptz   [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    earnings_code
+  }
+}
+
+Table deduction_result_line {
+  deduction_result_line_id      uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  deduction_code                varchar(50)   [not null]
+  deduction_description         varchar(200)  [not null]
+  calculated_amount             decimal(18,4) [not null]
+  pre_tax_flag                  boolean       [not null]
+  cash_impact_flag              boolean       [not null]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamptz   [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    deduction_code
+  }
+}
+
+Table tax_result_line {
+  tax_result_line_id            uuid          [pk, not null]
+  employee_payroll_result_id    uuid          [not null]
+  employment_id                 uuid          [not null]
+  jurisdiction_id               uuid          [not null]
+  tax_code                      varchar(50)   [not null]
+  tax_description               varchar(200)  [not null]
+  taxable_wages_amount          decimal(18,4) [not null]
+  calculated_amount             decimal(18,4) [not null]
+  employer_flag                 boolean       [not null, default: false, note: "True for employer-side tax lines"]
+  accumulator_impact_flag       boolean       [not null, default: false]
+  source_rule_version_id        uuid          [null]
+  correction_flag               boolean       [not null, default: false]
+  corrects_line_id              uuid          [null]
+  creation_timestamp            timestamptz   [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    jurisdiction_id
+    tax_code
+  }
+}
+
+Table employer_contribution_result_line {
+  employer_contribution_result_line_id  uuid          [pk, not null]
+  employee_payroll_result_id            uuid          [not null]
+  employment_id                         uuid          [not null]
+  contribution_code                     varchar(50)   [not null]
+  contribution_description              varchar(200)  [not null]
+  calculated_amount                     decimal(18,4) [not null]
+  accumulator_impact_flag               boolean       [not null, default: false]
+  source_rule_version_id                uuid          [null]
+  correction_flag                       boolean       [not null, default: false]
+  corrects_line_id                      uuid          [null]
+  creation_timestamp                    timestamptz   [not null]
+
+  indexes {
+    employee_payroll_result_id
+    employment_id
+    contribution_code
+  }
+}
+
+// ============================================================
+// PAYROLL CHECK
+// ============================================================
+
+Table payroll_check {
+  check_id                  uuid          [pk, not null, note: "System-generated. Immutable."]
+  check_number              varchar(50)   [not null, note: "Human-readable; unique within context"]
+  payroll_run_id            uuid          [not null]
+  employment_id             uuid          [not null]
+  pay_period_start_date     date          [not null]
+  pay_period_end_date       date          [not null]
+  check_date                date          [not null]
+  payment_date              date          [not null]
+  calendar_context_id       uuid          [not null]
+  payment_method_id         integer       [not null, note: "FK → lkp_payment_method.id"]
+  payment_context_id        integer       [not null, note: "FK → lkp_payment_context.id"]
+  check_status_id           integer       [not null, note: "FK → lkp_check_status.id"]
+  gross_earnings            decimal(18,4) [not null]
+  total_deductions          decimal(18,4) [not null]
+  total_taxes               decimal(18,4) [not null]
+  net_pay                   decimal(18,4) [not null]
+  employer_total_cost       decimal(18,4) [null]
+  void_reason               varchar(500)  [null]
+  corrects_check_id         uuid          [null, note: "Reference to original if this is a correction check"]
+  created_by                uuid          [not null]
+  creation_timestamp        timestamptz   [not null]
+
+  indexes {
+    payroll_run_id
+    employment_id
+    check_status_id
+    check_number
+    corrects_check_id
+  }
+}
+
+// ============================================================
+// PAYROLL ITEM
+// ============================================================
+
+Table payroll_item {
+  payroll_item_id           uuid          [pk, not null, note: "System-generated. Immutable."]
+  payroll_run_id            uuid          [not null]
+  payroll_check_id          uuid          [not null]
+  employment_id             uuid          [not null]
+  period_id                 uuid          [not null]
+  result_class_id           integer       [not null, note: "FK → lkp_result_class.id"]
+  code_type                 varchar(50)   [not null]
+  code                      varchar(50)   [not null]
+  description               varchar(200)  [not null]
+  hours                     decimal(18,4) [null]
+  rate                      decimal(18,4) [null]
+  amount                    decimal(18,4) [not null]
+  taxable_flag              boolean       [not null]
+  cash_impact_flag          boolean       [not null]
+  accumulator_target        varchar(100)  [null]
+  source_rule_version_id    uuid          [null]
+  item_status_id            integer       [not null, note: "FK → lkp_item_status.id"]
+  correction_flag           boolean       [not null, default: false]
+  corrects_item_id          uuid          [null]
+  creation_timestamp        timestamptz   [not null]
+
+  indexes {
+    payroll_run_id
+    payroll_check_id
+    employment_id
+    period_id
+    result_class_id
+    code
+    corrects_item_id
+  }
+}
+
+// ============================================================
+// ACCUMULATOR CHAIN (4 layers)
+// ============================================================
+
+Table accumulator_definition {
+  accumulator_definition_id   uuid        [pk, not null, note: "System-generated. Immutable."]
+  accumulator_family_id       integer     [not null, note: "FK → lkp_accumulator_family.id"]
+  accumulator_code            varchar(50) [not null, unique]
+  accumulator_name            varchar(200) [not null]
+  scope_type_id               integer     [not null, note: "FK → lkp_accumulator_scope_type.id"]
+  period_context_id           integer     [not null, note: "FK → lkp_period_context.id"]
+  reset_type                  varchar(50) [not null, note: "CALENDAR_YEAR, PLAN_YEAR, QUARTER, NONE, CONDITIONAL"]
+  carry_forward_flag          boolean     [not null, default: false]
+  reporting_flag              boolean     [not null, default: true]
+  remittance_flag             boolean     [not null, default: false]
+  effective_start_date        date        [not null]
+  effective_end_date          date        [null]
+  created_by                  uuid        [not null]
+  creation_timestamp          timestamptz [not null]
+  last_updated_by             uuid        [not null]
+  last_update_timestamp       timestamptz [not null]
+
+  indexes {
+    accumulator_code
+    accumulator_family_id
+    scope_type_id
+  }
+}
+
+Table accumulator_impact {
+  accumulator_impact_id         uuid          [pk, not null, note: "System-generated. Immutable."]
+  accumulator_definition_id     uuid          [not null]
+  payroll_run_result_set_id     uuid          [null, note: "Present for run-level impacts"]
+  employee_payroll_result_id    uuid          [null, note: "Present for employee-level impacts"]
+  payroll_run_id                uuid          [not null]
+  employment_id                 uuid          [null]
+  person_id                     uuid          [null]
+  impact_status_id              integer       [not null, note: "FK → lkp_impact_status.id"]
+  impact_source_type_id         integer       [not null, note: "FK → lkp_impact_source_type.id"]
+  source_object_id              uuid          [null, note: "Source result line reference"]
+  prior_value                   decimal(18,4) [not null]
+  delta_value                   decimal(18,4) [not null]
+  new_value                     decimal(18,4) [not null]
+  posting_direction_id          integer       [not null, note: "FK → lkp_posting_direction.id"]
+  scope_type_id                 integer       [not null, note: "FK → lkp_accumulator_scope_type.id"]
+  scope_object_id               uuid          [null]
+  jurisdiction_id               uuid          [null]
+  rule_pack_id                  uuid          [null]
+  rule_version_id               uuid          [null]
+  retroactive_flag              boolean       [not null, default: false]
+  reversal_flag                 boolean       [not null, default: false]
+  correction_flag               boolean       [not null, default: false]
+  prior_accumulator_impact_id   uuid          [null, note: "Links correction/reversal to original impact"]
+  notes                         varchar(500)  [null]
+  impact_timestamp              timestamptz   [not null]
+  created_timestamp             timestamptz   [not null]
+  updated_timestamp             timestamptz   [not null]
+
+  indexes {
+    accumulator_definition_id
+    payroll_run_id
+    payroll_run_result_set_id
+    employee_payroll_result_id
+    employment_id
+    impact_status_id
+    prior_accumulator_impact_id
+  }
+}
+
+Table accumulator_contribution {
+  contribution_id                   uuid          [pk, not null, note: "System-generated. Immutable."]
+  accumulator_id                    uuid          [not null, note: "Links to accumulator_balance"]
+  accumulator_impact_id             uuid          [not null, note: "Source impact that generated this contribution"]
+  accumulator_definition_id         uuid          [not null]
+  parent_contribution_id            uuid          [null, note: "Prior contribution in correction chain"]
+  root_contribution_id              uuid          [null, note: "Root contribution in lineage chain"]
+  contribution_lineage_sequence     int           [null]
+  correction_reference_id           uuid          [null]
+  source_run_id                     uuid          [not null]
+  source_result_set_id              uuid          [null]
+  source_employee_result_id         uuid          [null]
+  source_period_id                  uuid          [not null]
+  execution_period_id               uuid          [not null]
+  employment_id                     uuid          [null]
+  scope_type_id                     integer       [not null, note: "FK → lkp_accumulator_scope_type.id"]
+  scope_object_id                   uuid          [null]
+  contribution_amount               decimal(18,4) [not null]
+  contribution_type_id              integer       [not null, note: "FK → lkp_contribution_type.id"]
+  before_value                      decimal(18,4) [null]
+  after_value                       decimal(18,4) [null]
+  reason_code                       varchar(50)   [null]
+  creation_timestamp                timestamptz   [not null]
+
+  indexes {
+    accumulator_id
+    accumulator_impact_id
+    accumulator_definition_id
+    source_run_id
+    source_period_id
+    employment_id
+    parent_contribution_id
+    root_contribution_id
+  }
+}
+
+Table accumulator_balance {
+  accumulator_id              uuid          [pk, not null, note: "System-generated. Immutable."]
+  accumulator_definition_id   uuid          [not null]
+  accumulator_family_id       integer       [not null, note: "FK → lkp_accumulator_family.id"]
+  scope_type_id               integer       [not null, note: "FK → lkp_accumulator_scope_type.id"]
+  participant_id              uuid          [null, note: "Required if scope includes employee"]
+  employer_id                 uuid          [null, note: "Required if scope includes employer"]
+  jurisdiction_id             uuid          [null]
+  plan_id                     uuid          [null]
+  period_context_id           integer       [not null, note: "FK → lkp_period_context.id"]
+  calendar_context_id         uuid          [not null]
+  current_value               decimal(18,4) [not null]
+  balance_status_id           integer       [not null, note: "FK → lkp_accumulator_balance_status.id"]
+  last_updated_run_id         uuid          [not null]
+  last_updated_result_set_id  uuid          [null]
+  last_update_timestamp       timestamptz   [not null]
+
+  indexes {
+    accumulator_definition_id
+    (scope_type_id, participant_id, period_context_id, calendar_context_id)
+    (accumulator_family_id, scope_type_id, participant_id)
+    last_updated_run_id
+    balance_status_id
+  }
+}
+
+// ============================================================
+// PAYROLL PROFILE
+// Enrollment record linking employment_id to payroll_context.
+// ============================================================
+
+Table payroll_profile {
+  payroll_profile_id      uuid          [pk, not null, note: "System-generated. Immutable."]
+  employment_id           uuid          [not null, unique, note: "FK → employment.employment_id. One enrollment per employment."]
+  person_id               uuid          [not null, note: "FK → person.person_id. Denormalised for query convenience."]
+  payroll_context_id      uuid          [not null, note: "FK → payroll_context.payroll_context_id"]
+  enrollment_status       varchar(20)   [not null, note: "ACTIVE | SUSPENDED | FINAL_PAY_PENDING | TERMINATED"]
+  effective_start_date    date          [not null, note: "Date the enrollment became effective"]
+  effective_end_date      date          [null,     note: "Null = currently active"]
+  final_pay_flag          boolean       [not null, default: false, note: "Set by TERMINATION event; signals final pay required"]
+  blocking_tasks_cleared  boolean       [not null, default: false, note: "Set TRUE when OnboardingBlockingTasksCompletePayload received. FALSE excludes employee from payroll run population."]
+  enrollment_source       varchar(50)   [not null, note: "AUTO_HIRE | MANUAL"]
+  created_by              uuid          [not null]
+  creation_timestamp      timestamptz   [not null]
+  last_updated_by         uuid          [not null]
+  last_update_timestamp   timestamptz   [not null]
+
+  indexes {
+    employment_id       [unique]
+    payroll_context_id
+    enrollment_status
+    (payroll_context_id, enrollment_status)
+  }
+}
+
+// ============================================================
+// RESULT SET CHILD TABLES
+// ============================================================
+
+Table payroll_run_exception {
+  run_exception_id    uuid         [pk, not null,  note: "System-generated"]
+  run_id              uuid         [not null,      note: "FK → payroll_run.run_id"]
+  employment_id       uuid         [not null,      note: "Employee excluded from this run"]
+  exception_code      varchar(50)  [not null,      note: "BLOCKING_TASKS_INCOMPLETE | INACTIVE_PROFILE | etc."]
+  exception_message   varchar(500) [null,          note: "Human-readable detail for audit/reporting"]
+  created_timestamp   timestamptz  [not null,      note: "Server UTC time when exception was recorded"]
+
+  indexes {
+    run_id
+    (run_id, employment_id)
+    exception_code
+  }
+}
+
+Table funding_result_set {
+  funding_result_set_id         uuid          [pk, not null]
+  payroll_run_result_set_id     uuid          [not null]
+  funding_profile_id            uuid          [not null]
+  funding_status_id             integer       [not null, note: "FK → lkp_funding_status.id"]
+  funding_amount                decimal(18,4) [not null]
+  funding_timestamp             timestamptz   [null]
+  created_timestamp             timestamptz   [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    funding_status_id
+  }
+}
+
+Table remittance_result_set {
+  remittance_result_set_id      uuid          [pk, not null]
+  payroll_run_result_set_id     uuid          [not null]
+  remittance_profile_id         uuid          [not null]
+  total_remittance_amount       decimal(18,4) [not null]
+  remittance_status_id          integer       [not null, note: "FK → lkp_remittance_status.id"]
+  transmission_timestamp        timestamptz   [null]
+  created_timestamp             timestamptz   [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    remittance_status_id
+  }
+}
+
+Table disbursement_result_set {
+  disbursement_result_set_id    uuid          [pk, not null]
+  payroll_run_result_set_id     uuid          [not null]
+  net_pay_disbursement_id       uuid          [not null]
+  disbursement_status_id        integer       [not null, note: "FK → lkp_disbursement_status.id"]
+  disbursement_amount           decimal(18,4) [not null]
+  created_timestamp             timestamptz   [not null]
+
+  indexes {
+    payroll_run_result_set_id
+    disbursement_status_id
+  }
+}
+
+
+// ============================================================
+// TAX JURISDICTION & LEGAL ENTITY REGISTRATION
+// ============================================================
+
+Table tax_jurisdiction {
+  jurisdiction_id    integer      [pk, increment, not null, note: "Auto-generated"]
+  jurisdiction_code  varchar(20)  [not null, unique, note: "e.g. US-FED, US-NY, CA-FED, BB"]
+  jurisdiction_name  varchar(100) [not null]
+  country_code       char(2)      [not null, note: "ISO 3166-1 alpha-2"]
+  is_active          boolean      [not null, default: true]
+
+  indexes {
+    jurisdiction_code [unique]
+    country_code
+    is_active
+  }
+}
+
+Table legal_entity_jurisdiction {
+  legal_entity_id  uuid     [not null, note: "FK → org_unit.org_unit_id (legal entity rows only)"]
+  jurisdiction_id  integer  [not null, note: "FK → tax_jurisdiction.jurisdiction_id"]
+
+  indexes {
+    (legal_entity_id, jurisdiction_id) [pk]
+    legal_entity_id
+    jurisdiction_id
+  }
+}
+
+Ref: legal_entity_jurisdiction.jurisdiction_id > tax_jurisdiction.jurisdiction_id
+
+// ============================================================
+// PAYROLL CALCULATION STEPS
+// ============================================================
+
+Table payroll_calculation_steps {
+  step_id                  integer      [pk, increment, not null, note: "Auto-generated"]
+  jurisdiction_id          integer      [not null, note: "FK → tax_jurisdiction.jurisdiction_id"]
+  step_code                varchar(50)  [not null, unique, note: "e.g. US_FED_INCOME_TAX, BB_NIS. Used as StepCode in ICalculationStep"]
+  step_name                varchar(100) [not null]
+  step_type                varchar(30)  [not null, note: "STANDARD_DEDUCTION | ALLOWANCE | PROGRESSIVE_BRACKET | CREDIT | FLAT_RATE | TIERED_FLAT | PERCENTAGE_OF_PRIOR"]
+  calculation_category     varchar(40)  [not null, note: "PRETAX_BENEFIT | DEDUCTION_ALLOWANCE | INCOME_TAX | CREDIT | SOCIAL_INSURANCE | SUBNATIONAL_TAX | DERIVED_TAX | POSTTAX | EMPLOYER_CONTRIBUTION"]
+  sequence_number          integer      [not null, note: "Execution order within pipeline: 100-199 pre-tax benefits, 200-299 deductions/allowances, 300-399 national income tax, 400-499 credits, 500-599 social insurance, 600-699 sub-national income tax, 700-799 derived taxes, 800-899 post-tax deductions, 900-999 employer contributions"]
+  applies_to               varchar(10)  [not null, note: "EMPLOYEE | EMPLOYER | BOTH"]
+  reduces_income_tax_wages boolean      [not null, default: false, note: "TRUE for pre-tax steps that reduce IncomeTaxableWages"]
+  reduces_fica_wages       boolean      [not null, default: false, note: "TRUE for pre-tax steps that also reduce FicaTaxableWages"]
+  status_code              varchar(30)  [not null, default: 'DRAFT', note: "DRAFT | PENDING_REVIEW | APPROVED | ACTIVE | ARCHIVED"]
+  is_active                boolean      [not null, default: true]
+
+  indexes {
+    jurisdiction_id
+    step_code [unique]
+    step_type
+    calculation_category
+    status_code
+    is_active
+    (jurisdiction_id, sequence_number)
+    (jurisdiction_id, is_active)
+    (jurisdiction_id, status_code)
+  }
+}
+
+Ref: payroll_calculation_steps.jurisdiction_id > tax_jurisdiction.jurisdiction_id
+
+// ============================================================
+// TAX FILING STATUS
+// ============================================================
+
+Table tax_filing_status {
+  filing_status_id   integer     [pk, increment, not null, note: "Auto-generated"]
+  jurisdiction_id    integer     [not null, note: "FK → tax_jurisdiction.jurisdiction_id"]
+  filing_status_code varchar(20) [not null, note: "e.g. SINGLE, MFJ, MFS, HOH"]
+  filing_status_name varchar(50) [not null]
+
+  indexes {
+    jurisdiction_id
+    (jurisdiction_id, filing_status_code) [unique]
+  }
+}
+
+Ref: tax_filing_status.jurisdiction_id > tax_jurisdiction.jurisdiction_id
+
+// ============================================================
+// TAX RATE TABLES
+// ============================================================
+
+Table tax_brackets {
+  bracket_id         integer       [pk, increment, not null, note: "Auto-generated"]
+  step_code          varchar(50)   [not null, note: "FK → payroll_calculation_steps.step_code"]
+  filing_status_code varchar(20)   [null,     note: "NULL = applies to all filing statuses for this step"]
+  effective_from     date          [not null]
+  effective_to       date          [null,     note: "NULL = currently effective"]
+  lower_limit        decimal(18,4) [not null, note: "Annual income lower bound (inclusive)"]
+  upper_limit        decimal(18,4) [null,     note: "NULL = no upper limit (top bracket)"]
+  rate               decimal(10,6) [not null, note: "Marginal rate e.g. 0.220000 = 22%"]
+
+  indexes {
+    step_code
+    (step_code, filing_status_code, effective_from)
+    effective_from
+  }
+}
+
+Table tax_flat_rates {
+  flat_rate_id          integer       [pk, increment, not null, note: "Auto-generated"]
+  step_code             varchar(50)   [not null, note: "FK → payroll_calculation_steps.step_code"]
+  effective_from        date          [not null]
+  effective_to          date          [null,     note: "NULL = currently effective"]
+  rate                  decimal(10,6) [not null, note: "e.g. 0.062000 = 6.2%"]
+  wage_base             decimal(18,4) [null,     note: "Annual wage ceiling; NULL = no cap on taxable base"]
+  period_cap_amount     decimal(18,4) [null,     note: "Maximum deduction per pay period"]
+  annual_cap_amount     decimal(18,4) [null,     note: "Maximum deduction per calendar year; enforced via YTD accumulator"]
+  depends_on_step_code  varchar(50)   [null,     note: "PERCENTAGE_OF_PRIOR only — step whose result this rate is applied to"]
+
+  indexes {
+    step_code
+    (step_code, effective_from)
+    effective_from
+  }
+}
+
+Table tax_tiered_brackets {
+  tiered_bracket_id  integer       [pk, increment, not null, note: "Auto-generated"]
+  step_code          varchar(50)   [not null, note: "FK → payroll_calculation_steps.step_code"]
+  effective_from     date          [not null]
+  effective_to       date          [null,     note: "NULL = currently effective"]
+  lower_limit        decimal(18,4) [not null, note: "Annual earnings lower bound for this tier"]
+  upper_limit        decimal(18,4) [null,     note: "NULL = no upper limit"]
+  rate               decimal(10,6) [not null]
+  period_cap_amount  decimal(18,4) [null,     note: "Per-period contribution cap within this tier"]
+  annual_cap_amount  decimal(18,4) [null,     note: "Annual contribution cap within this tier; enforced via YTD accumulator"]
+
+  indexes {
+    step_code
+    (step_code, effective_from)
+    effective_from
+  }
+}
+
+Table tax_allowances {
+  allowance_id       integer       [pk, increment, not null, note: "Auto-generated"]
+  step_code          varchar(50)   [not null, note: "FK → payroll_calculation_steps.step_code"]
+  filing_status_code varchar(20)   [null,     note: "NULL = applies to all filing statuses"]
+  effective_from     date          [not null]
+  effective_to       date          [null,     note: "NULL = currently effective"]
+  annual_amount      decimal(18,4) [not null, note: "Annual deduction amount; divided by PayPeriodsPerYear at runtime"]
+
+  indexes {
+    step_code
+    (step_code, filing_status_code, effective_from)
+    effective_from
+  }
+}
+
+Table tax_credits {
+  credit_id        integer       [pk, increment, not null, note: "Auto-generated"]
+  step_code        varchar(50)   [not null, note: "FK → payroll_calculation_steps.step_code"]
+  effective_from   date          [not null]
+  effective_to     date          [null,     note: "NULL = currently effective"]
+  annual_amount    decimal(18,4) [not null, note: "Gross credit base e.g. Canada BPA CAD 16,129"]
+  credit_rate      decimal(10,6) [not null, note: "Rate applied to annual_amount e.g. 0.150000 = 15% for Canada BPA"]
+  is_refundable    boolean       [not null, default: false]
+
+  indexes {
+    step_code
+    (step_code, effective_from)
+    effective_from
+  }
+}
+
+// ============================================================
+// EMPLOYEE TAX FORMS
+// ============================================================
+
+Table lkp_tax_form_type {
+  id   integer     [pk, increment, not null, note: "Auto-generated"]
+  code varchar(20) [not null, unique]
+  name varchar(50) [not null]
+
+  indexes {
+    code [unique]
+  }
+}
+
+Table employee_tax_form_submission {
+  submission_id      uuid         [pk, not null, note: "System-generated"]
+  employment_id      uuid         [not null,     note: "FK → employment.employment_id"]
+  jurisdiction_id    integer      [not null,     note: "FK → tax_jurisdiction.jurisdiction_id"]
+  form_type_id       integer      [not null,     note: "FK → lkp_tax_form_type.id"]
+  source_document_id uuid         [null,         note: "FK → HRIS document store; nullable until scan attached"]
+  submitted_date     date         [not null,     note: "Date employee signed and submitted the form"]
+  exempt_flag        boolean      [not null, default: false, note: "Employee claimed withholding exemption on the form"]
+  effective_from     date         [not null]
+  effective_to       date         [null,         note: "NULL = currently active; set when superseded by a new filing"]
+  created_by         varchar(100) [not null]
+  creation_timestamp timestamptz  [not null]
+
+  indexes {
+    employment_id
+    jurisdiction_id
+    form_type_id
+    effective_from
+    (employment_id, jurisdiction_id, effective_from)
+    (employment_id, jurisdiction_id, effective_to)
+  }
+}
+
+Table employee_tax_form_detail {
+  submission_id          uuid          [pk, not null, note: "FK → employee_tax_form_submission.submission_id"]
+  filing_status_code     varchar(20)   [null,         note: "W-4 Step 1c, IT-2104 filing status, etc. NULL for TD1/TD1X."]
+  allowance_count        integer       [not null, default: 0,  note: "W-4 legacy Step 5, or state allowance count."]
+  additional_withholding decimal(18,4) [not null, default: 0,  note: "W-4 Step 4c / state extra withholding per period."]
+  is_legacy_form         boolean       [not null, default: false, note: "TRUE = pre-2020 W-4 (allowances format)."]
+  other_income_amount    decimal(18,4) [not null, default: 0,  note: "W-4 2020+ Step 4a — added to annualized base before bracket walk."]
+  deductions_amount      decimal(18,4) [not null, default: 0,  note: "W-4 2020+ Step 4b — subtracted from annualized base before bracket walk."]
+  credits_amount         decimal(18,4) [not null, default: 0,  note: "W-4 2020+ Step 3 — subtracted from annual tax after bracket walk."]
+  claim_code             smallint      [null,         note: "TD1/TD1X/BB-TD4: CRA standard claim code 1–10."]
+  total_claim_amount     decimal(18,4) [null,         note: "TD1/TD1X/BB-TD4: custom worksheet total."]
+  additional_tax_amount  decimal(18,4) [not null, default: 0,  note: "TD1/TD1X/BB-TD4: additional tax to deduct per period."]
+}
+
+Ref: employee_tax_form_submission.jurisdiction_id > tax_jurisdiction.jurisdiction_id
+Ref: employee_tax_form_submission.form_type_id > lkp_tax_form_type.id
+Ref: employee_tax_form_detail.submission_id > employee_tax_form_submission.submission_id
+
+// ============================================================
+// CONFIGURATION MANAGEMENT
+// ============================================================
+
+Table form_field_definition {
+  field_definition_id   integer      [pk, increment, not null, note: "Auto-generated"]
+  form_type_code        varchar(20)  [not null, note: "FK → lkp_tax_form_type.code"]
+  effective_from        date         [not null]
+  effective_to          date         [null, note: "NULL = currently effective"]
+  field_key             varchar(80)  [not null, note: "Stable identifier for this field within the form type"]
+  display_label         varchar(200) [not null]
+  field_type            varchar(40)  [not null, note: "TEXT | INTEGER | DECIMAL | BOOLEAN | ENUM | DATE"]
+  section_key           varchar(80)  [null, note: "Groups fields into form sections"]
+  section_label         varchar(160) [null]
+  display_order         integer      [not null]
+  is_required           boolean      [not null, default: false]
+  detail_column_name    varchar(80)  [null, note: "Physical column in employee_tax_form_detail"]
+  promotes_to_column    varchar(80)  [null, note: "CalculationContext property that receives this value"]
+  validation_rules_json text         [null, note: "ANSI TEXT — structured rule definition"]
+  visibility_rule_json  text         [null, note: "ANSI TEXT — conditional display rule"]
+  enum_values_json      text         [null, note: "ANSI TEXT — allowed values for ENUM field_type"]
+  default_value_text    varchar(200) [null]
+  help_text             text         [null]
+  status_code           varchar(30)  [not null, default: 'DRAFT', note: "DRAFT | PENDING_REVIEW | APPROVED | ACTIVE | ARCHIVED"]
+  is_active             boolean      [not null, default: true]
+
+  indexes {
+    form_type_code
+    (form_type_code, field_key, effective_from) [unique]
+    effective_from
+    status_code
+    is_active
+  }
+}
+
+Table configuration_audit_log {
+  audit_log_id      integer      [pk, increment, not null, note: "Auto-generated"]
+  entity_name       varchar(80)  [not null, note: "Table name, e.g. payroll_calculation_steps"]
+  entity_id_text    varchar(200) [not null, note: "String representation of entity PK"]
+  action_code       varchar(40)  [not null, note: "CREATED | SUBMITTED_FOR_REVIEW | APPROVED | ACTIVATED | ARCHIVED | REJECTED | EDITED"]
+  prior_status_code varchar(30)  [null]
+  new_status_code   varchar(30)  [null]
+  changed_by        varchar(100) [not null]
+  changed_at        timestamp    [not null]
+  approval_note     text         [null]
+  snapshot_json     text         [null, note: "Full row state at transition time; ANSI TEXT for portability"]
+
+  indexes {
+    entity_name
+    (entity_name, entity_id_text)
+    changed_at
+    action_code
+  }
+}
+
+
+// ============================================================
+// BENEFITS DEDUCTIONS
+// ============================================================
+
+Table deduction {
+  deduction_id         uuid         [pk, default: `gen_random_uuid()`]
+  code                 varchar(30)  [not null, unique]
+  description          varchar(200) [not null]
+  tax_treatment        varchar(10)  [not null, note: 'PRE_TAX | POST_TAX']
+  status               varchar(20)  [not null, default: 'ACTIVE', note: 'ACTIVE | INACTIVE']
+  calculation_mode     varchar(20)  [not null, default: 'FIXED_PER_PERIOD', note: 'FIXED_ANNUAL | FIXED_MONTHLY | FIXED_PER_PERIOD | PCT_PRE_TAX | PCT_POST_TAX | COVERAGE_BASED']
+  wage_base            varchar(20)  [null, note: 'ALL | REGULAR_ONLY | ELIGIBLE_ONLY | OT_ONLY — only valid for PCT modes']
+  age_as_of_rule       varchar(10)  [null, note: 'JAN_1 | PAY_DATE — only valid for COVERAGE_BASED mode']
+  effective_start_date date         [not null]
+  effective_end_date   date         [null]
+  created_at           timestamptz  [not null, default: `now()`]
+  updated_at           timestamptz  [not null, default: `now()`]
+}
+
+Table deduction_rate_table {
+  rate_table_id  uuid         [pk, default: `gen_random_uuid()`]
+  deduction_id   uuid         [not null, note: "FK → deduction.deduction_id"]
+  rate_type      varchar(20)  [not null, note: 'COVERAGE_TIER | AGE_BAND | SALARY_BAND']
+  effective_from date         [not null]
+  effective_to   date         [null]
+  description    varchar(200) [null]
+  created_at     timestamptz  [not null, default: `now()`]
+
+  indexes {
+    deduction_id
+  }
+}
+
+Table deduction_rate_entry {
+  rate_entry_id  uuid           [pk, default: `gen_random_uuid()`]
+  rate_table_id  uuid           [not null, note: "FK → deduction_rate_table.rate_table_id"]
+  tier_code      varchar(20)    [null, note: 'EE_ONLY | EE_SPOUSE | EE_CHILD | FAMILY — for COVERAGE_TIER tables']
+  band_min       decimal(12,4)  [null, note: 'Lower bound inclusive — for AGE_BAND and SALARY_BAND tables']
+  band_max       decimal(12,4)  [null, note: 'Upper bound inclusive; null = no upper limit']
+  employee_rate  decimal(12,6)  [not null, note: 'Monthly flat amount (COVERAGE_TIER) | rate per $1,000 coverage (AGE_BAND) | rate per $1 salary (SALARY_BAND)']
+  employer_rate  decimal(12,6)  [null]
+
+  indexes {
+    rate_table_id
+  }
+}
+
+Table deduction_employer_match {
+  match_id                uuid          [pk, default: `gen_random_uuid()`]
+  deduction_id            uuid          [not null, note: "FK → deduction.deduction_id"]
+  employee_group_id       uuid          [null, note: "Null = applies to all employees"]
+  match_rate              decimal(8,6)  [not null, note: "e.g. 0.500000 = 50% match of employee contribution"]
+  match_cap_pct_of_gross  decimal(8,6)  [null, note: "Match applies on up to this fraction of gross; exactly one cap must be set"]
+  match_cap_annual_amount decimal(12,4) [null, note: "Dollar cap per year; exactly one cap must be set"]
+  match_type              varchar(20)   [not null, default: 'PER_PERIOD', note: 'PER_PERIOD | ANNUAL_TRUE_UP']
+  effective_from          date          [not null]
+  effective_to            date          [null]
+  created_at              timestamptz   [not null, default: `now()`]
+
+  indexes {
+    deduction_id
+  }
+}
+
+Table benefit_deduction_election {
+  election_id                  uuid           [pk, default: `gen_random_uuid()`]
+  employment_id                uuid           [not null, note: "FK → employment.employment_id"]
+  deduction_id                 uuid           [not null, note: "FK → deduction.deduction_id"]
+  tax_treatment                varchar(10)    [not null, note: 'PRE_TAX | POST_TAX']
+  employee_amount              decimal(12,4)  [not null, default: 0]
+  employer_contribution_amount decimal(12,4)  [null]
+  contribution_pct             decimal(8,6)   [null, note: "For PCT_PRE_TAX / PCT_POST_TAX modes — fraction of wage base"]
+  coverage_tier                varchar(20)    [null, note: "EE_ONLY | EE_SPOUSE | EE_CHILD | FAMILY — for COVERAGE_BASED mode"]
+  annual_coverage_amount       decimal(12,4)  [null, note: "Face amount for life/AD&D — used in age-band rate lookup"]
+  annual_election_amount       decimal(12,4)  [null, note: "System-computed annualised deduction; populated on election activation"]
+  monthly_election_amount      decimal(12,4)  [null, note: "System-computed monthly equivalent; populated on election activation"]
+  partial_period_rule          varchar(20)    [not null, default: 'PRORATE_DAYS', note: 'PRORATE_DAYS | FULL_PERIOD | FIRST_FULL_PERIOD']
+  effective_start_date         date           [not null]
+  effective_end_date           date           [null]
+  status                       varchar(20)    [not null, note: 'PENDING | ACTIVE | SUSPENDED | SUPERSEDED | TERMINATED']
+  source                       varchar(10)    [not null, note: 'MANUAL | IMPORT | API']
+  created_by                   varchar(200)   [not null]
+  created_at                   timestamptz    [not null, default: `now()`]
+  updated_at                   timestamptz    [not null, default: `now()`]
+  election_version_id          uuid           [not null, default: `gen_random_uuid()`]
+  original_election_id         uuid           [null]
+  parent_election_id           uuid           [null]
+  correction_type              varchar(30)    [null]
+  source_event_id              uuid           [null]
+
+  indexes {
+    employment_id
+    deduction_id
+    status
+    (effective_start_date, effective_end_date)
+  }
+}
+
+Table benefit_configuration_audit_log {
+  log_id       uuid         [pk, default: `gen_random_uuid()`]
+  entity_type  varchar(100) [not null]
+  entity_id    uuid         [not null]
+  action       varchar(30)  [not null]
+  changed_by   varchar(200) [not null]
+  changed_at   timestamptz  [not null, default: `now()`]
+  before_value text         [null]
+  after_value  text         [null]
+}
+
+
+// ============================================================
+// TABLE GROUPS
+// ============================================================
+
+TableGroup lkp_run_lifecycle {
+  lkp_run_type
+  lkp_run_status
+}
+
+TableGroup lkp_result_sets {
+  lkp_result_set_type
+  lkp_result_set_status
+  lkp_employee_result_status
+  lkp_item_status
+  lkp_result_class
+}
+
+TableGroup lkp_payments {
+  lkp_payment_method
+  lkp_payment_context
+  lkp_check_status
+}
+
+TableGroup lkp_impacts_posting {
+  lkp_impact_status
+  lkp_impact_source_type
+  lkp_posting_direction
+  lkp_contribution_type
+}
+
+TableGroup lkp_accumulators {
+  lkp_accumulator_family
+  lkp_accumulator_scope_type
+  lkp_accumulator_balance_status
+  lkp_period_context
+}
+
+TableGroup lkp_scope_population {
+  lkp_scope_type
+  lkp_scope_status
+  lkp_population_method
+}
+
+TableGroup lkp_funding_disbursement {
+  lkp_funding_status
+  lkp_remittance_status
+  lkp_disbursement_status
+}
+
+TableGroup payroll_calendar {
+  payroll_context
+  payroll_period
+}
+
+TableGroup payroll_enrollment {
+  payroll_profile
+}
+
+TableGroup payroll_execution {
+  payroll_run
+  run_scope
+  payroll_run_result_set
+  employee_payroll_result
+  payroll_run_exception
+}
+
+TableGroup result_lines {
+  earnings_result_line
+  deduction_result_line
+  tax_result_line
+  employer_contribution_result_line
+  payroll_check
+  payroll_item
+}
+
+TableGroup accumulator_chain {
+  accumulator_definition
+  accumulator_impact
+  accumulator_contribution
+  accumulator_balance
+}
+
+TableGroup result_set_outputs {
+  funding_result_set
+  remittance_result_set
+  disbursement_result_set
+}
+
+TableGroup tax_jurisdiction_registry {
+  tax_jurisdiction
+  legal_entity_jurisdiction
+  payroll_calculation_steps
+  tax_filing_status
+}
+
+TableGroup tax_rate_tables {
+  tax_brackets
+  tax_flat_rates
+  tax_tiered_brackets
+  tax_allowances
+  tax_credits
+}
+
+TableGroup employee_tax_forms {
+  lkp_tax_form_type
+  employee_tax_form_submission
+  employee_tax_form_detail
+}
+
+TableGroup configuration_management {
+  form_field_definition
+  configuration_audit_log
+}
+
+TableGroup benefits_deductions {
+  deduction
+  deduction_rate_table
+  deduction_rate_entry
+  deduction_employer_match
+  benefit_deduction_election
+  benefit_configuration_audit_log
+}
+
+Ref: deduction_rate_table.deduction_id > deduction.deduction_id
+Ref: deduction_rate_entry.rate_table_id > deduction_rate_table.rate_table_id
+Ref: deduction_employer_match.deduction_id > deduction.deduction_id
+Ref: benefit_deduction_election.deduction_id > deduction.deduction_id

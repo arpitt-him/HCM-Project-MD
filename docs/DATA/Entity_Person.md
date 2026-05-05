@@ -89,16 +89,51 @@ Person_Status is informational. Payroll eligibility is governed by Employment_St
 
 ---
 
-## 6. Relationships
+## 6. Community Profile (person_social_profile)
+
+An optional satellite record keyed on `Person_ID`. Stores a voluntary community-facing profile that will be visible to colleagues once the Employee Self-Service (ESS) module is live.
+
+### 6.1 Purpose
+
+Enables employees to share a personal photo and a short bio (hobbies, interests, life outside work) to foster community within the organisation. The profile is per-person, not per-employment — it persists across transfers and rehires.
+
+### 6.2 Attributes
+
+| Attribute | DB Column | Type | Required | Notes |
+|---|---|---|---|---|
+| Person_ID | `person_id` | UUID | Yes (PK + FK) | FK → `person.person_id` |
+| Photo_Data | `photo_data` | bytea | No | Raw image bytes; max 2 MB enforced at upload |
+| Photo_MIME_Type | `photo_mime_type` | varchar(50) | No | `image/jpeg`, `image/png`, `image/webp` |
+| Bio_Text | `bio_text` | varchar(1000) | No | Free-text; max 1,000 characters |
+| Updated_At | `updated_at` | timestamptz | Yes | Set by server on each save |
+
+### 6.3 Storage & Serving
+
+- Photo bytes are stored directly in `person_social_profile.photo_data` (lightweight blob). No external object store for Phase 1.
+- Photo served via minimal API endpoint `GET /api/profile-photo/{personId}` with `Cache-Control: private, max-age=3600`.
+- Upload uses the existing `window.allworkFiles.readBase64` JS FileReader interop (avoids `IBrowserFile.OpenReadStream()` Blazor timeout issue).
+- Client-side size check (`allworkFiles.getFileSize`) + server-side byte check after base64 decode; rejected if > 2,097,152 bytes.
+
+### 6.4 Governance
+
+- Self-service only — employees supply their own photo and bio. HR administrators may clear the profile via the Employee Detail → Community tab.
+- No access control on photo endpoint beyond authentication (any authenticated user may view any colleague's photo once ESS is live).
+- Photo and bio are not subject to the same change-authorisation rules as core Person data (legal name, SSN, etc.).
+- DDL migration: `schemas/ddl/postgres/migrations/008_person_social_profile.sql`
+
+---
+
+## 7. Relationships
 
 | Relationship | Cardinality | Notes |
 |---|---|---|
 | Person → Employment | One-to-many | A person may have multiple employment episodes |
 | Person → Document | One-to-many | Person-level documents (e.g., ID verification) |
+| Person → Community Profile | One-to-one (optional) | Voluntary; row absent until first save |
 
 ---
 
-## 7. Governance
+## 8. Governance
 
 - Changes to legal name, national identifier, or date of birth require HR administrator authorization and may require supporting documentation.
 - National Identifier is encrypted at rest and access-controlled per the `Security_and_Access_Control_Model`.
@@ -107,7 +142,7 @@ Person_Status is informational. Payroll eligibility is governed by Employment_St
 
 ---
 
-## 8. Related Architecture Models
+## 9. Related Architecture Models
 
 | Model | Relevance |
 |---|---|
